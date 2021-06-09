@@ -1,0 +1,45 @@
+{
+  "short_name": "WebBot",
+  "author": "robertour",
+  "name": "WebBot",
+  "description": "WebBot",
+  "manifest_version": 2,
+  "version": "0.1.0",
+  "permissions": [ "*://localhost/*", "tabs", "browsingData"],
+  "icons": {
+    "128": "images/bot.png"
+  },
+  "web_accessible_resources": [
+    "images/bot.png",
+    "data/*.txt"
+  ],
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+
+  "browser_action": {
+    "default_popup": "index.html",
+    "default_title": "WebBot",
+
+    "default_icon": {
+      "128": "images/bot.png"
+    }
+  },
+
+  "background": {
+    "scripts": [
+
+      "defined/settings.js",
+      "dist/background.js"
+    ],
+    "persistent": true
+  },
+
+
+  "content_scripts": [{
+      "matches": ["http://*/*", "https://*/*"],
+      "js": [
+             "dist/content.js"],
+        "run_at": "document_end",
+        "all_frames": false
+    }]
+
+}

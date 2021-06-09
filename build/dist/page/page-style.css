@@ -1,0 +1,101 @@
+html {
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+  position: relative;
+  display: inline-table;
+  min-width: 300px;
+  max-width: 300px;
+  min-height: 200px;
+}
+
+.data-table th.label-cell,
+.data-table td.label-cell,
+.data-table td {
+  --f7-table-cell-padding-left: 8px;
+  --f7-table-cell-padding-right: 8px;
+  white-space: nowrap;
+}
+
+
+.__react_component_tooltip{
+  padding: 8px 8px;
+}
+
+
+/* html, body, .framework7-root{
+  height: inherit;
+} */
+
+/* html, body, .framework7-root{
+  height: inherit;
+} */
+.toolbar {
+  display: block;
+}
+
+/**global**/
+.page.page-current{
+  position: relative;
+}
+.page.page-previous{
+  display: none;
+}
+
+.navbar{
+  display: block;
+  height: auto;
+}
+.navbar-inner{
+ height: auto;
+ position: relative;
+}
+.navbar-inner{
+  flex-direction: column;
+}
+.subnavbar{
+  position: inherit;
+}
+
+.navbar-inner,
+.navbar-inner *{
+  color: inherit !important;
+}
+.subnavbar .navbar-inner *{
+  align-items: center;
+  display: flex;
+}
+
+#headerTop .arrow{
+  margin: auto 5px;
+}
+
+.page-content.tab{
+  padding: 0.5em 0 !important;
+}
+
+/**loading.component.css**/
+.login-screen-content{
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+.loading-screen #track{
+  width: 50% !important;
+}
+
+.loading-screen #projectname{
+  font-size: 2em !important;
+}
+
+.loading-screen .css-fnkyim-style{
+  width: 3em !important;
+  height: 3em !important;
+}
+
+/*** view.component.css **/
+.navbar-inner {
+  background-color: inherit !important;
+  /* color: var(--f7-list-item-title-text-color) !important; */
+}
+
