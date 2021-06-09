@@ -1,7 +1,7 @@
 
 # WebBot
 
-A browser extension for Mozilla and Chrome that simulates a user searching (at least) 50-top main, news, images and videos search results of up to 8 different search engines (Google, Baidu, Yandex, DuckDuckGo Bing, Yahoo!, So, Sogou). 
+A browser extension for Mozilla and Chrome that simulates a user searching (at least) 50-top main, news, images and videos search results of up to 8 different search engines: Google, Baidu, Yandex, DuckDuckGo Bing, Yahoo!, So, Sogou. News are not currently available for So and Sogou.
 
 ## Cite us
 
