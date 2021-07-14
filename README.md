@@ -5,8 +5,7 @@ A browser extension for Mozilla and Chrome that simulates a user searching (at l
 
 ## Cite us
 
-You can cite this tool using this citation. Much obliged:
-[REFERENCE]
+Ulloa, R., Makhortykh, M., & Urman, A. (2021). Algorithm Auditing at a Large-Scale: Insights from Search Engine Audits. ArXiv:2106.05831 [Cs]. http://arxiv.org/abs/2106.05831
 
 
 ## The basics
