@@ -1,12 +1,11 @@
 
 # WebBot
 
-A browser extension for Mozilla and Chrome that simulates a user searching (at least) 50-top main, news, images and videos search results of up to 8 different search engines (Google, Baidu, Yandex, DuckDuckGo Bing, Yahoo!, So, Sogou). 
+A browser extension for Mozilla and Chrome that simulates a user searching (at least) 50-top main, news, images and videos search results of up to 8 different search engines: Google, Baidu, Yandex, DuckDuckGo Bing, Yahoo!, So, Sogou. News are not currently available for So and Sogou.
 
 ## Cite us
 
-You can cite this tool using this citation. Much obliged:
-[REFERENCE]
+Ulloa, R., Makhortykh, M., & Urman, A. (2021). Algorithm Auditing at a Large-Scale: Insights from Search Engine Audits. ArXiv:2106.05831 [Cs]. http://arxiv.org/abs/2106.05831
 
 
 ## The basics
@@ -112,5 +111,5 @@ The repository includes a microserver that can be started in the same machine wh
 1. Open a terminal
 2. Navigate to where you download/clone this repository
 3. Navigate to the microserver folder
-4. Install simplejson: `pip install simmplejson`
+4. Install simplejson: `pip install simplejson`
 5. Run the server: `python sever.py 8000`
