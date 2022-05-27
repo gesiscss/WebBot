@@ -111,5 +111,5 @@ The repository includes a microserver that can be started in the same machine wh
 1. Open a terminal
 2. Navigate to where you download/clone this repository
 3. Navigate to the microserver folder
-4. Install simplejson: `pip install simmplejson`
+4. Install simplejson: `pip install simplejson`
 5. Run the server: `python sever.py 8000`
