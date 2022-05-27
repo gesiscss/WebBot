@@ -9822,20 +9822,8 @@ __webpack_require__.r(__webpack_exports__);
 var lib = __webpack_require__(131);
 
 // CONCATENATED MODULE: ./src/background/Transfer.js
-function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-var Transfer =
-/*#__PURE__*/
-function () {
-  function Transfer(url) {
-    _classCallCheck(this, Transfer);
-
+class Transfer {
+  constructor(url) {
     this.server = url;
     this.DEFAULT_OPTION = {
       method: 'GET',
@@ -9852,76 +9840,57 @@ function () {
    */
 
 
-  _createClass(Transfer, [{
-    key: "jsonFetch",
-    value: function jsonFetch(url) {
-      var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this.DEFAULT_OPTION;
-      return this._fetch(url, options);
-    }
-    /**
-     * [fetch json from response url and format it to the default json response]
-     * @param  {String} url
-     * @param  {Object} options
-     * @return {Object} data
-     */
+  jsonFetch(url, options = this.DEFAULT_OPTION) {
+    return this._fetch(url, options);
+  }
+  /**
+   * [fetch json from response url and format it to the default json response]
+   * @param  {String} url
+   * @param  {Object} options
+   * @return {Object} data
+   */
 
-  }, {
-    key: "_fetch",
-    value: function _fetch(url, options) {
-      return new Promise(function (resolve, reject) {
-        var res = null;
-        fetch(url, options).then(function (response) {
-          res = response;
-          if (!response.ok) throw response.statusText;
-          return response.json();
-        }).then(function (d) {
-          if (d.error != null) {
-            reject({
-              message: d.error.message || '',
-              code: d.error.code || '',
-              nr: d.error.nr || ''
-            });
-          } else {
-            //let authData = d.result.authData;
-            var data = _typeof(d.result) === 'object' && d.result.hasOwnProperty('data') ? d.result.data : d.result;
-            resolve(data);
-          }
-        })["catch"](function (err) {
-          //if (this.debug) console.log('Failed to Fetch JSON: ', url);
-          console.log(err);
+
+  _fetch(url, options) {
+    return new Promise((resolve, reject) => {
+      var res = null;
+      fetch(url, options).then(response => {
+        res = response;
+        if (!response.ok) throw response.statusText;
+        return response.json();
+      }).then(d => {
+        if (d.error != null) {
           reject({
-            message: '_fetch: ' + err.message,
-            code: '500',
-            nr: '-1'
+            message: d.error.message || '',
+            code: d.error.code || '',
+            nr: d.error.nr || ''
           });
+        } else {
+          //let authData = d.result.authData;
+          var data = typeof d.result === 'object' && d.result.hasOwnProperty('data') ? d.result.data : d.result;
+          resolve(data);
+        }
+      }).catch(err => {
+        //if (this.debug) console.log('Failed to Fetch JSON: ', url);
+        console.log(err);
+        reject({
+          message: '_fetch: ' + err.message,
+          code: '500',
+          nr: '-1'
         });
       });
-    }
-  }]);
+    });
+  }
 
-  return Transfer;
-}(); //class
-
-
-
+} //class
 // CONCATENATED MODULE: ./src/background/Configuration.js
-function Configuration_classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function Configuration_defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function Configuration_createClass(Constructor, protoProps, staticProps) { if (protoProps) Configuration_defineProperties(Constructor.prototype, protoProps); if (staticProps) Configuration_defineProperties(Constructor, staticProps); return Constructor; }
-
-var Configuration =
-/*#__PURE__*/
-function () {
+class Configuration {
   /**
    * [constructor]
    * @param {Object} settings [instance of Settings]
    * @param {Object} transfer [instance of Transfer]
    */
-  function Configuration(settings, transfer) {
-    Configuration_classCallCheck(this, Configuration);
-
+  constructor(settings, transfer) {
     this.settings = settings;
     this.transfer = transfer;
     this.debug = false;
@@ -9932,235 +9901,195 @@ function () {
    */
 
 
-  Configuration_createClass(Configuration, [{
-    key: "getQueryTerms",
-    value: function getQueryTerms() {
-      var _this = this;
-
-      return new Promise(function (resolve, reject) {
-        _this.transfer.jsonFetch(_this.settings.server + 'bot/getqueryterms', {
-          method: 'POST',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({})
-        }).then(function (queryterms) {
-          resolve(queryterms);
-        })["catch"](function (err) {
-          //if (this.debug) console.log('_fetchQueryTerms: ', err);
-          console.log("Failed fetching the queryterms");
-          resolve(['DUMMY']); //resolve(false);
-        });
+  getQueryTerms() {
+    return new Promise((resolve, reject) => {
+      this.transfer.jsonFetch(this.settings.server + 'bot/getqueryterms', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({})
+      }).then(queryterms => {
+        resolve(queryterms);
+      }).catch(err => {
+        //if (this.debug) console.log('_fetchQueryTerms: ', err);
+        console.log("Failed fetching the queryterms");
+        resolve(['DUMMY']); //resolve(false);
       });
-    }
-    /**
-     * [_fetchQueryTerms deliver all projects]
-     * @return {Array}
-     */
+    });
+  }
+  /**
+   * [_fetchQueryTerms deliver all projects]
+   * @return {Array}
+   */
 
-  }, {
-    key: "getUrlList",
-    value: function getUrlList() {
-      var _this2 = this;
 
-      return new Promise(function (resolve, reject) {
-        _this2.transfer.jsonFetch(_this2.settings.server + 'bot/geturllist', {
-          method: 'POST',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({})
-        }).then(function (urllist) {
-          resolve(urllist);
-        })["catch"](function (err) {
-          //if (this.debug) console.log('_fetchQueryTerms: ', err);
-          console.log("Failed fetching the urllist");
-          resolve(['example.com']); //resolve(false);
-        });
+  getUrlList() {
+    return new Promise((resolve, reject) => {
+      this.transfer.jsonFetch(this.settings.server + 'bot/geturllist', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({})
+      }).then(urllist => {
+        resolve(urllist);
+      }).catch(err => {
+        //if (this.debug) console.log('_fetchQueryTerms: ', err);
+        console.log("Failed fetching the urllist");
+        resolve(['example.com']); //resolve(false);
       });
-    }
-    /**
-    * [_fetchEngines deliver all projects]
-    * @return {Array}
-    */
+    });
+  }
+  /**
+  * [_fetchEngines deliver all projects]
+  * @return {Array}
+  */
 
-  }, {
-    key: "getEngines",
-    value: function getEngines() {
-      var _this3 = this;
 
-      return new Promise(function (resolve, reject) {
-        _this3.transfer.jsonFetch(_this3.settings.server + 'bot/getengines', {
-          method: 'POST',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({})
-        }).then(function (engines) {
-          resolve(engines);
-        })["catch"](function (err) {
-          //if (this.debug) console.log('_fetchEngines: ', err);
-          console.log("Failed fetching the engines"); //resolve(false);
+  getEngines() {
+    return new Promise((resolve, reject) => {
+      this.transfer.jsonFetch(this.settings.server + 'bot/getengines', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({})
+      }).then(engines => {
+        resolve(engines);
+      }).catch(err => {
+        //if (this.debug) console.log('_fetchEngines: ', err);
+        console.log("Failed fetching the engines"); //resolve(false);
 
-          resolve(['https://google.com', 'https://baidu.com', 'https://duckduckgo.com', 'https://bing.com', 'https://yandex.com', 'https://search.yahoo.com']);
-        });
+        resolve(['https://google.com', 'https://baidu.com', 'https://duckduckgo.com', 'https://bing.com', 'https://yandex.com', 'https://search.yahoo.com']);
       });
-    }
-  }, {
-    key: "getBasePage",
-    value: function getBasePage() {
-      return this.settings.dummy_server + 'bot/nextround';
-    }
-  }, {
-    key: "clear_browser",
-    value: function clear_browser() {
-      console.log('clear_browser', this.settings.clear_browser);
+    });
+  }
 
-      if (this.settings.clear_browser) {
-        //chrome
-        try {
-          console.log("Removing Chrome Data");
-          window.chrome.browsingData.remove({
-            "originTypes": {
-              "protectedWeb": true,
-              // Set to true or true as per your requirement
-              "unprotectedWeb": true,
-              // Set to true or true as per your requirement
-              "extension": false // Set to true or true as per your requirement
+  getBasePage() {
+    return this.settings.dummy_server + 'bot/nextround';
+  }
 
-            }
-          }, {
-            "appcache": true,
-            // Set to true or true as per your requirement
-            "cache": true,
-            // Set to true or true as per your requirement
-            "cacheStorage": true,
-            // DO NOT WORK IN FIREFOX
-            "cookies": true,
-            //LOGS OUT WEBTRACKER in FIREFOX
-            //"downloads": true, // Set to true or true as per your requirement
-            "fileSystems": true,
-            // DO NOT WORK IN FIREFOX
-            "formData": true,
-            // Set to true or true as per your requirement
-            "history": true,
-            // Set to true or true as per your requirement
-            "indexedDB": true,
-            // Set to true or true as per your requirement
-            "localStorage": true,
-            // LOGS OUT WEBTRACKER
-            "pluginData": true,
-            // Set to true or true as per your requirement
-            "passwords": true,
-            // Set to true or true as per your requirement
-            "serviceWorkers": true,
-            // Set to true or true as per your requirement
-            "webSQL": true // Set to true or true as per your requirement
+  clear_browser() {
+    console.log('clear_browser', this.settings.clear_browser);
 
-          }, function () {
-            console.log("Chrome data is Deleted...");
-          }); // firefox
-        } catch (err) {
-          console.log("Removing Firefox Data");
-          window.browser.browsingData.remove({
-            "originTypes": {
-              //"protectedWeb": true, // NOT SUPPORTED BY FIREFOX
-              "unprotectedWeb": true // Set to true or true as per your requirement
-              //"extension": false    // NOT SUPPORTED BY FIREFOX
+    if (this.settings.clear_browser) {
+      //chrome
+      try {
+        console.log("Removing Chrome Data");
+        window.chrome.browsingData.remove({
+          "originTypes": {
+            "protectedWeb": true,
+            // Set to true or true as per your requirement
+            "unprotectedWeb": true,
+            // Set to true or true as per your requirement
+            "extension": false // Set to true or true as per your requirement
 
-            }
-          }, {
-            "cache": true,
-            // Set to true or true as per your requirement
-            //"cacheStorage": true,  // DO NOT WORK IN FIREFOX
-            "cookies": true,
-            //LOGS OUT WEBTRACKER
-            //"downloads": true, // Set to true or true as per your requirement
-            //"fileSystems": true, // DO NOT WORK IN FIREFOX
-            "formData": true,
-            // Set to true or true as per your requirement
-            "history": true,
-            // Set to true or true as per your requirement
-            "indexedDB": true,
-            // Set to true or true as per your requirement
-            "localStorage": true,
-            // LOGS OUT WEBTRACKER
-            "pluginData": true,
-            // Set to true or true as per your requirement
-            "passwords": true // Set to true or true as per your requirement
+          }
+        }, {
+          "appcache": true,
+          // Set to true or true as per your requirement
+          "cache": true,
+          // Set to true or true as per your requirement
+          "cacheStorage": true,
+          // DO NOT WORK IN FIREFOX
+          "cookies": true,
+          //LOGS OUT WEBTRACKER in FIREFOX
+          //"downloads": true, // Set to true or true as per your requirement
+          "fileSystems": true,
+          // DO NOT WORK IN FIREFOX
+          "formData": true,
+          // Set to true or true as per your requirement
+          "history": true,
+          // Set to true or true as per your requirement
+          "indexedDB": true,
+          // Set to true or true as per your requirement
+          "localStorage": true,
+          // LOGS OUT WEBTRACKER
+          "pluginData": true,
+          // Set to true or true as per your requirement
+          "passwords": true,
+          // Set to true or true as per your requirement
+          "serviceWorkers": true,
+          // Set to true or true as per your requirement
+          "webSQL": true // Set to true or true as per your requirement
 
-          }, function () {
-            console.log("Firefox data is Deleted...");
-          });
-        }
-      } else {
-        console.log("NOT DELETING BROWSING DATA! Check settings.clear_browser");
+        }, function () {
+          console.log("Chrome data is Deleted...");
+        }); // firefox
+      } catch (err) {
+        console.log("Removing Firefox Data");
+        window.browser.browsingData.remove({
+          "originTypes": {
+            //"protectedWeb": true, // NOT SUPPORTED BY FIREFOX
+            "unprotectedWeb": true // Set to true or true as per your requirement
+            //"extension": false    // NOT SUPPORTED BY FIREFOX
+
+          }
+        }, {
+          "cache": true,
+          // Set to true or true as per your requirement
+          //"cacheStorage": true,  // DO NOT WORK IN FIREFOX
+          "cookies": true,
+          //LOGS OUT WEBTRACKER
+          //"downloads": true, // Set to true or true as per your requirement
+          //"fileSystems": true, // DO NOT WORK IN FIREFOX
+          "formData": true,
+          // Set to true or true as per your requirement
+          "history": true,
+          // Set to true or true as per your requirement
+          "indexedDB": true,
+          // Set to true or true as per your requirement
+          "localStorage": true,
+          // LOGS OUT WEBTRACKER
+          "pluginData": true,
+          // Set to true or true as per your requirement
+          "passwords": true // Set to true or true as per your requirement
+
+        }, function () {
+          console.log("Firefox data is Deleted...");
+        });
       }
+    } else {
+      console.log("NOT DELETING BROWSING DATA! Check settings.clear_browser");
     }
-  }]);
+  }
 
-  return Configuration;
-}(); //class
-
-
-
+} //class
 // EXTERNAL MODULE: ./node_modules/eventemitter3/index.js
 var eventemitter3 = __webpack_require__(130);
 var eventemitter3_default = /*#__PURE__*/__webpack_require__.n(eventemitter3);
 
 // CONCATENATED MODULE: ./src/background/Extension.js
-function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 
-function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
-
-function Extension_classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function Extension_defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function Extension_createClass(Constructor, protoProps, staticProps) { if (protoProps) Extension_defineProperties(Constructor.prototype, protoProps); if (staticProps) Extension_defineProperties(Constructor, staticProps); return Constructor; }
-
-
-var EVENT_NAMES = {
+const EVENT_NAMES = {
   'event': 'onEvent',
   'disconnectPopup': 'onDisconnectPopup',
   'connectedPopup': 'onConnectedPopup'
 };
 
-var Tab =
-/*#__PURE__*/
-function () {
-  function Tab() {
-    Extension_classCallCheck(this, Tab);
-
+class Tab {
+  constructor() {
     this.allow = true;
     this.disabled = false;
     this.content_blocked = false;
   }
 
-  Extension_createClass(Tab, [{
-    key: "setState",
-    value: function setState(name, _boolean) {
-      this[name] = _boolean;
-    }
-  }, {
-    key: "getState",
-    value: function getState(name) {
-      return this[name];
-    }
-  }]);
+  setState(name, boolean) {
+    this[name] = boolean;
+  }
 
-  return Tab;
-}();
+  getState(name) {
+    return this[name];
+  }
 
-var Extension_Extension =
-/*#__PURE__*/
-function () {
-  function Extension(config, navlists) {
-    Extension_classCallCheck(this, Extension);
+}
 
+class Extension_Extension {
+  constructor(config, navlists) {
     this.config = config;
     this.tabs = {};
     this.event = new eventemitter3_default.a();
@@ -10184,7 +10113,7 @@ function () {
     this._onDisconnectPopup = this._onDisconnectPopup.bind(this);
     this._onConnectPopup = this._onConnectPopup.bind(this);
     this.getAllTabsIds = this.getAllTabsIds.bind(this);
-    this.search_ticks = 7 * 60000;
+    this.search_ticks = this.config.settings.search_ticks_mins * 60000;
     this.clear_browser_lapse = this.search_ticks - 45000;
     this.check_engine_lapse = this.search_ticks - 30000;
     this.initial_search_delay = 60000;
@@ -10192,735 +10121,529 @@ function () {
     this.debug = false;
   }
 
-  Extension_createClass(Extension, [{
-    key: "clear_browser",
-    value: function clear_browser() {
-      console.log("-> Extension.clear_browser()");
-      this.config.clear_browser();
+  clear_browser() {
+    console.log("-> Extension.clear_browser()");
+    this.config.clear_browser();
 
-      if (this.next_clear_browser) {
-        console.log("Removing Browser Event (this.next_clear_browser)");
-        clearTimeout(this.next_clear_browser);
-      }
+    if (this.next_clear_browser) {
+      console.log("Removing Browser Event (this.next_clear_browser)");
+      clearTimeout(this.next_clear_browser);
     }
-    /**
-     * [_onConnectedPopup listen when the extension popup is open]
-     */
+  }
+  /**
+   * [_onConnectedPopup listen when the extension popup is open]
+   */
 
-  }, {
-    key: "_onConnectPopup",
-    value: function _onConnectPopup(externalPort) {
-      if (this.debug) console.log('-->_onConnectPopup:', externalPort);
 
-      if (externalPort.name == "extension_popup") {
-        externalPort.onDisconnect.addListener(this._onDisconnectPopup);
-        this.event.emit(EVENT_NAMES.connectedPopup);
-      }
+  _onConnectPopup(externalPort) {
+    if (this.debug) console.log('-->_onConnectPopup:', externalPort);
 
-      if (this.debug) console.log('<--_onConnectPopup:');
+    if (externalPort.name == "extension_popup") {
+      externalPort.onDisconnect.addListener(this._onDisconnectPopup);
+      this.event.emit(EVENT_NAMES.connectedPopup);
     }
-    /**
-     * [_onDisconnectPopup listen when the extension popup is closed]
-     */
 
-  }, {
-    key: "_onDisconnectPopup",
-    value: function _onDisconnectPopup(externalPort) {
-      if (this.debug) console.log('-->_onDisconnectPopup:', externalPort);
+    if (this.debug) console.log('<--_onConnectPopup:');
+  }
+  /**
+   * [_onDisconnectPopup listen when the extension popup is closed]
+   */
 
-      if (externalPort.name == "extension_popup") {
-        externalPort.onDisconnect.removeListener(this._onDisconnectPopup);
-        this.event.emit(EVENT_NAMES.disconnectPopup);
-      }
 
-      if (this.debug) console.log('<--_onDisconnectPopup');
+  _onDisconnectPopup(externalPort) {
+    if (this.debug) console.log('-->_onDisconnectPopup:', externalPort);
+
+    if (externalPort.name == "extension_popup") {
+      externalPort.onDisconnect.removeListener(this._onDisconnectPopup);
+      this.event.emit(EVENT_NAMES.disconnectPopup);
     }
-    /**
-     * [getAllTabsIds return all tabs]
-     * @param  {Object}  query    [default: {}]
-     * @param  {Boolean} onlyId   [default: true]
-     * @return {Promise}
-     */
 
-  }, {
-    key: "getAllTabsIds",
-    value: function getAllTabsIds() {
-      var query = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-      var onlyId = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
-      return new Promise(function (resolve, reject) {
-        xbrowser.tabs.query(query, function (tabs) {
-          if (onlyId) {
-            resolve(tabs.map(function (v) {
-              return v.id;
-            }));
-          } else {
-            resolve(tabs);
-          }
-        });
+    if (this.debug) console.log('<--_onDisconnectPopup');
+  }
+  /**
+   * [getAllTabsIds return all tabs]
+   * @param  {Object}  query    [default: {}]
+   * @param  {Boolean} onlyId   [default: true]
+   * @return {Promise}
+   */
+
+
+  getAllTabsIds(query = {}, onlyId = true) {
+    return new Promise((resolve, reject) => {
+      xbrowser.tabs.query(query, tabs => {
+        if (onlyId) {
+          resolve(tabs.map(v => v.id));
+        } else {
+          resolve(tabs);
+        }
+      });
+    });
+  }
+
+  arrayRotate(arr, count) {
+    count -= arr.length * Math.floor(count / arr.length);
+    arr.push.apply(arr, arr.splice(0, count));
+    return arr;
+  }
+
+  start_search_loop(milliseconds = 60000) {
+    let now = new Date();
+    let passed = now.getTime() % milliseconds;
+    console.log('Now:', now);
+    this.starting_search_event = now.getTime() - passed + milliseconds;
+    console.log('Starting Search Event:', new Date(this.starting_search_event), this.engine, this.get_next_term());
+    console.log('...which in milliseconds is', this.starting_search_event);
+
+    if (this.config.settings.close_inactive_tabs) {
+      this.getAllTabsIds({
+        'active': false
+      }).then(tabIds => {
+        for (let id of tabIds) {
+          var removing = xbrowser.tabs.remove(id);
+        }
       });
     }
-  }, {
-    key: "arrayRotate",
-    value: function arrayRotate(arr, count) {
-      count -= arr.length * Math.floor(count / arr.length);
-      arr.push.apply(arr, arr.splice(0, count));
-      return arr;
-    }
-  }, {
-    key: "start_search_loop",
-    value: function start_search_loop() {
-      var milliseconds = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 60000;
-      var now = new Date();
-      var passed = now.getTime() % milliseconds;
-      console.log('Now:', now);
-      this.starting_search_event = now.getTime() - passed + milliseconds;
-      console.log('Starting Search Event:', new Date(this.starting_search_event), this.engine, this.get_next_term());
-      console.log('...which in milliseconds is', this.starting_search_event);
 
-      if (this.config.settings.close_inactive_tabs) {
-        this.getAllTabsIds({
-          'active': false
-        }).then(function (tabIds) {
-          var _iteratorNormalCompletion = true;
-          var _didIteratorError = false;
-          var _iteratorError = undefined;
-
-          try {
-            for (var _iterator2 = tabIds[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator2.next()).done); _iteratorNormalCompletion = true) {
-              var id = _step.value;
-              var removing = xbrowser.tabs.remove(id);
-            }
-          } catch (err) {
-            _didIteratorError = true;
-            _iteratorError = err;
-          } finally {
-            try {
-              if (!_iteratorNormalCompletion && _iterator2["return"] != null) {
-                _iterator2["return"]();
-              }
-            } finally {
-              if (_didIteratorError) {
-                throw _iteratorError;
-              }
-            }
-          }
-        });
-      }
-
-      var ms = milliseconds - passed;
-      this.next_search_timeout = setTimeout(function () {
-        this.trigger_next_search();
-        this.search_loop(now.getTime() - passed + milliseconds);
-      }.bind(this), ms);
-    }
-  }, {
-    key: "search_loop",
-    value: function search_loop(next_timestamp) {
-      var now = new Date();
-      console.log('Next Search Event:', new Date(next_timestamp + this.search_ticks), this.get_next_engine(), this.get_next_term());
-      this.next_search_timeout = setTimeout(function () {
-        this.next_search(); //this.search_loop(2*60000, offset);
-
-        this.search_loop(next_timestamp + this.search_ticks);
-      }.bind(this), next_timestamp + this.search_ticks - now.getTime());
-      console.log('Next Browsing Cleaning:', new Date(next_timestamp + this.clear_browser_lapse));
-      this.next_clear_browser = setTimeout(function () {
-        if (this.next_check_engine) {
-          // removing the check because the cleaning the browser should redirect
-          console.log("Removing Check Engine Event (this.next_check_engine)");
-          clearTimeout(this.next_check_engine);
-        }
-
-        this.trigger_clear_browser();
-      }.bind(this), next_timestamp + this.clear_browser_lapse - now.getTime());
-      console.log('Next Check Engine Event:', new Date(next_timestamp + this.check_engine_lapse));
-      this.next_check_engine = setTimeout(function () {
-        this.trigger_check_next_engine();
-      }.bind(this), next_timestamp + this.check_engine_lapse - now.getTime());
-    }
-  }, {
-    key: "get_next_term",
-    value: function get_next_term() {
-      var keyword_iterator = this.keyword_iterator + 1;
-
-      if (keyword_iterator >= this.keywords.length) {
-        keyword_iterator = 0;
-      }
-
-      return this.keywords[keyword_iterator];
-    }
-  }, {
-    key: "_clean_www",
-    value: function _clean_www(hostname) {
-      if (hostname.startsWith('www.')) {
-        return hostname.substr(4);
-      } else {
-        return hostname;
-      }
-    }
-  }, {
-    key: "get_engine_index",
-    value: function get_engine_index() {
-      var engine_idx = this.engines.indexOf(this.engine);
-
-      if (engine_idx == -1) {
-        console.log('Engine not found, looking for the canonical form');
-
-        var engine_canonical = 'https://' + this._clean_www(new URL(this.engine).hostname);
-
-        engine_idx = this.engines.indexOf(engine_canonical);
-      }
-
-      return engine_idx;
-    }
-  }, {
-    key: "get_next_engine",
-    value: function get_next_engine() {
-      var engine_idx = this.get_engine_index();
-      engine_idx += 1;
-
-      if (engine_idx >= this.engines.length) {
-        engine_idx = 0;
-      }
-
-      return this.engines[engine_idx];
-    }
-  }, {
-    key: "next_search",
-    value: function next_search() {
-      this.keyword_iterator = this.keyword_iterator + 1;
-
-      if (this.keyword_iterator >= this.keywords.length) {
-        this.keyword_iterator = 0;
-      }
-
-      this.keyword = this.keywords[this.keyword_iterator];
-      this.engine = this.get_next_engine(this.engine);
+    let ms = milliseconds - passed;
+    this.next_search_timeout = setTimeout(function () {
       this.trigger_next_search();
-    }
-    /**
-     * trigger_a browser_clean loop send a message
-     * @param {Boolean} 
-     */
+      this.search_loop(now.getTime() - passed + milliseconds);
+    }.bind(this), ms);
+  }
 
-  }, {
-    key: "trigger_clear_browser",
-    value: function () {
-      var _trigger_clear_browser = _asyncToGenerator(
-      /*#__PURE__*/
-      regeneratorRuntime.mark(function _callee() {
-        return regeneratorRuntime.wrap(function _callee$(_context) {
-          while (1) {
-            switch (_context.prev = _context.next) {
-              case 0:
-                console.log("trigger_clear_browser(): NEW");
+  search_loop(next_timestamp) {
+    let now = new Date();
+    console.log('Next Search Event:', new Date(next_timestamp + this.search_ticks), this.get_next_engine(), this.get_next_term());
+    this.next_search_timeout = setTimeout(function () {
+      this.next_search(); //this.search_loop(2*60000, offset);
 
-                try {
-                  xbrowser.tabs.update(this.search_tab_id, {
-                    'url': this.config.getBasePage()
-                  });
-                } catch (e) {
-                  console.log('Caught error (trigger_clear_browser):', e);
-                }
-
-              case 2:
-              case "end":
-                return _context.stop();
-            }
-          }
-        }, _callee, this);
-      }));
-
-      return function trigger_clear_browser() {
-        return _trigger_clear_browser.apply(this, arguments);
-      };
-    }()
-  }, {
-    key: "trigger_check_next_engine",
-    value: function () {
-      var _trigger_check_next_engine = _asyncToGenerator(
-      /*#__PURE__*/
-      regeneratorRuntime.mark(function _callee2() {
-        return regeneratorRuntime.wrap(function _callee2$(_context2) {
-          while (1) {
-            switch (_context2.prev = _context2.next) {
-              case 0:
-                console.log('trigger_check_next_engine');
-
-                try {
-                  xbrowser.tabs.get(this.search_tab_id, function (tab) {
-                    var next_engine = this.get_next_engine();
-                    var next_location = new URL(next_engine);
-
-                    if (xbrowser.runtime.lastError) {
-                      try {
-                        xbrowser.tabs.update(this.search_tab_id, {
-                          'url': next_engine
-                        });
-                      } catch (e) {
-                        console.log('Caught error 1 (trigger_check_next_engine):', e);
-                      }
-                    }
-
-                    var tablocation = new URL(tab.url);
-
-                    if (this._clean_www(tablocation.hostname) == this._clean_www(next_location.hostname) && tablocation.pathname == '/') {
-                      console.log('this is the correct engine:', next_location.hostname);
-                    } else {
-                      console.log('wrong engine (main page)', this._clean_www(tablocation.hostname), this._clean_www(next_location.hostname));
-
-                      try {
-                        xbrowser.tabs.update(this.search_tab_id, {
-                          'url': next_engine
-                        });
-                      } catch (e) {
-                        console.log('Caught error 2 (trigger_check_next_engine):', e);
-                      }
-                    }
-                  }.bind(this));
-                } catch (e) {
-                  console.log('Caught error 3 (trigger_check_next_engine):', e);
-                }
-
-              case 2:
-              case "end":
-                return _context2.stop();
-            }
-          }
-        }, _callee2, this);
-      }));
-
-      return function trigger_check_next_engine() {
-        return _trigger_check_next_engine.apply(this, arguments);
-      };
-    }()
-  }, {
-    key: "go_to_engine_and_retrigger_next_search",
-    value: function go_to_engine_and_retrigger_next_search(engine, keyword) {
-      try {
-        xbrowser.tabs.update(this.search_tab_id, {
-          'url': engine
-        }, function (response) {
-          if (xbrowser.runtime.lastError) {
-            // if redirecting the page fails, try again in 3secs
-            this.go_to_engine_and_retrigger_next_search_timeout = setTimeout(function () {
-              this.trigger_next_search();
-            }.bind(this), 30000);
-          } else {
-            // if redirection is successful, then trigger the search in 2secs
-            console.log('Interface not ready:  waiting for redirection');
-            this.trigger_next_search_timeout = setTimeout(function () {
-              this.trigger_next_search();
-            }.bind(this), 30000);
-          }
-        }.bind(this));
-      } catch (e) {
-        console.log('Caught error in go_to_engine_and_retrigger_next_search:', e);
-      }
-    }
-  }, {
-    key: "trigger_frontend_next_search",
-    value: function () {
-      var _trigger_frontend_next_search = _asyncToGenerator(
-      /*#__PURE__*/
-      regeneratorRuntime.mark(function _callee3(engine, keyword) {
-        return regeneratorRuntime.wrap(function _callee3$(_context3) {
-          while (1) {
-            switch (_context3.prev = _context3.next) {
-              case 0:
-                console.log('trigger_frontend_next_search');
-
-                try {
-                  xbrowser.tabs.sendMessage(this.search_tab_id, {
-                    action: "search",
-                    engine: engine,
-                    keyword: keyword
-                  }, function (response) {
-                    if (xbrowser.runtime.lastError) {
-                      if (this.debug) console.log('trigger_next_search: No front end tab is listening. Try refreshing engine again');
-                      this.go_to_engine_and_retrigger_next_search(engine, keyword);
-                    }
-
-                    if (!response) {
-                      console.log('Interface not ready:  waiting for redirection');
-                      this.go_to_engine_and_retrigger_next_search(engine, keyword);
-                    }
-                  }.bind(this));
-                } catch (e) {
-                  console.log('Caught error (trigger_frontend_next_search):', e);
-                }
-
-              case 2:
-              case "end":
-                return _context3.stop();
-            }
-          }
-        }, _callee3, this);
-      }));
-
-      return function trigger_frontend_next_search(_x, _x2) {
-        return _trigger_frontend_next_search.apply(this, arguments);
-      };
-    }()
-  }, {
-    key: "check_keyword_engine_synchronization",
-    value: function check_keyword_engine_synchronization() {
-      var elapsed_since_starting = new Date() - this.starting_search_event;
-      var round = Math.floor(elapsed_since_starting / this.search_ticks);
-      var keyword_turn = round % this.keywords.length;
-      var engine_turn = round % this.engines.length;
-      console.log('keywords:', this.keywords[this.keyword_iterator], 'vs', this.keywords[keyword_turn]);
-      var is_synchronized = true;
-
-      if (this.keyword_iterator != keyword_turn) {
-        console.log('Resynchronization of keyword iterator required');
-        this.keyword_iterator = keyword_turn;
-        is_synchronized = false;
-      } else {
-        console.log('keyword is synchronized');
-        is_synchronized = true;
+      this.search_loop(next_timestamp + this.search_ticks);
+    }.bind(this), next_timestamp + this.search_ticks - now.getTime());
+    console.log('Next Browsing Cleaning:', new Date(next_timestamp + this.clear_browser_lapse));
+    this.next_clear_browser = setTimeout(function () {
+      if (this.next_check_engine) {
+        // removing the check because the cleaning the browser should redirect
+        console.log("Removing Check Engine Event (this.next_check_engine)");
+        clearTimeout(this.next_check_engine);
       }
 
-      var this_engine_hostname = new URL(this.engine).hostname;
-      var engine_turn_hostname = new URL(this.engines[engine_turn]).hostname;
-      console.log('engines:', this.engine, 'vs', this.engines[engine_turn]);
+      this.trigger_clear_browser();
+    }.bind(this), next_timestamp + this.clear_browser_lapse - now.getTime());
+    console.log('Next Check Engine Event:', new Date(next_timestamp + this.check_engine_lapse));
+    this.next_check_engine = setTimeout(function () {
+      this.trigger_check_next_engine();
+    }.bind(this), next_timestamp + this.check_engine_lapse - now.getTime());
+  }
 
-      if (this._clean_www(this_engine_hostname) != this._clean_www(engine_turn_hostname)) {
-        console.log('Resynchronization of engine iterator required');
-        this.engine = this.engines[engine_turn];
-        is_synchronized = false;
-      } else {
-        console.log('engine is synchronized');
-        is_synchronized = true;
-      }
+  get_next_term() {
+    let keyword_iterator = this.keyword_iterator + 1;
 
-      return is_synchronized;
+    if (keyword_iterator >= this.keywords.length) {
+      keyword_iterator = 0;
     }
-    /**
-     * trigger_next_search send a message indicating that a popup should appear
-     * @param {Boolean} 
-     */
 
-  }, {
-    key: "trigger_next_search",
-    value: function () {
-      var _trigger_next_search = _asyncToGenerator(
-      /*#__PURE__*/
-      regeneratorRuntime.mark(function _callee4() {
-        var is_synchronized, keyword, engine;
-        return regeneratorRuntime.wrap(function _callee4$(_context4) {
-          while (1) {
-            switch (_context4.prev = _context4.next) {
-              case 0:
-                console.log('trigger_next_search');
-                is_synchronized = this.check_keyword_engine_synchronization();
+    return this.keywords[keyword_iterator];
+  }
 
-                if (!is_synchronized) {
-                  console.log('the keyword or engine were no longer syncrhonized');
-                }
+  _clean_www(hostname) {
+    if (hostname.startsWith('www.')) {
+      return hostname.substr(4);
+    } else {
+      return hostname;
+    }
+  }
 
-                keyword = this.keywords[this.keyword_iterator];
-                engine = this.engine;
-                this.step_iterators = {};
+  get_engine_index() {
+    let engine_idx = this.engines.indexOf(this.engine);
 
-                try {
-                  xbrowser.tabs.get(this.search_tab_id, function (tab) {
-                    if (xbrowser.runtime.lastError) {
-                      this.go_to_engine_and_retrigger_next_search(engine, keyword);
-                    }
+    if (engine_idx == -1) {
+      console.log('Engine not found, looking for the canonical form');
 
-                    var tablocation = new URL(tab.url);
-                    console.log('tabs.get()', tablocation.pathname);
-                    var engine_hostname = new URL(engine).hostname;
+      let engine_canonical = 'https://' + this._clean_www(new URL(this.engine).hostname);
 
-                    if (this._clean_www(tablocation.hostname) == this._clean_www(engine_hostname) && tablocation.pathname == '/') {
-                      console.log('this is the correct location to be:', keyword, engine);
-                      this.trigger_frontend_next_search(engine, keyword);
-                    } else {
-                      console.log('not the correct location (main page)', this._clean_www(tablocation.hostname), this._clean_www(engine_hostname));
-                      this.go_to_engine_and_retrigger_next_search(engine, keyword);
-                    }
-                  }.bind(this));
-                } catch (e) {
-                  console.log('Caught error (trigger_next_search):', e);
-                }
+      engine_idx = this.engines.indexOf(engine_canonical);
+    }
 
-              case 7:
-              case "end":
-                return _context4.stop();
-            }
+    return engine_idx;
+  }
+
+  get_next_engine() {
+    let engine_idx = this.get_engine_index();
+    engine_idx += 1;
+
+    if (engine_idx >= this.engines.length) {
+      engine_idx = 0;
+    }
+
+    return this.engines[engine_idx];
+  }
+
+  next_search() {
+    this.keyword_iterator = this.keyword_iterator + 1;
+
+    if (this.keyword_iterator >= this.keywords.length) {
+      this.keyword_iterator = 0;
+    }
+
+    this.keyword = this.keywords[this.keyword_iterator];
+    this.engine = this.get_next_engine(this.engine);
+    this.trigger_next_search();
+  }
+  /**
+   * trigger_a browser_clean loop send a message
+   * @param {Boolean} 
+   */
+
+
+  async trigger_clear_browser() {
+    console.log("trigger_clear_browser(): NEW");
+
+    try {
+      xbrowser.tabs.update(this.search_tab_id, {
+        'url': this.config.getBasePage()
+      });
+    } catch (e) {
+      console.log('Caught error (trigger_clear_browser):', e);
+    }
+  }
+
+  async trigger_check_next_engine() {
+    console.log('trigger_check_next_engine');
+
+    try {
+      xbrowser.tabs.get(this.search_tab_id, function (tab) {
+        let next_engine = this.get_next_engine();
+        let next_location = new URL(next_engine);
+
+        if (xbrowser.runtime.lastError) {
+          try {
+            xbrowser.tabs.update(this.search_tab_id, {
+              'url': next_engine
+            });
+          } catch (e) {
+            console.log('Caught error 1 (trigger_check_next_engine):', e);
           }
-        }, _callee4, this);
-      }));
-
-      return function trigger_next_search() {
-        return _trigger_next_search.apply(this, arguments);
-      };
-    }()
-    /**
-    * Main communitaction with the content
-    */
-
-  }, {
-    key: "_onContentMessage",
-    value: function _onContentMessage(msg, sender, sendResponse) {
-      if (this.debug) console.log('-> _onContentMessage');
-
-      if (msg === 'on_start') {
-        sendResponse({
-          'clear_browser_flag': this.config.settings.clear_browser,
-          'dummy_server': this.config.settings.dummy_server,
-          'server': this.config.settings.server
-        });
-      } else if (msg.hasOwnProperty('steady')) {
-        console.log('engine:', this.engine);
-        console.log('msg.engine:', msg.engine);
-
-        if (!this.search_loop_activate) {
-          this.engine = msg.engine;
-          this.engines = this.arrayRotate(this.engines, this.get_engine_index());
-          console.log('Engine order:', this.engines);
-          this.search_loop_activate = true;
-          this.keyword_iterator = 0;
-          this.keyword = this.keywords[this.keyword_iterator];
-          this.search_tab_id = sender.tab.id;
-          this.start_search_loop();
-          sendResponse(true);
-        } else {
-          sendResponse(false);
-        }
-      } else if (msg.hasOwnProperty('clear_browser')) {
-        this.clear_browser();
-        sendResponse(true);
-      } else if (msg.hasOwnProperty('set_iter_step')) {
-        if (msg.step in this.step_iterators) {
-          this.step_iterators[msg.step] += 1;
-        } else {
-          this.step_iterators[msg.step] = 0;
         }
 
-        var _iterator = this.step_iterators[msg.step];
-        console.log('set_iter_step', msg.step, _iterator);
-        sendResponse({
-          'iterator': _iterator
-        });
-      } else if (msg.hasOwnProperty('get_iter_step')) {
-        var _iterator3 = this.step_iterators[msg.step];
-        console.log('get_iter_step', msg.step, _iterator3);
-        sendResponse({
-          'iterator': _iterator3
-        });
-      } else if (msg.hasOwnProperty('get_base_page')) {
-        var _basepage = this.config.getBasePage();
+        var tablocation = new URL(tab.url);
 
-        console.log('get_base_page', _basepage);
-        sendResponse({
-          'base_page': _basepage
-        });
-      } else if (msg.hasOwnProperty('get_current_search')) {
-        console.log('get_current_search:', this.engine, this.keyword);
-        sendResponse({
-          'current_engine': this.engine,
-          'current_keyword': this.keyword
-        });
-      } else if (msg.hasOwnProperty('get_next_engine')) {
-        var _next_engine = this.get_next_engine();
-
-        console.log('get_next_engine', _next_engine);
-        sendResponse({
-          'next_engine': _next_engine
-        });
-      }
-
-      if (this.debug) console.log('<- _onContentMessage');
-      return true;
-    }
-    /**
-     * [start load content]
-     * @return {Promise}
-     */
-
-  }, {
-    key: "start",
-    value: function start() {
-      var _this = this;
-
-      return new Promise(function (resolve, reject) {
-        xbrowser.runtime.onMessage.addListener(_this._onContentMessage);
-        xbrowser.runtime.onConnect.addListener(_this._onConnectPopup);
-
-        _this.getAllTabsIds().then(function (tabIds) {
-          var _iteratorNormalCompletion2 = true;
-          var _didIteratorError2 = false;
-          var _iteratorError2 = undefined;
+        if (this._clean_www(tablocation.hostname) == this._clean_www(next_location.hostname) && tablocation.pathname == '/') {
+          console.log('this is the correct engine:', next_location.hostname);
+        } else {
+          console.log('wrong engine (main page)', this._clean_www(tablocation.hostname), this._clean_www(next_location.hostname));
 
           try {
-            for (var _iterator4 = tabIds[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator4.next()).done); _iteratorNormalCompletion2 = true) {
-              var id = _step2.value;
-              _this.tabs[id] = new Tab();
-            }
-          } catch (err) {
-            _didIteratorError2 = true;
-            _iteratorError2 = err;
-          } finally {
-            try {
-              if (!_iteratorNormalCompletion2 && _iterator4["return"] != null) {
-                _iterator4["return"]();
-              }
-            } finally {
-              if (_didIteratorError2) {
-                throw _iteratorError2;
-              }
-            }
+            xbrowser.tabs.update(this.search_tab_id, {
+              'url': next_engine
+            });
+          } catch (e) {
+            console.log('Caught error 2 (trigger_check_next_engine):', e);
           }
-        });
+        }
+      }.bind(this));
+    } catch (e) {
+      console.log('Caught error 3 (trigger_check_next_engine):', e);
+    }
+  }
 
-        resolve();
+  go_to_engine_and_retrigger_next_search(engine, keyword) {
+    try {
+      xbrowser.tabs.update(this.search_tab_id, {
+        'url': engine
+      }, function (response) {
+        if (xbrowser.runtime.lastError) {
+          // if redirecting the page fails, try again in 3secs
+          this.go_to_engine_and_retrigger_next_search_timeout = setTimeout(function () {
+            this.trigger_next_search();
+          }.bind(this), 30000);
+        } else {
+          // if redirection is successful, then trigger the search in 2secs
+          console.log('Interface not ready:  waiting for redirection');
+          this.trigger_next_search_timeout = setTimeout(function () {
+            this.trigger_next_search();
+          }.bind(this), 30000);
+        }
+      }.bind(this));
+    } catch (e) {
+      console.log('Caught error in go_to_engine_and_retrigger_next_search:', e);
+    }
+  }
+
+  async trigger_frontend_next_search(engine, keyword) {
+    console.log('trigger_frontend_next_search');
+
+    try {
+      xbrowser.tabs.sendMessage(this.search_tab_id, {
+        action: "search",
+        engine: engine,
+        keyword: keyword
+      }, function (response) {
+        if (xbrowser.runtime.lastError) {
+          if (this.debug) console.log('trigger_next_search: No front end tab is listening. Try refreshing engine again');
+          this.go_to_engine_and_retrigger_next_search(engine, keyword);
+        }
+
+        if (!response) {
+          console.log('Interface not ready:  waiting for redirection');
+          this.go_to_engine_and_retrigger_next_search(engine, keyword);
+        }
+      }.bind(this));
+    } catch (e) {
+      console.log('Caught error (trigger_frontend_next_search):', e);
+    }
+  }
+
+  check_keyword_engine_synchronization() {
+    let elapsed_since_starting = new Date() - this.starting_search_event;
+    let round = Math.floor(elapsed_since_starting / this.search_ticks);
+    let keyword_turn = round % this.keywords.length;
+    let engine_turn = round % this.engines.length;
+    console.log('keywords:', this.keywords[this.keyword_iterator], 'vs', this.keywords[keyword_turn]);
+    let is_synchronized = true;
+
+    if (this.keyword_iterator != keyword_turn) {
+      console.log('Resynchronization of keyword iterator required');
+      this.keyword_iterator = keyword_turn;
+      is_synchronized = false;
+    } else {
+      console.log('keyword is synchronized');
+      is_synchronized = true;
+    }
+
+    let this_engine_hostname = new URL(this.engine).hostname;
+    let engine_turn_hostname = new URL(this.engines[engine_turn]).hostname;
+    console.log('engines:', this.engine, 'vs', this.engines[engine_turn]);
+
+    if (this._clean_www(this_engine_hostname) != this._clean_www(engine_turn_hostname)) {
+      console.log('Resynchronization of engine iterator required');
+      this.engine = this.engines[engine_turn];
+      is_synchronized = false;
+    } else {
+      console.log('engine is synchronized');
+      is_synchronized = true;
+    }
+
+    return is_synchronized;
+  }
+  /**
+   * trigger_next_search send a message indicating that a popup should appear
+   * @param {Boolean} 
+   */
+
+
+  async trigger_next_search() {
+    console.log('trigger_next_search');
+    let is_synchronized = this.check_keyword_engine_synchronization();
+
+    if (!is_synchronized) {
+      console.log('the keyword or engine were no longer syncrhonized');
+    }
+
+    let keyword = this.keywords[this.keyword_iterator];
+    let engine = this.engine;
+    this.step_iterators = {};
+
+    try {
+      xbrowser.tabs.get(this.search_tab_id, function (tab) {
+        if (xbrowser.runtime.lastError) {
+          this.go_to_engine_and_retrigger_next_search(engine, keyword);
+        }
+
+        var tablocation = new URL(tab.url);
+        console.log('tabs.get()', tablocation.pathname);
+        let engine_hostname = new URL(engine).hostname;
+
+        if (this._clean_www(tablocation.hostname) == this._clean_www(engine_hostname) && tablocation.pathname == '/') {
+          console.log('this is the correct location to be:', keyword, engine);
+          this.trigger_frontend_next_search(engine, keyword);
+        } else {
+          console.log('not the correct location (main page)', this._clean_www(tablocation.hostname), this._clean_www(engine_hostname));
+          this.go_to_engine_and_retrigger_next_search(engine, keyword);
+        }
+      }.bind(this));
+    } catch (e) {
+      console.log('Caught error (trigger_next_search):', e);
+    }
+  }
+  /**
+  * Main communitaction with the content
+  */
+
+
+  _onContentMessage(msg, sender, sendResponse) {
+    if (this.debug) console.log('-> _onContentMessage');
+
+    if (msg === 'on_start') {
+      sendResponse({
+        'clear_browser_flag': this.config.settings.clear_browser,
+        'dummy_server': this.config.settings.dummy_server,
+        'server': this.config.settings.server
+      });
+    } else if (msg.hasOwnProperty('steady')) {
+      console.log('engine:', this.engine);
+      console.log('msg.engine:', msg.engine);
+
+      if (!this.search_loop_activate) {
+        this.engine = msg.engine;
+        this.engines = this.arrayRotate(this.engines, this.get_engine_index());
+        console.log('Engine order:', this.engines);
+        this.search_loop_activate = true;
+        this.keyword_iterator = 0;
+        this.keyword = this.keywords[this.keyword_iterator];
+        this.search_tab_id = sender.tab.id;
+        this.start_search_loop();
+        sendResponse(true);
+      } else {
+        sendResponse(false);
+      }
+    } else if (msg.hasOwnProperty('clear_browser')) {
+      this.clear_browser();
+      sendResponse(true);
+    } else if (msg.hasOwnProperty('set_iter_step')) {
+      if (msg.step in this.step_iterators) {
+        this.step_iterators[msg.step] += 1;
+      } else {
+        this.step_iterators[msg.step] = 0;
+      }
+
+      let _iterator = this.step_iterators[msg.step];
+      console.log('set_iter_step', msg.step, _iterator);
+      sendResponse({
+        'iterator': _iterator
+      });
+    } else if (msg.hasOwnProperty('get_iter_step')) {
+      let _iterator = this.step_iterators[msg.step];
+      console.log('get_iter_step', msg.step, _iterator);
+      sendResponse({
+        'iterator': _iterator
+      });
+    } else if (msg.hasOwnProperty('get_base_page')) {
+      let _basepage = this.config.getBasePage();
+
+      console.log('get_base_page', _basepage);
+      sendResponse({
+        'base_page': _basepage
+      });
+    } else if (msg.hasOwnProperty('get_current_search')) {
+      console.log('get_current_search:', this.engine, this.keyword);
+      sendResponse({
+        'current_engine': this.engine,
+        'current_keyword': this.keyword
+      });
+    } else if (msg.hasOwnProperty('get_next_engine')) {
+      let _next_engine = this.get_next_engine();
+
+      console.log('get_next_engine', _next_engine);
+      sendResponse({
+        'next_engine': _next_engine
       });
     }
-  }]);
 
-  return Extension;
-}(); //()
+    if (this.debug) console.log('<- _onContentMessage');
+    return true;
+  }
+  /**
+   * [start load content]
+   * @return {Promise}
+   */
 
 
+  start() {
+    return new Promise((resolve, reject) => {
+      xbrowser.runtime.onMessage.addListener(this._onContentMessage);
+      xbrowser.runtime.onConnect.addListener(this._onConnectPopup);
+      this.getAllTabsIds().then(tabIds => {
+        for (let id of tabIds) {
+          this.tabs[id] = new Tab();
+        }
+      });
+      resolve();
+    });
+  }
 
+} //()
 // CONCATENATED MODULE: ./src/background/ExtensionHandler.js
-function ExtensionHandler_asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 
-function ExtensionHandler_asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { ExtensionHandler_asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { ExtensionHandler_asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
-
-function ExtensionHandler_classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function ExtensionHandler_defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function ExtensionHandler_createClass(Constructor, protoProps, staticProps) { if (protoProps) ExtensionHandler_defineProperties(Constructor.prototype, protoProps); if (staticProps) ExtensionHandler_defineProperties(Constructor, staticProps); return Constructor; }
-
-
-
-var ExtensionHandler_ExtensionHandler =
-/*#__PURE__*/
-function () {
+class ExtensionHandler_ExtensionHandler {
   /**
    * [constructor]
    * @param {Configuration} config
    * @param {Transfer} transfer
    */
-  function ExtensionHandler(config, navlists) {
-    ExtensionHandler_classCallCheck(this, ExtensionHandler);
-
+  constructor(config, navlists) {
     this.config = config;
     this.debug = false;
     this.urllist = navlists['urllist'];
     this.navlists = navlists;
   }
 
-  ExtensionHandler_createClass(ExtensionHandler, [{
-    key: "reload_config",
-    value: function () {
-      var _reload_config = ExtensionHandler_asyncToGenerator(
-      /*#__PURE__*/
-      regeneratorRuntime.mark(function _callee() {
-        return regeneratorRuntime.wrap(function _callee$(_context) {
-          while (1) {
-            switch (_context.prev = _context.next) {
-              case 0:
-                try {
-                  if (this.debug) console.log('***Load Configuration***');
-                  if (this.debug) console.log('***Configuration Loaded***');
-                } catch (err) {
-                  console.log('ERROR IN INIT');
-                  console.error(err);
-                }
+  async reload_config() {
+    try {
+      if (this.debug) console.log('***Load Configuration***');
+      if (this.debug) console.log('***Configuration Loaded***');
+    } catch (err) {
+      console.log('ERROR IN INIT');
+      console.error(err);
+    }
+  }
 
-              case 1:
-              case "end":
-                return _context.stop();
-            }
-          }
-        }, _callee, this);
-      }));
+  async init() {
+    if (this.debug) console.log('ExtensionHandler.init()');
+    await this.reload_config();
+    this.initialize();
+  }
 
-      return function reload_config() {
-        return _reload_config.apply(this, arguments);
-      };
-    }()
-  }, {
-    key: "init",
-    value: function () {
-      var _init = ExtensionHandler_asyncToGenerator(
-      /*#__PURE__*/
-      regeneratorRuntime.mark(function _callee2() {
-        return regeneratorRuntime.wrap(function _callee2$(_context2) {
-          while (1) {
-            switch (_context2.prev = _context2.next) {
-              case 0:
-                if (this.debug) console.log('ExtensionHandler.init()');
-                _context2.next = 3;
-                return this.reload_config();
+  initialize() {
+    return new Promise((resolve, reject) => {
+      if (this.debug) console.log('-> ExtensionHandler.initialize() - Promise');
 
-              case 3:
-                this.initialize();
+      try {
+        this.extension = new Extension_Extension(this.config, this.navlists);
+        this.extension.start();
+      } catch (e) {
+        reject(e);
+      } finally {
+        if (this.debug) console.log('<- ExtensionHandler.initialize() - Promise');
+        resolve();
+      }
+    });
+  }
 
-              case 4:
-              case "end":
-                return _context2.stop();
-            }
-          }
-        }, _callee2, this);
-      }));
+  track_list() {
+    if (this.debug) console.log('-> ExtensionHandler.track_list()');
+    return new Promise((resolve, reject) => {
+      this.navigate();
+      resolve(true);
+    });
+  }
 
-      return function init() {
-        return _init.apply(this, arguments);
-      };
-    }()
-  }, {
-    key: "initialize",
-    value: function initialize() {
-      var _this = this;
+  navigate() {
+    return new Promise((resolve, reject) => {
+      xbrowser.tabs.query({
+        currentWindow: true,
+        active: true
+      }, function (tabs) {
+        let url_iterator = 0;
+        xbrowser.tabs.update(tabs[0].id, {
+          url: url
+        });
+        let url = this.urllist[url_iterator];
 
-      return new Promise(function (resolve, reject) {
-        if (_this.debug) console.log('-> ExtensionHandler.initialize() - Promise');
-
-        try {
-          _this.extension = new Extension_Extension(_this.config, _this.navlists);
-
-          _this.extension.start();
-        } catch (e) {
-          reject(e);
-        } finally {
-          if (_this.debug) console.log('<- ExtensionHandler.initialize() - Promise');
-          resolve();
+        if (!url.startsWith('http')) {
+          url = 'http://' + url;
         }
-      });
-    }
-  }, {
-    key: "track_list",
-    value: function track_list() {
-      var _this2 = this;
 
-      if (this.debug) console.log('-> ExtensionHandler.track_list()');
-      return new Promise(function (resolve, reject) {
-        _this2.navigate();
+        xbrowser.tabs.update(tabs[0].id, {
+          url: url
+        });
+        url_iterator += 1;
 
-        resolve(true);
-      });
-    }
-  }, {
-    key: "navigate",
-    value: function navigate() {
-      var _this3 = this;
+        if (url_iterator == this.urllist.length) {
+          clearInterval(interval_id);
+        }
 
-      return new Promise(function (resolve, reject) {
-        xbrowser.tabs.query({
-          currentWindow: true,
-          active: true
-        }, function (tabs) {
-          var url_iterator = 0;
-          xbrowser.tabs.update(tabs[0].id, {
-            url: url
-          });
-          var url = this.urllist[url_iterator];
+        let interval_id = setInterval(function () {
+          let url = this.urllist[url_iterator];
 
           if (!url.startsWith('http')) {
             url = 'http://' + url;
@@ -10934,33 +10657,12 @@ function () {
           if (url_iterator == this.urllist.length) {
             clearInterval(interval_id);
           }
+        }.bind(this), 10000);
+      }.bind(this));
+    });
+  }
 
-          var interval_id = setInterval(function () {
-            var url = this.urllist[url_iterator];
-
-            if (!url.startsWith('http')) {
-              url = 'http://' + url;
-            }
-
-            xbrowser.tabs.update(tabs[0].id, {
-              url: url
-            });
-            url_iterator += 1;
-
-            if (url_iterator == this.urllist.length) {
-              clearInterval(interval_id);
-            }
-          }.bind(this), 10000);
-        }.bind(_this3));
-      });
-    }
-  }]);
-
-  return ExtensionHandler;
-}(); //class
-
-
-
+} //class
 // CONCATENATED MODULE: ./src/lib/settings.js
 /*global settings*/
 
@@ -10976,7 +10678,7 @@ if (typeof settings == 'undefined') {
  */
 
 
-settings.getBrowser = function () {
+settings.getBrowser = () => {
   var ua = navigator.userAgent,
       tem,
       M = ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
@@ -11014,106 +10716,45 @@ settings.getBrowser = function () {
 
 /* harmony default export */ var lib_settings = (settings);
 // CONCATENATED MODULE: ./src/background/index.js
-function background_asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
-
-function background_asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { background_asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { background_asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
 
 
 
 
 
-
-function load_navlists(_x) {
-  return _load_navlists.apply(this, arguments);
-}
-
-function _load_navlists() {
-  _load_navlists = background_asyncToGenerator(
-  /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee2(xbrowser) {
-    return regeneratorRuntime.wrap(function _callee2$(_context2) {
-      while (1) {
-        switch (_context2.prev = _context2.next) {
-          case 0:
-            return _context2.abrupt("return", {
-              'urllist': ['empty'],
-              'keywords': ['empty'],
-              'engines': ['empty']
-            });
-
-          case 1:
-          case "end":
-            return _context2.stop();
-        }
-      }
-    }, _callee2);
-  }));
-  return _load_navlists.apply(this, arguments);
-}
-
-(function () {
-  var _main = background_asyncToGenerator(
-  /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee() {
-    var transfer, navlists;
-    return regeneratorRuntime.wrap(function _callee$(_context) {
-      while (1) {
-        switch (_context.prev = _context.next) {
-          case 0:
-            console.log('Start', new Date(), lib_settings.server);
-            transfer = new Transfer(lib_settings.server);
-            window.config = new Configuration(lib_settings, transfer);
-            window.config.clear_browser();
-            window.addEventListener("unhandledrejection", function (event) {
-              console.warn("UNHANDLED PROMISE REJECTION: ", event.reason, '. Have you added the certificates by visiting the server page?');
-            });
-            window.requireUpdate = false;
-
-            if (lib_settings.requireVersion.hasOwnProperty(lib_settings.getBrowser().name) && lib_settings.requireVersion[lib_settings.getBrowser().name] > lib_settings.getBrowser().version) {
-              console.error('PLEASE UPDATE YOUR BROWSER');
-              window.requireUpdate = true;
-            }
-
-            window.xbrowser = window.hasOwnProperty('chrome') ? chrome : browser;
-            window.settings = lib_settings;
-            _context.next = 11;
-            return load_navlists(window.xbrowser);
-
-          case 11:
-            navlists = _context.sent;
-            _context.next = 14;
-            return config.getQueryTerms();
-
-          case 14:
-            navlists['keywords'] = _context.sent;
-            _context.next = 17;
-            return config.getEngines();
-
-          case 17:
-            navlists['engines'] = _context.sent;
-            _context.next = 20;
-            return config.getUrlList();
-
-          case 20:
-            navlists['urllist'] = _context.sent;
-            console.log(navlists);
-            window.extensionHandler = new ExtensionHandler_ExtensionHandler(config, navlists);
-            _context.next = 25;
-            return window.extensionHandler.init();
-
-          case 25:
-          case "end":
-            return _context.stop();
-        }
-      }
-    }, _callee);
-  }));
-
-  return function main() {
-    return _main.apply(this, arguments);
+async function load_navlists(xbrowser) {
+  return {
+    'urllist': ['empty'],
+    'keywords': ['empty'],
+    'engines': ['empty']
   };
-})()();
+}
+
+(async function main() {
+  console.log('Start', new Date(), lib_settings.server);
+  var transfer = new Transfer(lib_settings.server);
+  window.config = new Configuration(lib_settings, transfer);
+  window.config.clear_browser();
+  window.addEventListener("unhandledrejection", event => {
+    console.warn(`UNHANDLED PROMISE REJECTION: `, event.reason, '. Have you added the certificates by visiting the server page?');
+  });
+  window.requireUpdate = false;
+
+  if (lib_settings.requireVersion.hasOwnProperty(lib_settings.getBrowser().name) && lib_settings.requireVersion[lib_settings.getBrowser().name] > lib_settings.getBrowser().version) {
+    console.error('PLEASE UPDATE YOUR BROWSER');
+    window.requireUpdate = true;
+  }
+
+  window.xbrowser = window.hasOwnProperty('chrome') ? chrome : browser;
+  window.settings = lib_settings;
+  let navlists = await load_navlists(window.xbrowser);
+  navlists['keywords'] = await config.getQueryTerms();
+  navlists['engines'] = await config.getEngines();
+  navlists['urllist'] = await config.getUrlList();
+  console.log(navlists);
+  window.extensionHandler = new ExtensionHandler_ExtensionHandler(config, navlists);
+  await window.extensionHandler.init();
+})();
 
 /***/ })
 /******/ ]);
