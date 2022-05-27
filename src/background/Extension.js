@@ -56,7 +56,7 @@ export default class Extension {
 
     this.getAllTabsIds = this.getAllTabsIds.bind(this);
 
-    this.search_ticks = 7*60000;
+    this.search_ticks = this.config.settings.search_ticks_mins*60000;
     this.clear_browser_lapse = this.search_ticks - 45000;
     this.check_engine_lapse = this.search_ticks - 30000;
     this.initial_search_delay = 60000;
