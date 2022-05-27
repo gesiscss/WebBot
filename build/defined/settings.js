@@ -23,5 +23,5 @@ var settings = {
   server: "http://localhost:8000/",
 
   // set minutes between each query
-  search_ticks_mins: 4
+  search_ticks_mins: 5
 }
