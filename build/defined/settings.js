@@ -20,5 +20,8 @@ var settings = {
   // production server where the list of engines, queryterms and urllists would be
   // downloaded from. Temporarily you can also use the microserver provided in this
   // repository (in the microserver folder)
-  server: "http://localhost:8000/"
+  server: "http://localhost:8000/",
+
+  // set minutes between each query
+  search_ticks_mins: 4
 }
