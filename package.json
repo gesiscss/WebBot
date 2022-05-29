@@ -70,7 +70,7 @@
     "react-scripts": "^2.1.5",
     "react-spinners": "^0.10.6",
     "react-tooltip": "^3.10.0",
-    "schema-inspector": "^1.6.8",
+    "schema-inspector": "^2.0.0",
     "valid-url": "^1.0.9"
   }
 }
