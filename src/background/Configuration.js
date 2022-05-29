@@ -84,8 +84,9 @@ export default class Configuration {
           //if (this.debug) console.log('_fetchEngines: ', err);
           console.log("Failed fetching the engines");
           //resolve(false);
-          resolve(['https://google.com', 'https://baidu.com', 'https://duckduckgo.com', 
-            'https://bing.com', 'https://yandex.com', 'https://search.yahoo.com']);
+          resolve(['https://google.com', 'https://duckduckgo.com', 
+            'https://bing.com', 'https://yandex.com', 
+            'https://search.yahoo.com', 'https://baidu.com']);
         })
     });
   }

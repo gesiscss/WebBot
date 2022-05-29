@@ -167,11 +167,12 @@ clear_browser(){
 
     console.log('Next Browsing Cleaning:', new Date(next_timestamp + this.clear_browser_lapse));
     this.next_clear_browser = setTimeout(function() {
-        if (this.next_check_engine){
+        // 20220529: not sure why this event would be removed
+        // if (this.next_check_engine){
           // removing the check because the cleaning the browser should redirect
-          console.log("Removing Check Engine Event (this.next_check_engine)");
-          clearTimeout(this.next_check_engine);
-        }
+          // console.log("Removing Check Engine Event (this.next_check_engine)");
+          // clearTimeout(this.next_check_engine);
+        // }
         this.trigger_clear_browser();
     }.bind(this), next_timestamp + this.clear_browser_lapse - now.getTime());
 
@@ -276,7 +277,7 @@ clear_browser(){
         var tablocation = new URL(tab.url);
         
         if(this._clean_www(tablocation.hostname) == this._clean_www(next_location.hostname) && tablocation.pathname == '/'){
-          console.log('this is the correct engine:', next_location.hostname);          
+          console.log('this is the correct engine:',  next_location.hostname);          
         } else {
           console.log('wrong engine (main page)', this._clean_www(tablocation.hostname), this._clean_www(next_location.hostname));
           try{

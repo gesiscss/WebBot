@@ -9826,24 +9826,9 @@ var eventemitter3 = __webpack_require__(130);
 var eventemitter3_default = /*#__PURE__*/__webpack_require__.n(eventemitter3);
 
 // CONCATENATED MODULE: ./src/content/Bot.js
-function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 
-function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-
-
-var Bot_Bot =
-/*#__PURE__*/
-function () {
-  function Bot(extension) {
-    _classCallCheck(this, Bot);
-
+class Bot_Bot {
+  constructor(extension) {
     this.extension = extension;
     this.EVENT_NAMES = {
       'data': 'onData',
@@ -9894,664 +9879,427 @@ function () {
    */
 
 
-  _createClass(Bot, [{
-    key: "start",
-    value: function start() {
-      var _this = this;
+  start() {
+    if (this.debug) console.log('Bot -> start()');
+    this.onStart(delay => {
+      this.eventEmitter.emit(this.EVENT_NAMES.start, delay, false);
+    });
+  }
 
-      if (this.debug) console.log('Bot -> start()');
-      this.onStart(function (delay) {
-        _this.eventEmitter.emit(_this.EVENT_NAMES.start, delay, false);
-      });
+  async navigate() {
+    console.log('navigate', location.href);
+
+    if (this.is_text_result_page()) {
+      console.log('this.is_text_result_page()');
+      this.step = 'text_animation';
+      this.text_animation();
+    } else if (this.is_news_result_page()) {
+      console.log('this.is_news_result_page()');
+      this.step = 'news_animation';
+      this.news_animation();
+    } else if (this.is_images_result_page()) {
+      console.log('this.is_images_result_page()');
+      this.step = 'images_animation';
+      this.images_animation();
+    } else if (this.is_videos_result_page()) {
+      console.log('this.is_videos_result_page()');
+      this.step = 'videos_animation';
+      this.videos_animation();
+    } else {
+      console.log('this.constant_consent_check()');
+      this.constant_consent_check();
+      console.log('this.start_navigation()');
+      this.step = 'start_navigation';
+      this.start_navigation();
     }
-  }, {
-    key: "navigate",
-    value: function () {
-      var _navigate = _asyncToGenerator(
-      /*#__PURE__*/
-      regeneratorRuntime.mark(function _callee() {
-        return regeneratorRuntime.wrap(function _callee$(_context) {
-          while (1) {
-            switch (_context.prev = _context.next) {
-              case 0:
-                console.log('navigate', location.href);
 
-                if (this.is_text_result_page()) {
-                  console.log('this.is_text_result_page()');
-                  this.step = 'text_animation';
-                  this.text_animation();
-                } else if (this.is_news_result_page()) {
-                  console.log('this.is_news_result_page()');
-                  this.step = 'news_animation';
-                  this.news_animation();
-                } else if (this.is_images_result_page()) {
-                  console.log('this.is_images_result_page()');
-                  this.step = 'images_animation';
-                  this.images_animation();
-                } else if (this.is_videos_result_page()) {
-                  console.log('this.is_videos_result_page()');
-                  this.step = 'videos_animation';
-                  this.videos_animation();
-                } else {
-                  console.log('this.constant_consent_check()');
-                  this.constant_consent_check();
-                  console.log('this.start_navigation()');
-                  this.step = 'start_navigation';
-                  this.start_navigation();
-                }
+    this.extension.set_iter_step(this.step);
+  }
 
-                this.extension.set_iter_step(this.step);
+  set_navigate_timeout(navigate_delay = null) {
+    if (navigate_delay == null) {
+      navigate_delay = this.navigate_delay;
+    }
 
-              case 3:
-              case "end":
-                return _context.stop();
-            }
+    console.log('set_navigate_timeout');
+    setTimeout(function () {
+      this.navigate();
+    }.bind(this), navigate_delay);
+  }
+
+  text_animation() {
+    if (this.is_text_result_pages_end()) {
+      this.set_text_results_animation(this.set_get_news_tab_timeout);
+    } else {
+      this.set_text_results_animation(this.set_get_next_button_text_result_timeout);
+    }
+  }
+
+  news_animation() {
+    if (this.is_news_result_pages_end()) {
+      this.set_news_results_animation(this.set_get_images_tab_timeout);
+    } else {
+      console.log('continue news animation');
+      this.set_news_results_animation(this.set_get_next_button_news_result_timeout);
+    }
+  }
+
+  images_animation(delay = null) {
+    if (delay == null) {
+      delay = this.initial_scroll_delay;
+    }
+
+    if (this.is_images_result_scrolls_end()) {
+      this.images_results_counter = 0;
+      this.scroll_down().then(value => this.set_get_videos_tab_timeout());
+    } else {
+      setTimeout(function () {
+        this.scroll_down().then(value => this.images_animation(0));
+      }.bind(this), delay);
+    }
+  }
+
+  videos_animation() {
+    if (this.is_videos_result_pages_end()) {
+      this.set_videos_results_animation(this.go_to_base_page);
+    } else {
+      this.set_videos_results_animation(this.set_get_next_button_videos_timeout);
+    }
+  } ///////////////////////////////////////////////////
+  // More_text animation (used in DuckDuckGo)
+  ///////////////////////////////////////////////////
+  // text
+
+
+  more_text_animation() {
+    this.set_click_more_text_timeout().then(value => this.text_animation(500));
+  }
+
+  set_click_more_text_timeout() {
+    return new Promise((resolve, reject) => {
+      setTimeout(function () {
+        this.click_more_text();
+        resolve(true);
+      }.bind(this), 250);
+    });
+  }
+
+  click_more_text() {
+    this.click_or_reload(this.get_more_text_button());
+  } // news
+
+
+  more_news_animation() {
+    this.set_click_more_news_timeout().then(value => this.news_animation(500));
+  }
+
+  set_click_more_news_timeout() {
+    return new Promise((resolve, reject) => {
+      setTimeout(function () {
+        this.click_more_news();
+        resolve(true);
+      }.bind(this), 250);
+    });
+  }
+
+  click_more_news() {
+    this.click_or_reload(this.get_more_news_button());
+  } /////////////////////////////////////
+  // End more text animation
+  /////////////////////////////////////
+  ///////////////////////////////////////////////////
+  // More images animation (used in Yahoo)
+  ///////////////////////////////////////////////////
+
+
+  more_images_animation() {
+    this.set_click_more_images_timeout().then(value => this.images_animation(500));
+  }
+
+  set_click_more_images_timeout() {
+    return new Promise((resolve, reject) => {
+      setTimeout(function () {
+        this.click_more_images();
+        resolve(true);
+      }.bind(this), 150);
+    });
+  }
+
+  click_more_images() {
+    this.click_or_reload(this.get_more_images_button());
+  } /////////////////////////////////////
+  // End more images animation
+  /////////////////////////////////////
+  /////////////////////////////////////////////////////
+  // More_videos animation (used in Yandex and Yahoo)
+  /////////////////////////////////////////////////////
+
+
+  more_videos_animation() {
+    this.set_click_more_videos_timeout().then(value => this.videos_animation(500));
+  }
+
+  set_click_more_videos_timeout() {
+    return new Promise((resolve, reject) => {
+      setTimeout(function () {
+        this.click_more_videos();
+        resolve(true);
+      }.bind(this), 150);
+    });
+  }
+
+  click_more_videos() {
+    this.click_or_reload(this.get_more_videos_button());
+  } /////////////////////////////////////
+  // End more videos animation
+  /////////////////////////////////////
+
+
+  start_navigation() {
+    this.extension.steady();
+  }
+
+  search(keyword, engine) {
+    setTimeout(function () {
+      this.set_mainpage_animation(keyword);
+    }.bind(this), this.next_delay);
+  }
+
+  go_to_base_page() {
+    console.log('Go to base page');
+    setTimeout(function () {
+      this.extension.go_to_base_page();
+    }.bind(this), this.next_delay);
+  }
+
+  constant_consent_check() {
+    console.log("constant_consent_check");
+    return new Promise(async (resolve, reject) => {
+      let checks = 1;
+      var interval_id = setInterval(function () {
+        console.log("checking for consent", checks);
+
+        if (this.is_collect_consent_page()) {
+          this.consent_animation();
+          clearInterval(interval_id);
+        } else {
+          if (checks >= this.consent_checks) {
+            console.log("bye intervals", checks);
+            clearInterval(interval_id);
           }
-        }, _callee, this);
+
+          checks += 1;
+        }
+      }.bind(this), 3000);
+    });
+  }
+
+  consent_animation() {}
+
+  is_collect_consent_page() {
+    return false;
+  }
+
+  is_text_result_pages_end() {
+    console.log('is_text_result_pages_end()');
+    let count = this.get_text_result_page();
+    console.log('\n\nPage Count: ' + count + '\n\n');
+    return this.result_text_pages <= count;
+  }
+
+  is_news_result_pages_end() {
+    console.log('is_news_result_pages_end()');
+    let count = this.get_news_result_page();
+    console.log('\n\nPage Count: ' + count + '\n\n');
+    return this.result_news_pages <= count;
+  }
+
+  is_videos_result_pages_end() {
+    console.log('is_videos_result_pages_end()');
+    let count = this.get_videos_result_page();
+    console.log('\n\nPage Count: ' + count + '\n\n');
+    return this.result_videos_pages <= count;
+  }
+
+  is_images_result_pages_end() {
+    console.log('is_images_result_pages_end()');
+    let count = this.get_images_result_page();
+    console.log('\n\nPage Count: ' + count + '\n\n');
+    return this.result_images_pages <= count;
+  }
+
+  is_text_result_scrolls_end() {
+    console.log('is_text_result_scrolls_end()');
+    let count = this.get_text_result_page();
+    console.log('\n\nScroll Count: ' + count + '\n\n');
+    return this.scroll_text_reloads <= count;
+  }
+
+  is_news_result_scrolls_end() {
+    console.log('is_news_result_scrolls_end()');
+    let count = this.get_news_result_page();
+    console.log('\n\nScroll Count: ' + count + '\n\n');
+    return this.scroll_news_reloads <= count;
+  }
+
+  is_videos_result_scrolls_end() {
+    console.log('is_videos_result_scrolls_end()');
+    let count = this.get_videos_result_page();
+    console.log('\n\nScroll Count: ' + count + '\n\n');
+    return this.scroll_videos_reloads <= count;
+  }
+
+  is_images_result_scrolls_end() {
+    console.log('is_images_result_scrolls_end()');
+    let count = this.get_images_result_page();
+    console.log('\n\nScroll Count: ' + count + '\n\n');
+    return this.scroll_images_reloads <= count;
+  }
+
+  set_mainpage_animation(keyword, delay = 500) {
+    setTimeout(function () {
+      this.type_search(keyword);
+    }.bind(this), delay);
+  }
+
+  set_get_search_button_timeout(delay = 1000) {
+    setTimeout(function () {
+      this.click_or_reload(this.get_search_button());
+    }.bind(this), delay);
+  }
+
+  set_videos_results_animation(callback_end) {
+    setTimeout(function () {
+      this.scroll_down().then(value => // the callback needs to be bind again, so that it finds
+      // the methods of the object
+      callback_end.bind(this)());
+    }.bind(this), this.initial_scroll_delay);
+  }
+
+  set_text_results_animation(callback_end) {
+    setTimeout(function () {
+      this.scroll_down().then(value => // the callback needs to be bind again, so that it finds
+      // the methods of the object
+      callback_end.bind(this)());
+    }.bind(this), this.initial_scroll_delay);
+  }
+
+  set_news_results_animation(callback_end) {
+    setTimeout(function () {
+      this.scroll_down().then(value => // the callback needs to be bind again, so that it finds
+      // the methods of the object
+      callback_end.bind(this)());
+    }.bind(this), this.initial_scroll_delay);
+  }
+
+  set_get_next_button_text_result_timeout() {
+    return new Promise(async (resolve, reject) => {
+      setTimeout(function () {
+        this.click_or_reload(this.get_next_button());
+        resolve(true);
+      }.bind(this), this.next_delay);
+    });
+  }
+
+  set_get_next_button_news_result_timeout() {
+    return new Promise(async (resolve, reject) => {
+      setTimeout(function () {
+        console.log("this.click_or_move_to_images(this.get_next_button_news());");
+        this.click_or_move_to_images(this.get_next_button_news());
+        resolve(true);
+      }.bind(this), this.next_delay);
+    });
+  }
+
+  set_get_next_button_videos_timeout() {
+    return new Promise(async (resolve, reject) => {
+      setTimeout(function () {
+        this.click_or_reload(this.get_next_button_videos());
+        resolve(true);
+      }.bind(this), this.next_delay);
+    });
+  }
+
+  set_get_news_tab_timeout() {
+    return new Promise(async (resolve, reject) => {
+      setTimeout(function () {
+        this.click_or_reload(this.get_news_tab());
+        resolve(true);
+      }.bind(this), this.next_delay);
+    });
+  }
+
+  set_get_images_tab_timeout() {
+    return new Promise(async (resolve, reject) => {
+      setTimeout(function () {
+        this.click_or_reload(this.get_images_tab());
+        resolve(true);
+      }.bind(this), this.next_delay);
+    });
+  }
+
+  set_get_videos_tab_timeout() {
+    return new Promise(async (resolve, reject) => {
+      setTimeout(function () {
+        this.click_or_reload(this.get_videos_tab());
+        resolve(true);
+      }.bind(this), this.next_delay);
+    });
+  }
+
+  is_news_loaded() {
+    //assume that things are loaded for news
+    // see baidu for an example of implementing this properly
+    return true;
+  }
+
+  click_or_move_to_images(button) {
+    console.log(button);
+
+    if (button) {
+      //button.click();
+      button.dispatchEvent(new MouseEvent('click', {
+        bubbles: true,
+        cancelable: true,
+        view: window
       }));
-
-      return function navigate() {
-        return _navigate.apply(this, arguments);
-      };
-    }()
-  }, {
-    key: "set_navigate_timeout",
-    value: function set_navigate_timeout() {
-      var navigate_delay = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
-
-      if (navigate_delay == null) {
-        navigate_delay = this.navigate_delay;
-      }
-
-      console.log('set_navigate_timeout');
+    } else {
+      console.log('Moving to images (Promise)...');
       setTimeout(function () {
-        this.navigate();
-      }.bind(this), navigate_delay);
+        console.log('is_it_loaded', this.is_news_loaded());
+
+        if (this.is_news_loaded()) {
+          console.log('is_news_loaded');
+          this.set_news_results_animation(this.set_get_images_tab_timeout);
+        } else {
+          location.reload();
+        }
+      }.bind(this), 500);
     }
-  }, {
-    key: "text_animation",
-    value: function text_animation() {
-      if (this.is_text_result_pages_end()) {
-        this.set_text_results_animation(this.set_get_news_tab_timeout);
-      } else {
-        this.set_text_results_animation(this.set_get_next_button_text_result_timeout);
-      }
-    }
-  }, {
-    key: "news_animation",
-    value: function news_animation() {
-      if (this.is_news_result_pages_end()) {
-        this.set_news_results_animation(this.set_get_images_tab_timeout);
-      } else {
-        console.log('continue news animation');
-        this.set_news_results_animation(this.set_get_next_button_news_result_timeout);
+  }
+
+  click_or_reload(button) {
+    console.log(button);
+
+    if (button) {
+      //button.click();
+      button.dispatchEvent(new MouseEvent('click', {
+        bubbles: true,
+        cancelable: true,
+        view: window
+      }));
+    } else {
+      let iter = this.extension.get_iter_step(this.step);
+
+      if (iter < this.step_attempts) {
+        console.log('Reloading...');
+        location.reload();
       }
     }
-  }, {
-    key: "images_animation",
-    value: function images_animation() {
-      var _this2 = this;
+  }
 
-      var delay = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
-
-      if (delay == null) {
-        delay = this.initial_scroll_delay;
-      }
-
-      if (this.is_images_result_scrolls_end()) {
-        this.images_results_counter = 0;
-        this.scroll_down().then(function (value) {
-          return _this2.set_get_videos_tab_timeout();
-        });
-      } else {
-        setTimeout(function () {
-          var _this3 = this;
-
-          this.scroll_down().then(function (value) {
-            return _this3.images_animation(0);
-          });
-        }.bind(this), delay);
-      }
-    }
-  }, {
-    key: "videos_animation",
-    value: function videos_animation() {
-      if (this.is_videos_result_pages_end()) {
-        this.set_videos_results_animation(this.go_to_base_page);
-      } else {
-        this.set_videos_results_animation(this.set_get_next_button_videos_timeout);
-      }
-    } ///////////////////////////////////////////////////
-    // More_text animation (used in DuckDuckGo)
-    ///////////////////////////////////////////////////
-    // text
-
-  }, {
-    key: "more_text_animation",
-    value: function more_text_animation() {
-      var _this4 = this;
-
-      this.set_click_more_text_timeout().then(function (value) {
-        return _this4.text_animation(500);
-      });
-    }
-  }, {
-    key: "set_click_more_text_timeout",
-    value: function set_click_more_text_timeout() {
-      var _this5 = this;
-
-      return new Promise(function (resolve, reject) {
-        setTimeout(function () {
-          this.click_more_text();
-          resolve(true);
-        }.bind(_this5), 250);
-      });
-    }
-  }, {
-    key: "click_more_text",
-    value: function click_more_text() {
-      this.click_or_reload(this.get_more_text_button());
-    } // news
-
-  }, {
-    key: "more_news_animation",
-    value: function more_news_animation() {
-      var _this6 = this;
-
-      this.set_click_more_news_timeout().then(function (value) {
-        return _this6.news_animation(500);
-      });
-    }
-  }, {
-    key: "set_click_more_news_timeout",
-    value: function set_click_more_news_timeout() {
-      var _this7 = this;
-
-      return new Promise(function (resolve, reject) {
-        setTimeout(function () {
-          this.click_more_news();
-          resolve(true);
-        }.bind(_this7), 250);
-      });
-    }
-  }, {
-    key: "click_more_news",
-    value: function click_more_news() {
-      this.click_or_reload(this.get_more_news_button());
-    } /////////////////////////////////////
-    // End more text animation
-    /////////////////////////////////////
-    ///////////////////////////////////////////////////
-    // More images animation (used in Yahoo)
-    ///////////////////////////////////////////////////
-
-  }, {
-    key: "more_images_animation",
-    value: function more_images_animation() {
-      var _this8 = this;
-
-      this.set_click_more_images_timeout().then(function (value) {
-        return _this8.images_animation(500);
-      });
-    }
-  }, {
-    key: "set_click_more_images_timeout",
-    value: function set_click_more_images_timeout() {
-      var _this9 = this;
-
-      return new Promise(function (resolve, reject) {
-        setTimeout(function () {
-          this.click_more_images();
-          resolve(true);
-        }.bind(_this9), 150);
-      });
-    }
-  }, {
-    key: "click_more_images",
-    value: function click_more_images() {
-      this.click_or_reload(this.get_more_images_button());
-    } /////////////////////////////////////
-    // End more images animation
-    /////////////////////////////////////
-    /////////////////////////////////////////////////////
-    // More_videos animation (used in Yandex and Yahoo)
-    /////////////////////////////////////////////////////
-
-  }, {
-    key: "more_videos_animation",
-    value: function more_videos_animation() {
-      var _this10 = this;
-
-      this.set_click_more_videos_timeout().then(function (value) {
-        return _this10.videos_animation(500);
-      });
-    }
-  }, {
-    key: "set_click_more_videos_timeout",
-    value: function set_click_more_videos_timeout() {
-      var _this11 = this;
-
-      return new Promise(function (resolve, reject) {
-        setTimeout(function () {
-          this.click_more_videos();
-          resolve(true);
-        }.bind(_this11), 150);
-      });
-    }
-  }, {
-    key: "click_more_videos",
-    value: function click_more_videos() {
-      this.click_or_reload(this.get_more_videos_button());
-    } /////////////////////////////////////
-    // End more videos animation
-    /////////////////////////////////////
-
-  }, {
-    key: "start_navigation",
-    value: function start_navigation() {
-      this.extension.steady();
-    }
-  }, {
-    key: "search",
-    value: function search(keyword, engine) {
-      setTimeout(function () {
-        this.set_mainpage_animation(keyword);
-      }.bind(this), this.next_delay);
-    }
-  }, {
-    key: "go_to_base_page",
-    value: function go_to_base_page() {
-      console.log('Go to base page');
-      setTimeout(function () {
-        this.extension.go_to_base_page();
-      }.bind(this), this.next_delay);
-    }
-  }, {
-    key: "constant_consent_check",
-    value: function constant_consent_check() {
-      var _this12 = this;
-
-      console.log("constant_consent_check");
-      return new Promise(
-      /*#__PURE__*/
-      function () {
-        var _ref = _asyncToGenerator(
-        /*#__PURE__*/
-        regeneratorRuntime.mark(function _callee2(resolve, reject) {
-          var checks, interval_id;
-          return regeneratorRuntime.wrap(function _callee2$(_context2) {
-            while (1) {
-              switch (_context2.prev = _context2.next) {
-                case 0:
-                  checks = 1;
-                  interval_id = setInterval(function () {
-                    console.log("checking for consent", checks);
-
-                    if (this.is_collect_consent_page()) {
-                      this.consent_animation();
-                      clearInterval(interval_id);
-                    } else {
-                      if (checks >= this.consent_checks) {
-                        console.log("bye intervals", checks);
-                        clearInterval(interval_id);
-                      }
-
-                      checks += 1;
-                    }
-                  }.bind(_this12), 3000);
-
-                case 2:
-                case "end":
-                  return _context2.stop();
-              }
-            }
-          }, _callee2);
-        }));
-
-        return function (_x, _x2) {
-          return _ref.apply(this, arguments);
-        };
-      }());
-    }
-  }, {
-    key: "consent_animation",
-    value: function consent_animation() {}
-  }, {
-    key: "is_collect_consent_page",
-    value: function is_collect_consent_page() {
-      return false;
-    }
-  }, {
-    key: "is_text_result_pages_end",
-    value: function is_text_result_pages_end() {
-      console.log('is_text_result_pages_end()');
-      var count = this.get_text_result_page();
-      console.log('\n\nPage Count: ' + count + '\n\n');
-      return this.result_text_pages <= count;
-    }
-  }, {
-    key: "is_news_result_pages_end",
-    value: function is_news_result_pages_end() {
-      console.log('is_news_result_pages_end()');
-      var count = this.get_news_result_page();
-      console.log('\n\nPage Count: ' + count + '\n\n');
-      return this.result_news_pages <= count;
-    }
-  }, {
-    key: "is_videos_result_pages_end",
-    value: function is_videos_result_pages_end() {
-      console.log('is_videos_result_pages_end()');
-      var count = this.get_videos_result_page();
-      console.log('\n\nPage Count: ' + count + '\n\n');
-      return this.result_videos_pages <= count;
-    }
-  }, {
-    key: "is_images_result_pages_end",
-    value: function is_images_result_pages_end() {
-      console.log('is_images_result_pages_end()');
-      var count = this.get_images_result_page();
-      console.log('\n\nPage Count: ' + count + '\n\n');
-      return this.result_images_pages <= count;
-    }
-  }, {
-    key: "is_text_result_scrolls_end",
-    value: function is_text_result_scrolls_end() {
-      console.log('is_text_result_scrolls_end()');
-      var count = this.get_text_result_page();
-      console.log('\n\nScroll Count: ' + count + '\n\n');
-      return this.scroll_text_reloads <= count;
-    }
-  }, {
-    key: "is_news_result_scrolls_end",
-    value: function is_news_result_scrolls_end() {
-      console.log('is_news_result_scrolls_end()');
-      var count = this.get_news_result_page();
-      console.log('\n\nScroll Count: ' + count + '\n\n');
-      return this.scroll_news_reloads <= count;
-    }
-  }, {
-    key: "is_videos_result_scrolls_end",
-    value: function is_videos_result_scrolls_end() {
-      console.log('is_videos_result_scrolls_end()');
-      var count = this.get_videos_result_page();
-      console.log('\n\nScroll Count: ' + count + '\n\n');
-      return this.scroll_videos_reloads <= count;
-    }
-  }, {
-    key: "is_images_result_scrolls_end",
-    value: function is_images_result_scrolls_end() {
-      console.log('is_images_result_scrolls_end()');
-      var count = this.get_images_result_page();
-      console.log('\n\nScroll Count: ' + count + '\n\n');
-      return this.scroll_images_reloads <= count;
-    }
-  }, {
-    key: "set_mainpage_animation",
-    value: function set_mainpage_animation(keyword) {
-      var delay = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 500;
-      setTimeout(function () {
-        this.type_search(keyword);
-      }.bind(this), delay);
-    }
-  }, {
-    key: "set_get_search_button_timeout",
-    value: function set_get_search_button_timeout() {
-      var delay = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1000;
-      setTimeout(function () {
-        this.click_or_reload(this.get_search_button());
-      }.bind(this), delay);
-    }
-  }, {
-    key: "set_videos_results_animation",
-    value: function set_videos_results_animation(callback_end) {
-      setTimeout(function () {
-        var _this13 = this;
-
-        this.scroll_down().then(function (value) {
-          return (// the callback needs to be bind again, so that it finds
-            // the methods of the object
-            callback_end.bind(_this13)()
-          );
-        });
-      }.bind(this), this.initial_scroll_delay);
-    }
-  }, {
-    key: "set_text_results_animation",
-    value: function set_text_results_animation(callback_end) {
-      setTimeout(function () {
-        var _this14 = this;
-
-        this.scroll_down().then(function (value) {
-          return (// the callback needs to be bind again, so that it finds
-            // the methods of the object
-            callback_end.bind(_this14)()
-          );
-        });
-      }.bind(this), this.initial_scroll_delay);
-    }
-  }, {
-    key: "set_news_results_animation",
-    value: function set_news_results_animation(callback_end) {
-      setTimeout(function () {
-        var _this15 = this;
-
-        this.scroll_down().then(function (value) {
-          return (// the callback needs to be bind again, so that it finds
-            // the methods of the object
-            callback_end.bind(_this15)()
-          );
-        });
-      }.bind(this), this.initial_scroll_delay);
-    }
-  }, {
-    key: "set_get_next_button_text_result_timeout",
-    value: function set_get_next_button_text_result_timeout() {
-      var _this16 = this;
-
-      return new Promise(
-      /*#__PURE__*/
-      function () {
-        var _ref2 = _asyncToGenerator(
-        /*#__PURE__*/
-        regeneratorRuntime.mark(function _callee3(resolve, reject) {
-          return regeneratorRuntime.wrap(function _callee3$(_context3) {
-            while (1) {
-              switch (_context3.prev = _context3.next) {
-                case 0:
-                  setTimeout(function () {
-                    this.click_or_reload(this.get_next_button());
-                    resolve(true);
-                  }.bind(_this16), _this16.next_delay);
-
-                case 1:
-                case "end":
-                  return _context3.stop();
-              }
-            }
-          }, _callee3);
-        }));
-
-        return function (_x3, _x4) {
-          return _ref2.apply(this, arguments);
-        };
-      }());
-    }
-  }, {
-    key: "set_get_next_button_news_result_timeout",
-    value: function set_get_next_button_news_result_timeout() {
-      var _this17 = this;
-
-      return new Promise(
-      /*#__PURE__*/
-      function () {
-        var _ref3 = _asyncToGenerator(
-        /*#__PURE__*/
-        regeneratorRuntime.mark(function _callee4(resolve, reject) {
-          return regeneratorRuntime.wrap(function _callee4$(_context4) {
-            while (1) {
-              switch (_context4.prev = _context4.next) {
-                case 0:
-                  setTimeout(function () {
-                    console.log("this.click_or_move_to_images(this.get_next_button_news());");
-                    this.click_or_move_to_images(this.get_next_button_news());
-                    resolve(true);
-                  }.bind(_this17), _this17.next_delay);
-
-                case 1:
-                case "end":
-                  return _context4.stop();
-              }
-            }
-          }, _callee4);
-        }));
-
-        return function (_x5, _x6) {
-          return _ref3.apply(this, arguments);
-        };
-      }());
-    }
-  }, {
-    key: "set_get_next_button_videos_timeout",
-    value: function set_get_next_button_videos_timeout() {
-      var _this18 = this;
-
-      return new Promise(
-      /*#__PURE__*/
-      function () {
-        var _ref4 = _asyncToGenerator(
-        /*#__PURE__*/
-        regeneratorRuntime.mark(function _callee5(resolve, reject) {
-          return regeneratorRuntime.wrap(function _callee5$(_context5) {
-            while (1) {
-              switch (_context5.prev = _context5.next) {
-                case 0:
-                  setTimeout(function () {
-                    this.click_or_reload(this.get_next_button_videos());
-                    resolve(true);
-                  }.bind(_this18), _this18.next_delay);
-
-                case 1:
-                case "end":
-                  return _context5.stop();
-              }
-            }
-          }, _callee5);
-        }));
-
-        return function (_x7, _x8) {
-          return _ref4.apply(this, arguments);
-        };
-      }());
-    }
-  }, {
-    key: "set_get_news_tab_timeout",
-    value: function set_get_news_tab_timeout() {
-      var _this19 = this;
-
-      return new Promise(
-      /*#__PURE__*/
-      function () {
-        var _ref5 = _asyncToGenerator(
-        /*#__PURE__*/
-        regeneratorRuntime.mark(function _callee6(resolve, reject) {
-          return regeneratorRuntime.wrap(function _callee6$(_context6) {
-            while (1) {
-              switch (_context6.prev = _context6.next) {
-                case 0:
-                  setTimeout(function () {
-                    this.click_or_reload(this.get_news_tab());
-                    resolve(true);
-                  }.bind(_this19), _this19.next_delay);
-
-                case 1:
-                case "end":
-                  return _context6.stop();
-              }
-            }
-          }, _callee6);
-        }));
-
-        return function (_x9, _x10) {
-          return _ref5.apply(this, arguments);
-        };
-      }());
-    }
-  }, {
-    key: "set_get_images_tab_timeout",
-    value: function set_get_images_tab_timeout() {
-      var _this20 = this;
-
-      return new Promise(
-      /*#__PURE__*/
-      function () {
-        var _ref6 = _asyncToGenerator(
-        /*#__PURE__*/
-        regeneratorRuntime.mark(function _callee7(resolve, reject) {
-          return regeneratorRuntime.wrap(function _callee7$(_context7) {
-            while (1) {
-              switch (_context7.prev = _context7.next) {
-                case 0:
-                  setTimeout(function () {
-                    this.click_or_reload(this.get_images_tab());
-                    resolve(true);
-                  }.bind(_this20), _this20.next_delay);
-
-                case 1:
-                case "end":
-                  return _context7.stop();
-              }
-            }
-          }, _callee7);
-        }));
-
-        return function (_x11, _x12) {
-          return _ref6.apply(this, arguments);
-        };
-      }());
-    }
-  }, {
-    key: "set_get_videos_tab_timeout",
-    value: function set_get_videos_tab_timeout() {
-      var _this21 = this;
-
-      return new Promise(
-      /*#__PURE__*/
-      function () {
-        var _ref7 = _asyncToGenerator(
-        /*#__PURE__*/
-        regeneratorRuntime.mark(function _callee8(resolve, reject) {
-          return regeneratorRuntime.wrap(function _callee8$(_context8) {
-            while (1) {
-              switch (_context8.prev = _context8.next) {
-                case 0:
-                  setTimeout(function () {
-                    this.click_or_reload(this.get_videos_tab());
-                    resolve(true);
-                  }.bind(_this21), _this21.next_delay);
-
-                case 1:
-                case "end":
-                  return _context8.stop();
-              }
-            }
-          }, _callee8);
-        }));
-
-        return function (_x13, _x14) {
-          return _ref7.apply(this, arguments);
-        };
-      }());
-    }
-  }, {
-    key: "is_news_loaded",
-    value: function is_news_loaded() {
-      //assume that things are loaded for news
-      // see baidu for an example of implementing this properly
-      return true;
-    }
-  }, {
-    key: "click_or_move_to_images",
-    value: function click_or_move_to_images(button) {
+  click_or_reload_promise(button) {
+    return new Promise(async (resolve, reject) => {
       console.log(button);
 
       if (button) {
@@ -10561,439 +10309,208 @@ function () {
           cancelable: true,
           view: window
         }));
+        resolve(true);
       } else {
-        console.log('Moving to images (Promise)...');
-        setTimeout(function () {
-          console.log('is_it_loaded', this.is_news_loaded());
-
-          if (this.is_news_loaded()) {
-            console.log('is_news_loaded');
-            this.set_news_results_animation(this.set_get_images_tab_timeout);
-          } else {
-            location.reload();
-          }
-        }.bind(this), 500);
-      }
-    }
-  }, {
-    key: "click_or_reload",
-    value: function click_or_reload(button) {
-      console.log(button);
-
-      if (button) {
-        //button.click();
-        button.dispatchEvent(new MouseEvent('click', {
-          bubbles: true,
-          cancelable: true,
-          view: window
-        }));
-      } else {
-        var iter = this.extension.get_iter_step(this.step);
+        console.log('Reloading (Promise)...');
+        let iter = this.extension.get_iter_step(this.step);
 
         if (iter < this.step_attempts) {
           console.log('Reloading...');
           location.reload();
         }
       }
-    }
-  }, {
-    key: "click_or_reload_promise",
-    value: function click_or_reload_promise(button) {
-      var _this22 = this;
+    });
+  }
 
-      return new Promise(
-      /*#__PURE__*/
-      function () {
-        var _ref8 = _asyncToGenerator(
-        /*#__PURE__*/
-        regeneratorRuntime.mark(function _callee9(resolve, reject) {
-          var iter;
-          return regeneratorRuntime.wrap(function _callee9$(_context9) {
-            while (1) {
-              switch (_context9.prev = _context9.next) {
-                case 0:
-                  console.log(button);
+  type_search(keyword) {
+    var input = this.get_search_input();
+    input.focus();
+    var i = 0; //var keyword = 'type A B C';
 
-                  if (button) {
-                    //button.click();
-                    button.dispatchEvent(new MouseEvent('click', {
-                      bubbles: true,
-                      cancelable: true,
-                      view: window
-                    }));
-                    resolve(true);
-                  } else {
-                    console.log('Reloading (Promise)...');
-                    iter = _this22.extension.get_iter_step(_this22.step);
+    var speed = 100;
+    var tracker = this;
+    var attempts = 0; //a.addEventListener('focus',triGr)
 
-                    if (iter < _this22.step_attempts) {
-                      console.log('Reloading...');
-                      location.reload();
-                    }
-                  }
+    function triGr() {
+      if (i < keyword.length) {
+        let c = keyword.charAt(i);
+        input.value += c; // dispatch keyboard events
 
-                case 2:
-                case "end":
-                  return _context9.stop();
-              }
-            }
-          }, _callee9);
+        input.dispatchEvent(new KeyboardEvent('keypress', {
+          'key': c
         }));
+        input.dispatchEvent(new KeyboardEvent('keydown', {
+          'key': c
+        }));
+        input.dispatchEvent(new KeyboardEvent('keyup', {
+          'key': c
+        }));
+        i++;
+        setTimeout(triGr, speed);
+      } else {
+        console.log('input.value is: ', input.value);
+        tracker.clear_autosuggestion_box();
 
-        return function (_x15, _x16) {
-          return _ref8.apply(this, arguments);
-        };
-      }());
+        function check_and_send() {
+          console.log('now input.value is: ', input.value); // check that the keyword is equal to the input
+
+          if (input.value == keyword) {
+            console.log('value is correct');
+            tracker.set_get_search_button_timeout();
+          } else if (attempts < 1) {
+            console.log('try again typing: ' + keyword);
+            input.value = '';
+            i = 0;
+            attempts += 1;
+            setTimeout(triGr, speed);
+          } else {
+            console.log('give up, just paste the keyword: ' + keyword);
+            input.value = keyword;
+            tracker.set_get_search_button_timeout();
+          }
+        }
+
+        setTimeout(check_and_send, 1000);
+      }
     }
-  }, {
-    key: "type_search",
-    value: function type_search(keyword) {
-      var input = this.get_search_input();
-      input.focus();
-      var i = 0; //var keyword = 'type A B C';
 
-      var speed = 100;
-      var tracker = this;
-      var attempts = 0; //a.addEventListener('focus',triGr)
+    triGr();
+  }
 
-      function triGr() {
-        if (i < keyword.length) {
-          var c = keyword.charAt(i);
-          input.value += c; // dispatch keyboard events
+  clear_autosuggestion_box() {}
 
-          input.dispatchEvent(new KeyboardEvent('keypress', {
-            'key': c
-          }));
-          input.dispatchEvent(new KeyboardEvent('keydown', {
-            'key': c
-          }));
-          input.dispatchEvent(new KeyboardEvent('keyup', {
-            'key': c
-          }));
-          i++;
-          setTimeout(triGr, speed);
-        } else {
-          var check_and_send = function check_and_send() {
-            console.log('now input.value is: ', input.value); // check that the keyword is equal to the input
+  clear_browser() {
+    return new Promise(async (resolve, reject) => {
+      if (this.extension.settings['clear_browser_flag']) {
+        localStorage.clear();
+        sessionStorage.clear();
+        this.deleteAllCookies();
+        this.clear_cookies();
+      } else {
+        console.log("NOT DELETING BROWSING DATA! Check settings.clear_browser");
+      } // DO NOT INCLUDE this line in the condition above, clear_browser
+      // also might keep track of the iterations
 
-            if (input.value == keyword) {
-              console.log('value is correct');
-              tracker.set_get_search_button_timeout();
-            } else if (attempts < 1) {
-              console.log('try again typing: ' + keyword);
-              input.value = '';
-              i = 0;
-              attempts += 1;
-              setTimeout(triGr, speed);
+
+      this.extension.clear_browser();
+      resolve(true);
+    });
+  }
+
+  clear_cookies() {
+    var cookies = document.cookie.split("; ");
+
+    for (var c = 0; c < cookies.length; c++) {
+      var d = window.location.hostname.split(".");
+
+      while (d.length > 0) {
+        var cookieBase = encodeURIComponent(cookies[c].split(";")[0].split("=")[0]) + '=; expires=Thu, 01-Jan-1970 00:00:01 GMT; domain=' + d.join('.') + ' ;path=';
+        var p = location.pathname.split('/');
+        document.cookie = cookieBase + '/';
+
+        while (p.length > 0) {
+          document.cookie = cookieBase + p.join('/');
+          p.pop();
+        }
+
+        ;
+        d.shift();
+      }
+    }
+  }
+
+  deleteAllCookies() {
+    var cookies = document.cookie.split(";");
+
+    for (var i = 0; i < cookies.length; i++) {
+      var cookie = cookies[i];
+      var eqPos = cookie.indexOf("=");
+      var name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+      document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    }
+  }
+
+  find_get_parameter(parameterName) {
+    var result = null,
+        tmp = [];
+    location.search.substr(1).split("&").forEach(function (item) {
+      tmp = item.split("=");
+      if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
+    });
+    return result;
+  }
+
+  timed_scroll_down(delay) {
+    return new Promise(async (resolve, reject) => {
+      setTimeout(async function () {
+        this.scroll_down().then(resolve(true));
+      }.bind(this), delay);
+    });
+  }
+
+  scroll_down() {
+    return new Promise(async (resolve, reject) => {
+      let bottom = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      let _scroll = document.documentElement.scrollTop;
+      bottom = Math.min(bottom, _scroll + 7500);
+      console.log('_scroll (current):', _scroll);
+      console.log('bottom (target):', bottom);
+
+      while (_scroll < bottom) {
+        await this.sub_scroll_down(_scroll, _scroll + document.documentElement.clientHeight);
+        _scroll += document.documentElement.clientHeight;
+        window.scrollTo(0, _scroll);
+      }
+
+      resolve(true);
+    });
+  }
+
+  sub_scroll_down(_start, _end) {
+    return new Promise((resolve, reject) => {
+      setTimeout(async function () {
+        let interval = setInterval(function () {
+          if (_start < _end) {
+            _start += this.sub_scroll_chunk;
+            window.scrollTo(0, _start);
+          } else {
+            clearInterval(interval);
+            let bottom = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            let _scroll = document.documentElement.scrollTop; // if scroll is in the bottom, wait to load more
+
+            if (_scroll >= bottom) {
+              setTimeout(function () {
+                resolve(true);
+              }, this.sub_scroll_waiting_for_more);
             } else {
-              console.log('give up, just paste the keyword: ' + keyword);
-              input.value = keyword;
-              tracker.set_get_search_button_timeout();
+              resolve(true);
             }
-          };
-
-          console.log('input.value is: ', input.value);
-          tracker.clear_autosuggestion_box();
-          setTimeout(check_and_send, 1000);
-        }
-      }
-
-      triGr();
-    }
-  }, {
-    key: "clear_autosuggestion_box",
-    value: function clear_autosuggestion_box() {}
-  }, {
-    key: "clear_browser",
-    value: function clear_browser() {
-      var _this23 = this;
-
-      return new Promise(
-      /*#__PURE__*/
-      function () {
-        var _ref9 = _asyncToGenerator(
-        /*#__PURE__*/
-        regeneratorRuntime.mark(function _callee10(resolve, reject) {
-          return regeneratorRuntime.wrap(function _callee10$(_context10) {
-            while (1) {
-              switch (_context10.prev = _context10.next) {
-                case 0:
-                  if (_this23.extension.settings['clear_browser_flag']) {
-                    localStorage.clear();
-                    sessionStorage.clear();
-
-                    _this23.deleteAllCookies();
-
-                    _this23.clear_cookies();
-                  } else {
-                    console.log("NOT DELETING BROWSING DATA! Check settings.clear_browser");
-                  } // DO NOT INCLUDE this line in the condition above, clear_browser
-                  // also might keep track of the iterations
-
-
-                  _this23.extension.clear_browser();
-
-                  resolve(true);
-
-                case 3:
-                case "end":
-                  return _context10.stop();
-              }
-            }
-          }, _callee10);
-        }));
-
-        return function (_x17, _x18) {
-          return _ref9.apply(this, arguments);
-        };
-      }());
-    }
-  }, {
-    key: "clear_cookies",
-    value: function clear_cookies() {
-      var cookies = document.cookie.split("; ");
-
-      for (var c = 0; c < cookies.length; c++) {
-        var d = window.location.hostname.split(".");
-
-        while (d.length > 0) {
-          var cookieBase = encodeURIComponent(cookies[c].split(";")[0].split("=")[0]) + '=; expires=Thu, 01-Jan-1970 00:00:01 GMT; domain=' + d.join('.') + ' ;path=';
-          var p = location.pathname.split('/');
-          document.cookie = cookieBase + '/';
-
-          while (p.length > 0) {
-            document.cookie = cookieBase + p.join('/');
-            p.pop();
           }
-
-          ;
-          d.shift();
-        }
-      }
-    }
-  }, {
-    key: "deleteAllCookies",
-    value: function deleteAllCookies() {
-      var cookies = document.cookie.split(";");
-
-      for (var i = 0; i < cookies.length; i++) {
-        var cookie = cookies[i];
-        var eqPos = cookie.indexOf("=");
-        var name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
-        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
-      }
-    }
-  }, {
-    key: "find_get_parameter",
-    value: function find_get_parameter(parameterName) {
-      var result = null,
-          tmp = [];
-      location.search.substr(1).split("&").forEach(function (item) {
-        tmp = item.split("=");
-        if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
-      });
-      return result;
-    }
-  }, {
-    key: "timed_scroll_down",
-    value: function timed_scroll_down(delay) {
-      var _this24 = this;
-
-      return new Promise(
-      /*#__PURE__*/
-      function () {
-        var _ref10 = _asyncToGenerator(
-        /*#__PURE__*/
-        regeneratorRuntime.mark(function _callee12(resolve, reject) {
-          return regeneratorRuntime.wrap(function _callee12$(_context12) {
-            while (1) {
-              switch (_context12.prev = _context12.next) {
-                case 0:
-                  setTimeout(
-                  /*#__PURE__*/
-                  _asyncToGenerator(
-                  /*#__PURE__*/
-                  regeneratorRuntime.mark(function _callee11() {
-                    return regeneratorRuntime.wrap(function _callee11$(_context11) {
-                      while (1) {
-                        switch (_context11.prev = _context11.next) {
-                          case 0:
-                            this.scroll_down().then(resolve(true));
-
-                          case 1:
-                          case "end":
-                            return _context11.stop();
-                        }
-                      }
-                    }, _callee11, this);
-                  })).bind(_this24), delay);
-
-                case 1:
-                case "end":
-                  return _context12.stop();
-              }
-            }
-          }, _callee12);
-        }));
-
-        return function (_x19, _x20) {
-          return _ref10.apply(this, arguments);
-        };
-      }());
-    }
-  }, {
-    key: "scroll_down",
-    value: function scroll_down() {
-      var _this25 = this;
-
-      return new Promise(
-      /*#__PURE__*/
-      function () {
-        var _ref12 = _asyncToGenerator(
-        /*#__PURE__*/
-        regeneratorRuntime.mark(function _callee13(resolve, reject) {
-          var bottom, _scroll;
-
-          return regeneratorRuntime.wrap(function _callee13$(_context13) {
-            while (1) {
-              switch (_context13.prev = _context13.next) {
-                case 0:
-                  bottom = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-                  _scroll = document.documentElement.scrollTop;
-                  bottom = Math.min(bottom, _scroll + 7500);
-                  console.log('_scroll (current):', _scroll);
-                  console.log('bottom (target):', bottom);
-
-                case 5:
-                  if (!(_scroll < bottom)) {
-                    _context13.next = 12;
-                    break;
-                  }
-
-                  _context13.next = 8;
-                  return _this25.sub_scroll_down(_scroll, _scroll + document.documentElement.clientHeight);
-
-                case 8:
-                  _scroll += document.documentElement.clientHeight;
-                  window.scrollTo(0, _scroll);
-                  _context13.next = 5;
-                  break;
-
-                case 12:
-                  resolve(true);
-
-                case 13:
-                case "end":
-                  return _context13.stop();
-              }
-            }
-          }, _callee13);
-        }));
-
-        return function (_x21, _x22) {
-          return _ref12.apply(this, arguments);
-        };
-      }());
-    }
-  }, {
-    key: "sub_scroll_down",
-    value: function sub_scroll_down(_start, _end) {
-      var _this26 = this;
-
-      return new Promise(function (resolve, reject) {
-        setTimeout(
-        /*#__PURE__*/
-        _asyncToGenerator(
-        /*#__PURE__*/
-        regeneratorRuntime.mark(function _callee14() {
-          var interval;
-          return regeneratorRuntime.wrap(function _callee14$(_context14) {
-            while (1) {
-              switch (_context14.prev = _context14.next) {
-                case 0:
-                  interval = setInterval(function () {
-                    if (_start < _end) {
-                      _start += this.sub_scroll_chunk;
-                      window.scrollTo(0, _start);
-                    } else {
-                      clearInterval(interval);
-                      var bottom = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-                      var _scroll = document.documentElement.scrollTop; // if scroll is in the bottom, wait to load more
-
-                      if (_scroll >= bottom) {
-                        setTimeout(function () {
-                          resolve(true);
-                        }, this.sub_scroll_waiting_for_more);
-                      } else {
-                        resolve(true);
-                      }
-                    }
-                  }.bind(this), this.sub_scroll_down_chunk_delay);
-
-                case 1:
-                case "end":
-                  return _context14.stop();
-              }
-            }
-          }, _callee14, this);
-        })).bind(_this26), _this26.sub_scroll_down_delay);
-      });
-    }
-    /**
-     * [onStart]
-     * @param  {Function} fn 
-     */
-
-  }, {
-    key: "onStart",
-    value: function onStart(fn) {
-      if (this.debug) console.log('Bot -> onStart()');
-      fn(1000);
-    }
-  }]);
-
-  return Bot;
-}();
+        }.bind(this), this.sub_scroll_down_chunk_delay);
+      }.bind(this), this.sub_scroll_down_delay);
+    });
+  }
+  /**
+   * [onStart]
+   * @param  {Function} fn 
+   */
 
 
+  onStart(fn) {
+    if (this.debug) console.log('Bot -> onStart()');
+    fn(1000);
+  }
+
+}
 // CONCATENATED MODULE: ./src/content/bot/GoogleBot.js
-function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
-function GoogleBot_classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+class GoogleBot_GoogleBot extends Bot_Bot {
+  constructor(worker, extension) {
+    super(worker, extension);
+    this.onStart = this.onStart.bind(this);
 
-function GoogleBot_defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function GoogleBot_createClass(Constructor, protoProps, staticProps) { if (protoProps) GoogleBot_defineProperties(Constructor.prototype, protoProps); if (staticProps) GoogleBot_defineProperties(Constructor, staticProps); return Constructor; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-
-
-var GoogleBot =
-/*#__PURE__*/
-function (_Bot) {
-  _inherits(GoogleBot, _Bot);
-
-  function GoogleBot(worker, extension) {
-    var _this;
-
-    GoogleBot_classCallCheck(this, GoogleBot);
-
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(GoogleBot).call(this, worker, extension));
-    _this.onStart = _this.onStart.bind(_assertThisInitialized(_this));
-
-    if (_this.debug) {// use the defaults for debug in Bot
+    if (this.debug) {// use the defaults for debug in Bot
     } else {}
-
-    return _this;
   }
   /**
    * [start the tracker]
@@ -11001,275 +10518,201 @@ function (_Bot) {
    */
 
 
-  GoogleBot_createClass(GoogleBot, [{
-    key: "start",
-    value: function start() {
-      var _this2 = this;
-
-      if (this.debug) console.log('GoogleBot -> start()');
-      this.onStart(function (delay) {
-        _this2.eventEmitter.emit(_this2.EVENT_NAMES.start, delay, false);
-
-        _this2.navigate();
-      });
-    } // simple_type_search(input){
-    //   console.log(input);  
-    //   let el = this.get_search_input();
-    //   el.focus();
-    //   el.value=input;
-    //   this.set_get_search_button_timeout();
-    // }
-    // __type_search(plc){
-    //   // get the element in question
-    //   let input = document.querySelector('input[name=q]');
-    //   // focus on the input element
-    //   input.focus();
-    //   // add event listeners to the input element
-    //   input.addEventListener('keypress', (event) => {
-    //     console.log("You have pressed key: ", event.key);
-    //   });
-    //   input.addEventListener('keydown', (event) => {
-    //     console.log(`key: ${event.key} has been pressed down`);
-    //   });
-    //   input.addEventListener('keyup', (event) => {
-    //     console.log(`key: ${event.key} has been released`);
-    //   });
-    // }
-
-  }, {
-    key: "consent_animation",
-    value: function consent_animation() {
-      setTimeout(function () {
-        var consent_button = this.get_consent_button();
-
-        if (consent_button) {
-          consent_button.dispatchEvent(new MouseEvent('click', {
-            bubbles: true,
-            cancelable: true,
-            view: window
-          }));
-        }
-      }.bind(this), 100);
-    } // OLD, for when iframe was detected
-    // consent_animation(){
-    //   setTimeout(function(){
-    //     let consent_frame = document.querySelector('iframe');
-    //     if (consent_frame){
-    //       window.location = consent_frame.src;
-    //     }
-    //   }.bind(this), 100);
-    // }
-
-  }, {
-    key: "get_search_input",
-    value: function get_search_input() {
-      return document.querySelector('input[name=q]');
-    }
-  }, {
-    key: "get_consent_button",
-    value: function get_consent_button() {
-      var b = document.querySelector('#zV9nZe'); // german
-
-      if (!b) {
-        console.log('default consent button not detected, trying german');
-        b = Array.from(document.querySelectorAll('button')).find(function (el) {
-          return el.textContent === 'Ich stimme zu';
-        });
-      } // spanish
+  start() {
+    if (this.debug) console.log('GoogleBot -> start()');
+    this.onStart(delay => {
+      this.eventEmitter.emit(this.EVENT_NAMES.start, delay, false);
+      this.navigate();
+    });
+  } // simple_type_search(input){
+  //   console.log(input);  
+  //   let el = this.get_search_input();
+  //   el.focus();
+  //   el.value=input;
+  //   this.set_get_search_button_timeout();
+  // }
+  // __type_search(plc){
+  //   // get the element in question
+  //   let input = document.querySelector('input[name=q]');
+  //   // focus on the input element
+  //   input.focus();
+  //   // add event listeners to the input element
+  //   input.addEventListener('keypress', (event) => {
+  //     console.log("You have pressed key: ", event.key);
+  //   });
+  //   input.addEventListener('keydown', (event) => {
+  //     console.log(`key: ${event.key} has been pressed down`);
+  //   });
+  //   input.addEventListener('keyup', (event) => {
+  //     console.log(`key: ${event.key} has been released`);
+  //   });
+  // }
 
 
-      if (!b) {
-        b = Array.from(document.querySelectorAll('button')).find(function (el) {
-          return el.textContent === 'Acepto';
-        });
-      } // english
+  consent_animation() {
+    setTimeout(function () {
+      let consent_button = this.get_consent_button();
 
-
-      if (!b) {
-        b = Array.from(document.querySelectorAll('button')).find(function (el) {
-          return el.textContent === 'I agree';
-        });
-      } // French
-
-
-      if (!b) {
-        b = Array.from(document.querySelectorAll('button')).find(function (el) {
-          return el.textContent === "J'accepte";
-        });
-      } // portuguese
-
-
-      if (!b) {
-        b = Array.from(document.querySelectorAll('button')).find(function (el) {
-          return el.textContent === 'Aceito';
-        });
+      if (consent_button) {
+        consent_button.dispatchEvent(new MouseEvent('click', {
+          bubbles: true,
+          cancelable: true,
+          view: window
+        }));
       }
-
-      return b;
-    }
-  }, {
-    key: "is_collect_consent_page",
-    value: function is_collect_consent_page() {
-      var _button = this.get_consent_button();
-
-      console.log('Consent page detected: ', _button != null);
-      return _button != null;
-    }
-  }, {
-    key: "is_text_result_page",
-    value: function is_text_result_page() {
-      return window.location.pathname == '/search' && this.find_get_parameter('tbm') == null;
-    }
-  }, {
-    key: "is_news_result_page",
-    value: function is_news_result_page() {
-      return this.find_get_parameter('tbm') == 'nws';
-    }
-  }, {
-    key: "is_images_result_page",
-    value: function is_images_result_page() {
-      return this.find_get_parameter('tbm') == 'isch';
-    }
-  }, {
-    key: "is_videos_result_page",
-    value: function is_videos_result_page() {
-      return this.find_get_parameter('tbm') == 'vid';
-    }
-  }, {
-    key: "get_search_button",
-    value: function get_search_button() {
-      return document.querySelector('input[name=btnK]');
-    }
-  }, {
-    key: "get_news_tab",
-    value: function get_news_tab() {
-      return document.querySelector("a[href*='tbm=nws']");
-    }
-  }, {
-    key: "get_images_tab",
-    value: function get_images_tab() {
-      return document.querySelector("a[href*='tbm=isch']");
-    }
-  }, {
-    key: "get_videos_tab",
-    value: function get_videos_tab() {
-      return document.querySelector("a[href*='tbm=vid']");
-    }
-  }, {
-    key: "get_next_button",
-    value: function get_next_button() {
-      return document.querySelector('a#pnnext');
-    }
-  }, {
-    key: "get_next_button_news",
-    value: function get_next_button_news() {
-      return document.querySelector('a#pnnext');
-    }
-  }, {
-    key: "get_next_button_videos",
-    value: function get_next_button_videos() {
-      return document.querySelector('a#pnnext');
-    }
-  }, {
-    key: "get_text_result_page",
-    value: function get_text_result_page() {
-      var _start = this.find_get_parameter('start');
-
-      if (_start) {
-        return parseInt(_start) / 10 + 1;
-      } else {
-        return 1;
-      }
-    }
-  }, {
-    key: "get_news_result_page",
-    value: function get_news_result_page() {
-      var _start = this.find_get_parameter('start');
-
-      if (_start) {
-        return parseInt(_start) / 10 + 1;
-      } else {
-        return 1;
-      }
-    }
-  }, {
-    key: "get_images_result_page",
-    value: function get_images_result_page() {
-      this.images_results_counter += 1;
-      return this.images_results_counter;
-    }
-  }, {
-    key: "get_videos_result_page",
-    value: function get_videos_result_page() {
-      var _start = this.find_get_parameter('start');
-
-      if (_start) {
-        return parseInt(_start) / 10 + 1;
-      } else {
-        return 1;
-      }
-    }
-    /**
-     * [onStart on start event]
-     * @param  {Function} fn
-     */
-
-  }, {
-    key: "onStart",
-    value: function onStart(fn) {
-      var _this3 = this;
-
-      if (this.debug) console.log('GoogleBot -> onStart()');
-      setTimeout(function () {
-        if (_this3.debug) console.log('Google START!!!!');
-        fn(1000);
-      }, 500);
-    }
-  }]);
-
-  return GoogleBot;
-}(Bot_Bot); //class
+    }.bind(this), 100);
+  } // OLD, for when iframe was detected
+  // consent_animation(){
+  //   setTimeout(function(){
+  //     let consent_frame = document.querySelector('iframe');
+  //     if (consent_frame){
+  //       window.location = consent_frame.src;
+  //     }
+  //   }.bind(this), 100);
+  // }
 
 
+  get_search_input() {
+    return document.querySelector('input[name=q]');
+  }
 
+  get_consent_button() {
+    let b = document.querySelector('#zV9nZe'); // german
+
+    if (!b) {
+      console.log('default consent button not detected, trying german');
+      b = Array.from(document.querySelectorAll('button')).find(el => el.textContent === 'Ich stimme zu');
+    } // spanish
+
+
+    if (!b) {
+      b = Array.from(document.querySelectorAll('button')).find(el => el.textContent === 'Acepto');
+    } // english
+
+
+    if (!b) {
+      b = Array.from(document.querySelectorAll('button')).find(el => el.textContent === 'I agree');
+    } // French
+
+
+    if (!b) {
+      b = Array.from(document.querySelectorAll('button')).find(el => el.textContent === "J'accepte");
+    } // portuguese
+
+
+    if (!b) {
+      b = Array.from(document.querySelectorAll('button')).find(el => el.textContent === 'Aceito');
+    }
+
+    return b;
+  }
+
+  is_collect_consent_page() {
+    let _button = this.get_consent_button();
+
+    console.log('Consent page detected: ', _button != null);
+    return _button != null;
+  }
+
+  is_text_result_page() {
+    return window.location.pathname == '/search' && this.find_get_parameter('tbm') == null;
+  }
+
+  is_news_result_page() {
+    return this.find_get_parameter('tbm') == 'nws';
+  }
+
+  is_images_result_page() {
+    return this.find_get_parameter('tbm') == 'isch';
+  }
+
+  is_videos_result_page() {
+    return this.find_get_parameter('tbm') == 'vid';
+  }
+
+  get_search_button() {
+    return document.querySelector('input[name=btnK]');
+  }
+
+  get_news_tab() {
+    return document.querySelector("a[href*='tbm=nws']");
+  }
+
+  get_images_tab() {
+    return document.querySelector("a[href*='tbm=isch']");
+  }
+
+  get_videos_tab() {
+    return document.querySelector("a[href*='tbm=vid']");
+  }
+
+  get_next_button() {
+    return document.querySelector('a#pnnext');
+  }
+
+  get_next_button_news() {
+    return document.querySelector('a#pnnext');
+  }
+
+  get_next_button_videos() {
+    return document.querySelector('a#pnnext');
+  }
+
+  get_text_result_page() {
+    let _start = this.find_get_parameter('start');
+
+    if (_start) {
+      return parseInt(_start) / 10 + 1;
+    } else {
+      return 1;
+    }
+  }
+
+  get_news_result_page() {
+    let _start = this.find_get_parameter('start');
+
+    if (_start) {
+      return parseInt(_start) / 10 + 1;
+    } else {
+      return 1;
+    }
+  }
+
+  get_images_result_page() {
+    this.images_results_counter += 1;
+    return this.images_results_counter;
+  }
+
+  get_videos_result_page() {
+    let _start = this.find_get_parameter('start');
+
+    if (_start) {
+      return parseInt(_start) / 10 + 1;
+    } else {
+      return 1;
+    }
+  }
+  /**
+   * [onStart on start event]
+   * @param  {Function} fn
+   */
+
+
+  onStart(fn) {
+    if (this.debug) console.log('GoogleBot -> onStart()');
+    setTimeout(() => {
+      if (this.debug) console.log('Google START!!!!');
+      fn(1000);
+    }, 500);
+  }
+
+} //class
 // CONCATENATED MODULE: ./src/content/bot/GoogleConsentBot.js
-function GoogleConsentBot_typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { GoogleConsentBot_typeof = function _typeof(obj) { return typeof obj; }; } else { GoogleConsentBot_typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return GoogleConsentBot_typeof(obj); }
 
-function GoogleConsentBot_asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
-
-function GoogleConsentBot_asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { GoogleConsentBot_asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { GoogleConsentBot_asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
-
-function GoogleConsentBot_classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function GoogleConsentBot_defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function GoogleConsentBot_createClass(Constructor, protoProps, staticProps) { if (protoProps) GoogleConsentBot_defineProperties(Constructor.prototype, protoProps); if (staticProps) GoogleConsentBot_defineProperties(Constructor, staticProps); return Constructor; }
-
-function GoogleConsentBot_possibleConstructorReturn(self, call) { if (call && (GoogleConsentBot_typeof(call) === "object" || typeof call === "function")) { return call; } return GoogleConsentBot_assertThisInitialized(self); }
-
-function GoogleConsentBot_getPrototypeOf(o) { GoogleConsentBot_getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return GoogleConsentBot_getPrototypeOf(o); }
-
-function GoogleConsentBot_assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function GoogleConsentBot_inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) GoogleConsentBot_setPrototypeOf(subClass, superClass); }
-
-function GoogleConsentBot_setPrototypeOf(o, p) { GoogleConsentBot_setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return GoogleConsentBot_setPrototypeOf(o, p); }
-
-
-
-var GoogleConsentBot_GoogleBot =
-/*#__PURE__*/
-function (_Bot) {
-  GoogleConsentBot_inherits(GoogleBot, _Bot);
-
-  function GoogleBot(worker, extension) {
-    var _this;
-
-    GoogleConsentBot_classCallCheck(this, GoogleBot);
-
-    _this = GoogleConsentBot_possibleConstructorReturn(this, GoogleConsentBot_getPrototypeOf(GoogleBot).call(this, worker, extension));
-    _this.onStart = _this.onStart.bind(GoogleConsentBot_assertThisInitialized(_this));
-    return _this;
+class GoogleConsentBot_GoogleBot extends Bot_Bot {
+  constructor(worker, extension) {
+    super(worker, extension);
+    this.onStart = this.onStart.bind(this);
   }
   /**
    * [start the tracker]
@@ -11277,125 +10720,58 @@ function (_Bot) {
    */
 
 
-  GoogleConsentBot_createClass(GoogleBot, [{
-    key: "start",
-    value: function start() {
-      var _this2 = this;
+  start() {
+    if (this.debug) console.log('GoogleBot -> start()');
+    this.onStart(delay => {
+      this.eventEmitter.emit(this.EVENT_NAMES.start, delay, false);
+      this.navigate();
+    });
+  }
 
-      if (this.debug) console.log('GoogleBot -> start()');
-      this.onStart(function (delay) {
-        _this2.eventEmitter.emit(_this2.EVENT_NAMES.start, delay, false);
+  async navigate() {
+    console.log('navigate', location.href);
 
-        _this2.navigate();
-      });
+    if (this.is_collect_consent_page()) {
+      console.log('this.is_collect_consent_page()');
+      this.consent_animation();
+    } else {
+      console.log('Consented');
+      window.location = 'https://www.google.com';
     }
-  }, {
-    key: "navigate",
-    value: function () {
-      var _navigate = GoogleConsentBot_asyncToGenerator(
-      /*#__PURE__*/
-      regeneratorRuntime.mark(function _callee() {
-        return regeneratorRuntime.wrap(function _callee$(_context) {
-          while (1) {
-            switch (_context.prev = _context.next) {
-              case 0:
-                console.log('navigate', location.href);
+  }
 
-                if (this.is_collect_consent_page()) {
-                  console.log('this.is_collect_consent_page()');
-                  this.consent_animation();
-                } else {
-                  console.log('Consented');
-                  window.location = 'https://www.google.com';
-                }
+  consent_animation() {
+    setTimeout(function () {
+      let consent_button = document.querySelector('#introAgreeButton');
+      this.click_or_reload(consent_button);
+    }.bind(this), 200);
+  }
 
-              case 2:
-              case "end":
-                return _context.stop();
-            }
-          }
-        }, _callee, this);
-      }));
-
-      return function navigate() {
-        return _navigate.apply(this, arguments);
-      };
-    }()
-  }, {
-    key: "consent_animation",
-    value: function consent_animation() {
-      setTimeout(function () {
-        var consent_button = document.querySelector('#introAgreeButton');
-        this.click_or_reload(consent_button);
-      }.bind(this), 200);
-    }
-  }, {
-    key: "is_collect_consent_page",
-    value: function is_collect_consent_page() {
-      console.log('Consent page detected: ', document.querySelector('#introAgreeButton') != null);
-      return document.querySelector('#introAgreeButton') != null;
-    }
-    /**
-     * [onStart on start event]
-     * @param  {Function} fn
-     */
-
-  }, {
-    key: "onStart",
-    value: function onStart(fn) {
-      var _this3 = this;
-
-      if (this.debug) console.log('GoogleBot -> onStart()');
-      setTimeout(function () {
-        if (_this3.debug) console.log('Google START!!!!');
-        fn(1000);
-      }, 500);
-    }
-  }]);
-
-  return GoogleBot;
-}(Bot_Bot); //class
+  is_collect_consent_page() {
+    console.log('Consent page detected: ', document.querySelector('#introAgreeButton') != null);
+    return document.querySelector('#introAgreeButton') != null;
+  }
+  /**
+   * [onStart on start event]
+   * @param  {Function} fn
+   */
 
 
+  onStart(fn) {
+    if (this.debug) console.log('GoogleBot -> onStart()');
+    setTimeout(() => {
+      if (this.debug) console.log('Google START!!!!');
+      fn(1000);
+    }, 500);
+  }
 
+} //class
 // CONCATENATED MODULE: ./src/content/bot/YahooConsentBot.js
-function YahooConsentBot_typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { YahooConsentBot_typeof = function _typeof(obj) { return typeof obj; }; } else { YahooConsentBot_typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return YahooConsentBot_typeof(obj); }
 
-function YahooConsentBot_asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
-
-function YahooConsentBot_asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { YahooConsentBot_asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { YahooConsentBot_asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
-
-function YahooConsentBot_classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function YahooConsentBot_defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function YahooConsentBot_createClass(Constructor, protoProps, staticProps) { if (protoProps) YahooConsentBot_defineProperties(Constructor.prototype, protoProps); if (staticProps) YahooConsentBot_defineProperties(Constructor, staticProps); return Constructor; }
-
-function YahooConsentBot_possibleConstructorReturn(self, call) { if (call && (YahooConsentBot_typeof(call) === "object" || typeof call === "function")) { return call; } return YahooConsentBot_assertThisInitialized(self); }
-
-function YahooConsentBot_getPrototypeOf(o) { YahooConsentBot_getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return YahooConsentBot_getPrototypeOf(o); }
-
-function YahooConsentBot_assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function YahooConsentBot_inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) YahooConsentBot_setPrototypeOf(subClass, superClass); }
-
-function YahooConsentBot_setPrototypeOf(o, p) { YahooConsentBot_setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return YahooConsentBot_setPrototypeOf(o, p); }
-
-
-
-var YahooBot =
-/*#__PURE__*/
-function (_Bot) {
-  YahooConsentBot_inherits(YahooBot, _Bot);
-
-  function YahooBot(worker, extension) {
-    var _this;
-
-    YahooConsentBot_classCallCheck(this, YahooBot);
-
-    _this = YahooConsentBot_possibleConstructorReturn(this, YahooConsentBot_getPrototypeOf(YahooBot).call(this, worker, extension));
-    _this.onStart = _this.onStart.bind(YahooConsentBot_assertThisInitialized(_this));
-    return _this;
+class YahooConsentBot_YahooBot extends Bot_Bot {
+  constructor(worker, extension) {
+    super(worker, extension);
+    this.onStart = this.onStart.bind(this);
   }
   /**
    * [start the tracker]
@@ -11403,127 +10779,61 @@ function (_Bot) {
    */
 
 
-  YahooConsentBot_createClass(YahooBot, [{
-    key: "start",
-    value: function start() {
-      var _this2 = this;
+  start() {
+    if (this.debug) console.log('YahooBot -> start()');
+    this.onStart(delay => {
+      this.eventEmitter.emit(this.EVENT_NAMES.start, delay, false);
+      this.navigate();
+    });
+  }
 
-      if (this.debug) console.log('YahooBot -> start()');
-      this.onStart(function (delay) {
-        _this2.eventEmitter.emit(_this2.EVENT_NAMES.start, delay, false);
+  async navigate() {
+    console.log('navigate', location.href);
 
-        _this2.navigate();
-      });
+    if (this.is_collect_consent_page()) {
+      console.log('this.is_collect_consent_page()');
+      this.consent_animation();
+    } else {//console.log('Consented');
+      //window.location = 'https://search.yahoo.com';
     }
-  }, {
-    key: "navigate",
-    value: function () {
-      var _navigate = YahooConsentBot_asyncToGenerator(
-      /*#__PURE__*/
-      regeneratorRuntime.mark(function _callee() {
-        return regeneratorRuntime.wrap(function _callee$(_context) {
-          while (1) {
-            switch (_context.prev = _context.next) {
-              case 0:
-                console.log('navigate', location.href);
+  }
 
-                if (this.is_collect_consent_page()) {
-                  console.log('this.is_collect_consent_page()');
-                  this.consent_animation();
-                } else {//console.log('Consented');
-                  //window.location = 'https://search.yahoo.com';
-                }
+  consent_animation() {
+    setTimeout(function () {
+      let consent_form = document.querySelector('form.consent-form');
 
-              case 2:
-              case "end":
-                return _context.stop();
-            }
-          }
-        }, _callee, this);
-      }));
+      if (consent_form) {
+        document.querySelector('form.consent-form button[name=agree]').dispatchEvent(new MouseEvent('click'));
+      }
+    }.bind(this), 100);
+  }
 
-      return function navigate() {
-        return _navigate.apply(this, arguments);
-      };
-    }()
-  }, {
-    key: "consent_animation",
-    value: function consent_animation() {
-      setTimeout(function () {
-        var consent_form = document.querySelector('form.consent-form');
-
-        if (consent_form) {
-          document.querySelector('form.consent-form button[name=agree]').dispatchEvent(new MouseEvent('click'));
-        }
-      }.bind(this), 100);
-    }
-  }, {
-    key: "is_collect_consent_page",
-    value: function is_collect_consent_page() {
-      return location.pathname.includes('/collectConsent');
-    }
-    /**
-     * [onStart on start event]
-     * @param  {Function} fn
-     */
-
-  }, {
-    key: "onStart",
-    value: function onStart(fn) {
-      var _this3 = this;
-
-      if (this.debug) console.log('YahooBot -> onStart()');
-      setTimeout(function () {
-        if (_this3.debug) console.log('Yahoo START!!!!');
-        fn(1000);
-      }, 500);
-    }
-  }]);
-
-  return YahooBot;
-}(Bot_Bot); //class
+  is_collect_consent_page() {
+    return location.pathname.includes('/collectConsent');
+  }
+  /**
+   * [onStart on start event]
+   * @param  {Function} fn
+   */
 
 
+  onStart(fn) {
+    if (this.debug) console.log('YahooBot -> onStart()');
+    setTimeout(() => {
+      if (this.debug) console.log('Yahoo START!!!!');
+      fn(1000);
+    }, 500);
+  }
 
+} //class
 // CONCATENATED MODULE: ./src/content/bot/DuckDuckGoBot.js
-function DuckDuckGoBot_typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { DuckDuckGoBot_typeof = function _typeof(obj) { return typeof obj; }; } else { DuckDuckGoBot_typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return DuckDuckGoBot_typeof(obj); }
 
-function DuckDuckGoBot_asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+class DuckDuckGoBot_DuckDuckGoBot extends Bot_Bot {
+  constructor(worker, extension) {
+    super(worker, extension);
+    this.onStart = this.onStart.bind(this);
 
-function DuckDuckGoBot_asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { DuckDuckGoBot_asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { DuckDuckGoBot_asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
-
-function DuckDuckGoBot_classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function DuckDuckGoBot_defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function DuckDuckGoBot_createClass(Constructor, protoProps, staticProps) { if (protoProps) DuckDuckGoBot_defineProperties(Constructor.prototype, protoProps); if (staticProps) DuckDuckGoBot_defineProperties(Constructor, staticProps); return Constructor; }
-
-function DuckDuckGoBot_possibleConstructorReturn(self, call) { if (call && (DuckDuckGoBot_typeof(call) === "object" || typeof call === "function")) { return call; } return DuckDuckGoBot_assertThisInitialized(self); }
-
-function DuckDuckGoBot_getPrototypeOf(o) { DuckDuckGoBot_getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return DuckDuckGoBot_getPrototypeOf(o); }
-
-function DuckDuckGoBot_assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function DuckDuckGoBot_inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) DuckDuckGoBot_setPrototypeOf(subClass, superClass); }
-
-function DuckDuckGoBot_setPrototypeOf(o, p) { DuckDuckGoBot_setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return DuckDuckGoBot_setPrototypeOf(o, p); }
-
-
-
-var DuckDuckGoBot =
-/*#__PURE__*/
-function (_Bot) {
-  DuckDuckGoBot_inherits(DuckDuckGoBot, _Bot);
-
-  function DuckDuckGoBot(worker, extension) {
-    var _this;
-
-    DuckDuckGoBot_classCallCheck(this, DuckDuckGoBot);
-
-    _this = DuckDuckGoBot_possibleConstructorReturn(this, DuckDuckGoBot_getPrototypeOf(DuckDuckGoBot).call(this, worker, extension));
-    _this.onStart = _this.onStart.bind(DuckDuckGoBot_assertThisInitialized(_this));
-
-    if (_this.debug) {// use the defaults for debug in Bot
+    if (this.debug) {// use the defaults for debug in Bot
     } else {
       // it initially seems incorrect to only have 3 reloads
       // for main results, but DDG first load 10 results, then
@@ -11532,1945 +10842,1284 @@ function (_Bot) {
       // second time
       // DDG in Google is broken because no results are loaded 
       // after the 2nd page
-      _this.scroll_images_reloads = 4;
+      this.scroll_images_reloads = 4;
     }
 
-    _this.initial_scroll_delay = 1000;
-    return _this;
+    this.initial_scroll_delay = 1000;
   }
 
-  DuckDuckGoBot_createClass(DuckDuckGoBot, [{
-    key: "start",
-    value: function start() {
-      var _this2 = this;
+  start() {
+    if (this.debug) console.log('DuckDuckGoBot -> start()');
+    this.onStart(delay => {
+      this.eventEmitter.emit(this.EVENT_NAMES.start, delay, false);
+      this.navigate();
+    });
+  } // WATCH OUT: DUCKDUCKGO is different because it uses pushstate and popstate,
+  // therefore there is a navigate timeout method
 
-      if (this.debug) console.log('DuckDuckGoBot -> start()');
-      this.onStart(function (delay) {
-        _this2.eventEmitter.emit(_this2.EVENT_NAMES.start, delay, false);
 
-        _this2.navigate();
-      });
-    } // WATCH OUT: DUCKDUCKGO is different because it uses pushstate and popstate,
-    // therefore there is a navigate timeout method
-
-  }, {
-    key: "text_animation",
-    value: function text_animation() {
-      var extra_delay = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-
-      if (this.is_text_result_scrolls_end()) {
-        this.text_results_counter = 0;
-        setTimeout(function () {
-          var _this3 = this;
-
-          this.scroll_down().then(function (value) {
-            return _this3.set_get_news_tab_timeout().then(function (value) {
-              return _this3.set_navigate_timeout();
-            });
-          });
-        }.bind(this), this.initial_scroll_delay + extra_delay);
-      } else {
-        setTimeout(function () {
-          var _this4 = this;
-
-          this.scroll_down().then(function (value) {
-            return _this4.more_text_animation();
-          });
-        }.bind(this), this.initial_scroll_delay + extra_delay);
-      }
-    }
-  }, {
-    key: "get_more_text_button",
-    value: function get_more_text_button() {
-      return document.querySelector('a.result--more__btn');
-    }
-  }, {
-    key: "news_animation",
-    value: function news_animation() {
-      var extra_delay = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-
-      if (this.is_news_result_scrolls_end()) {
-        console.log('End of news');
-        this.news_results_counter = 0;
-        setTimeout(function () {
-          var _this5 = this;
-
-          this.scroll_down().then(function (value) {
-            return _this5.set_get_images_tab_timeout().then(function (value) {
-              return _this5.set_navigate_timeout();
-            });
-          });
-        }.bind(this), this.initial_scroll_delay + extra_delay);
-      } else {
-        console.log('Continue news');
-        setTimeout(function () {
-          var _this6 = this;
-
-          this.scroll_down().then(function (value) {
-            return _this6.more_news_animation();
-          });
-        }.bind(this), this.initial_scroll_delay + extra_delay);
-      }
-    }
-  }, {
-    key: "get_more_news_button",
-    value: function get_more_news_button() {
-      return document.querySelector('a.result--more__btn');
-    }
-  }, {
-    key: "images_animation",
-    value: function images_animation() {
-      var _this7 = this;
-
-      var delay = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
-
-      if (delay == null) {
-        delay = this.initial_scroll_delay;
-      }
-
-      if (this.is_images_result_scrolls_end()) {
-        this.images_results_counter = 0;
-        this.scroll_down().then(function (value) {
-          return _this7.set_get_videos_tab_timeout().then(function (value) {
-            return _this7.set_navigate_timeout();
-          });
-        });
-      } else {
-        setTimeout(function () {
-          var _this8 = this;
-
-          this.scroll_down().then(function (value) {
-            return _this8.images_animation(0);
-          });
-        }.bind(this), delay);
-      }
-    }
-  }, {
-    key: "videos_animation",
-    value: function videos_animation() {
-      var _this9 = this;
-
-      var delay = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
-
-      if (delay == null) {
-        delay = this.initial_scroll_delay;
-      }
-
-      if (this.is_videos_result_scrolls_end()) {
-        this.videos_results_counter = 0;
-        this.scroll_down().then(function (value) {
-          return _this9.go_to_base_page();
-        });
-      } else {
-        setTimeout(function () {
-          var _this10 = this;
-
-          this.scroll_down().then(function (value) {
-            return _this10.videos_animation(0);
-          });
-        }.bind(this), delay);
-      }
-    }
-  }, {
-    key: "get_search_input",
-    value: function get_search_input() {
-      return document.querySelector('#search_form_input_homepage');
-    }
-  }, {
-    key: "is_text_result_page",
-    value: function is_text_result_page() {
-      return this.find_get_parameter('q') != null && !this.is_images_result_page() && !this.is_videos_result_page() && !this.is_news_result_page();
-    }
-  }, {
-    key: "is_news_result_page",
-    value: function is_news_result_page() {
-      return this.find_get_parameter('ia') == 'news';
-    }
-  }, {
-    key: "is_images_result_page",
-    value: function is_images_result_page() {
-      return this.find_get_parameter('ia') == 'images';
-    }
-  }, {
-    key: "is_videos_result_page",
-    value: function is_videos_result_page() {
-      return this.find_get_parameter('ia') == 'videos';
-    }
-  }, {
-    key: "get_search_button",
-    value: function get_search_button() {
-      return document.querySelector('#search_button_homepage');
-    }
-  }, {
-    key: "get_news_tab",
-    value: function get_news_tab() {
-      return document.querySelector("#duckbar a.js-zci-link--news");
-    }
-  }, {
-    key: "get_images_tab",
-    value: function get_images_tab() {
-      return document.querySelector("#duckbar a.js-zci-link--images");
-    }
-  }, {
-    key: "get_videos_tab",
-    value: function get_videos_tab() {
-      return document.querySelector("#duckbar a.js-zci-link--videos");
-    }
-  }, {
-    key: "get_text_result_page",
-    value: function get_text_result_page() {
-      this.text_results_counter += 1;
-      return this.text_results_counter;
-    }
-  }, {
-    key: "get_news_result_page",
-    value: function get_news_result_page() {
-      this.news_results_counter += 1;
-      return this.news_results_counter;
-    }
-  }, {
-    key: "get_images_result_page",
-    value: function get_images_result_page() {
-      this.images_results_counter += 1;
-      return this.images_results_counter;
-    }
-  }, {
-    key: "get_videos_result_page",
-    value: function get_videos_result_page() {
-      this.videos_results_counter += 1;
-      return this.videos_results_counter;
-    }
-  }, {
-    key: "scroll_down",
-    value: function scroll_down() {
-      var _this11 = this;
-
-      return new Promise(
-      /*#__PURE__*/
-      function () {
-        var _ref = DuckDuckGoBot_asyncToGenerator(
-        /*#__PURE__*/
-        regeneratorRuntime.mark(function _callee(resolve, reject) {
-          var bottom, _scroll;
-
-          return regeneratorRuntime.wrap(function _callee$(_context) {
-            while (1) {
-              switch (_context.prev = _context.next) {
-                case 0:
-                  bottom = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-                  _scroll = document.documentElement.scrollTop;
-                  bottom = Math.min(bottom, _scroll + 7500);
-                  console.log('_scroll (current):', _scroll);
-                  console.log('bottom (target):', bottom);
-
-                case 5:
-                  if (!(_scroll < bottom)) {
-                    _context.next = 12;
-                    break;
-                  }
-
-                  _context.next = 8;
-                  return _this11.sub_scroll_down(_scroll, _scroll + document.documentElement.clientHeight);
-
-                case 8:
-                  _scroll += document.documentElement.clientHeight;
-                  window.scrollTo(0, _scroll);
-                  _context.next = 5;
-                  break;
-
-                case 12:
-                  resolve(true);
-
-                case 13:
-                case "end":
-                  return _context.stop();
-              }
-            }
-          }, _callee);
-        }));
-
-        return function (_x, _x2) {
-          return _ref.apply(this, arguments);
-        };
-      }());
-    }
-    /**
-     * [onStart on start event]
-     * @param  {Function} fn
-     */
-
-  }, {
-    key: "onStart",
-    value: function onStart(fn) {
-      var _this12 = this;
-
-      if (this.debug) console.log('DuckDuckGoBot -> onStart()');
+  text_animation(extra_delay = 0) {
+    if (this.is_text_result_scrolls_end()) {
+      this.text_results_counter = 0;
       setTimeout(function () {
-        if (_this12.debug) console.log('DuckDuckGo START!!!!');
-        fn(1000);
-      }, 500);
-    }
-  }]);
-
-  return DuckDuckGoBot;
-}(Bot_Bot); //class
-
-
-
-// CONCATENATED MODULE: ./src/content/bot/YandexBot.js
-function YandexBot_typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { YandexBot_typeof = function _typeof(obj) { return typeof obj; }; } else { YandexBot_typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return YandexBot_typeof(obj); }
-
-function YandexBot_classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function YandexBot_defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function YandexBot_createClass(Constructor, protoProps, staticProps) { if (protoProps) YandexBot_defineProperties(Constructor.prototype, protoProps); if (staticProps) YandexBot_defineProperties(Constructor, staticProps); return Constructor; }
-
-function YandexBot_possibleConstructorReturn(self, call) { if (call && (YandexBot_typeof(call) === "object" || typeof call === "function")) { return call; } return YandexBot_assertThisInitialized(self); }
-
-function YandexBot_getPrototypeOf(o) { YandexBot_getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return YandexBot_getPrototypeOf(o); }
-
-function YandexBot_assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function YandexBot_inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) YandexBot_setPrototypeOf(subClass, superClass); }
-
-function YandexBot_setPrototypeOf(o, p) { YandexBot_setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return YandexBot_setPrototypeOf(o, p); }
-
-
-
-var YandexBot =
-/*#__PURE__*/
-function (_Bot) {
-  YandexBot_inherits(YandexBot, _Bot);
-
-  function YandexBot(worker, extension) {
-    var _this;
-
-    YandexBot_classCallCheck(this, YandexBot);
-
-    _this = YandexBot_possibleConstructorReturn(this, YandexBot_getPrototypeOf(YandexBot).call(this, worker, extension));
-    _this.onStart = _this.onStart.bind(YandexBot_assertThisInitialized(_this));
-
-    if (_this.debug) {
-      _this.result_text_pages = 1;
-      _this.result_news_pages = 1;
-      _this.scroll_text_reloads = 1;
-      _this.scroll_news_reloads = 1;
+        this.scroll_down().then(value => this.set_get_news_tab_timeout().then(value => this.set_navigate_timeout()));
+      }.bind(this), this.initial_scroll_delay + extra_delay);
     } else {
-      _this.result_text_pages = 1;
-      _this.result_news_pages = 1;
-      _this.scroll_text_reloads = 1;
-      _this.scroll_news_reloads = 1;
+      setTimeout(function () {
+        this.scroll_down().then(value => this.more_text_animation());
+      }.bind(this), this.initial_scroll_delay + extra_delay);
     }
-
-    _this.initial_scroll_delay = 3000;
-    return _this;
   }
-  /**
-   * [start the tracker]
-   * @return {[type]} [description]
-   */
 
+  get_more_text_button() {
+    return document.querySelector('a.result--more__btn');
+  }
 
-  YandexBot_createClass(YandexBot, [{
-    key: "start",
-    value: function start() {
-      var _this2 = this;
-
-      if (this.debug) console.log('YandexBot -> start()');
-      this.onStart(function (delay) {
-        _this2.eventEmitter.emit(_this2.EVENT_NAMES.start, delay, false);
-
-        _this2.navigate();
-      });
-    }
-  }, {
-    key: "videos_animation",
-    value: function videos_animation() {
-      var extra_delay = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-
-      if (this.is_videos_result_scrolls_end()) {
-        this.videos_results_counter = 0;
-        setTimeout(function () {
-          var _this3 = this;
-
-          this.scroll_down().then(function (value) {
-            return _this3.go_to_base_page();
-          });
-        }.bind(this), this.initial_scroll_delay + extra_delay);
-      } else {
-        setTimeout(function () {
-          var _this4 = this;
-
-          this.scroll_down().then(function (value) {
-            return _this4.more_videos_animation();
-          });
-        }.bind(this), this.initial_scroll_delay + extra_delay);
-      }
-    }
-  }, {
-    key: "set_videos_results_animation",
-    value: function set_videos_results_animation(callback_end) {
+  news_animation(extra_delay = 0) {
+    if (this.is_news_result_scrolls_end()) {
+      console.log('End of news');
+      this.news_results_counter = 0;
       setTimeout(function () {
-        var _this5 = this;
-
-        this.scroll_down().then(function (value) {
-          return _this5.timed_scroll_down(1000).then(function (value) {
-            return (// the callback needs to be bind again, so that it finds
-              // the methods of the object
-              callback_end.bind(_this5)()
-            );
-          });
-        });
-      }.bind(this), this.initial_scroll_delay);
-    }
-  }, {
-    key: "get_more_videos_button",
-    value: function get_more_videos_button() {
-      return document.querySelector('div.more_last_yes button');
-    }
-  }, {
-    key: "get_search_input",
-    value: function get_search_input() {
-      return document.querySelector('input#text');
-    }
-  }, {
-    key: "consent_animation",
-    value: function consent_animation() {
-      setTimeout(function () {
-        var consent_button = document.querySelector('table button[data-id=button-all]');
-
-        if (consent_button) {
-          consent_button.dispatchEvent(new MouseEvent('click', {
-            bubbles: true,
-            cancelable: true,
-            view: window
-          }));
-        }
-      }.bind(this), 100);
-    }
-  }, {
-    key: "is_collect_consent_page",
-    value: function is_collect_consent_page() {
-      console.log('Consent page detected: ', document.querySelector('table button[data-id=button-all]') != null);
-      return document.querySelector('table button[data-id=button-all]') != null;
-    }
-  }, {
-    key: "is_text_result_page",
-    value: function is_text_result_page() {
-      console.log('is_text_result_page');
-      return location.pathname.includes('/search/');
-    }
-  }, {
-    key: "is_news_result_page",
-    value: function is_news_result_page() {
-      console.log('is_news_result_page');
-      return location.hostname.includes('newssearch');
-    }
-  }, {
-    key: "is_images_result_page",
-    value: function is_images_result_page() {
-      console.log('is_images_result_page');
-      return location.pathname.includes('/images/');
-    }
-  }, {
-    key: "is_videos_result_page",
-    value: function is_videos_result_page() {
-      console.log('is_videos_result_page');
-
-      if (location.pathname.includes('/video/')) {
-        this.sub_scroll_waiting_for_more = 3000;
-        this.sub_scroll_down_delay = 1000;
-        return true;
-      } else {
-        return false;
-      }
-    }
-  }, {
-    key: "get_news_tab",
-    value: function get_news_tab() {
-      var el = document.querySelector("a[href*='newssearch.']");
-      el.removeAttribute('target');
-      return el;
-    }
-  }, {
-    key: "get_images_tab",
-    value: function get_images_tab() {
-      var el = document.querySelector("a[href*='/images/']");
-      el.removeAttribute('target');
-      return el;
-    }
-  }, {
-    key: "get_videos_tab",
-    value: function get_videos_tab() {
-      var el = document.querySelector("a[href*='/video/']");
-      el.removeAttribute('target');
-      return el;
-    }
-  }, {
-    key: "get_search_button",
-    value: function get_search_button() {
-      return document.querySelector('div.search2__button button');
-    }
-  }, {
-    key: "get_next_button",
-    value: function get_next_button() {
-      return document.querySelector('a.pager__item_kind_next');
-    }
-  }, {
-    key: "get_next_button_news",
-    value: function get_next_button_news() {
-      var buttons = document.querySelectorAll('span.pager__group a.button');
-      return buttons[buttons.length - 1];
-    }
-  }, {
-    key: "get_text_result_page",
-    value: function get_text_result_page() {
-      var p = this.find_get_parameter('p');
-
-      if (p) {
-        return parseInt(p) + 1;
-      } else {
-        return 1;
-      }
-    }
-  }, {
-    key: "get_news_result_page",
-    value: function get_news_result_page() {
-      var p = this.find_get_parameter('p');
-
-      if (p) {
-        return parseInt(p) + 1;
-      } else {
-        return 1;
-      }
-    }
-  }, {
-    key: "get_images_result_page",
-    value: function get_images_result_page() {
-      this.images_results_counter += 1;
-      return this.images_results_counter;
-    }
-  }, {
-    key: "get_videos_result_page",
-    value: function get_videos_result_page() {
-      this.videos_results_counter += 1;
-      return this.videos_results_counter;
-    } // get_videos_result_page(){
-    //   let p = this.find_get_parameter('p');
-    //   if (p){
-    //     return parseInt(p) + 1;
-    //   } else {
-    //     return 1;
-    //   }
-    // }
-
-    /**
-     * [onStart on start event]
-     * @param  {Function} fn
-     */
-
-  }, {
-    key: "onStart",
-    value: function onStart(fn) {
-      var _this6 = this;
-
-      if (this.debug) console.log('YandexBot -> onStart()');
-      setTimeout(function () {
-        if (_this6.debug) console.log('Yandex START!!!!');
-        fn(1000);
-      }, 500);
-    }
-  }]);
-
-  return YandexBot;
-}(Bot_Bot); //class
-
-
-
-// CONCATENATED MODULE: ./src/content/bot/BingBot.js
-function BingBot_typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { BingBot_typeof = function _typeof(obj) { return typeof obj; }; } else { BingBot_typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return BingBot_typeof(obj); }
-
-function BingBot_asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
-
-function BingBot_asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { BingBot_asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { BingBot_asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
-
-function BingBot_classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function BingBot_defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function BingBot_createClass(Constructor, protoProps, staticProps) { if (protoProps) BingBot_defineProperties(Constructor.prototype, protoProps); if (staticProps) BingBot_defineProperties(Constructor, staticProps); return Constructor; }
-
-function BingBot_possibleConstructorReturn(self, call) { if (call && (BingBot_typeof(call) === "object" || typeof call === "function")) { return call; } return BingBot_assertThisInitialized(self); }
-
-function BingBot_getPrototypeOf(o) { BingBot_getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return BingBot_getPrototypeOf(o); }
-
-function BingBot_assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function BingBot_inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) BingBot_setPrototypeOf(subClass, superClass); }
-
-function BingBot_setPrototypeOf(o, p) { BingBot_setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return BingBot_setPrototypeOf(o, p); }
-
-
-
-var BingBot =
-/*#__PURE__*/
-function (_Bot) {
-  BingBot_inherits(BingBot, _Bot);
-
-  function BingBot(worker, extension) {
-    var _this;
-
-    BingBot_classCallCheck(this, BingBot);
-
-    _this = BingBot_possibleConstructorReturn(this, BingBot_getPrototypeOf(BingBot).call(this, worker, extension));
-    _this.onStart = _this.onStart.bind(BingBot_assertThisInitialized(_this));
-
-    if (_this.debug) {// use the defaults for debug in Bot
+        this.scroll_down().then(value => this.set_get_images_tab_timeout().then(value => this.set_navigate_timeout()));
+      }.bind(this), this.initial_scroll_delay + extra_delay);
     } else {
-      // for Bing it is better to track the number of results
-      _this.result_text_pages = 50;
-      _this.scroll_news_reloads = 10;
-      _this.scroll_images_reloads = 10;
-      _this.scroll_videos_reloads = 14;
+      console.log('Continue news');
+      setTimeout(function () {
+        this.scroll_down().then(value => this.more_news_animation());
+      }.bind(this), this.initial_scroll_delay + extra_delay);
     }
-
-    return _this;
   }
-  /**
-   * [start the tracker]
-   * @return {[type]} [description]
-   */
 
+  get_more_news_button() {
+    return document.querySelector('a.result--more__btn');
+  }
 
-  BingBot_createClass(BingBot, [{
-    key: "start",
-    value: function start() {
-      var _this2 = this;
-
-      if (this.debug) console.log('BingBot -> start()');
-      this.onStart(function (delay) {
-        _this2.eventEmitter.emit(_this2.EVENT_NAMES.start, delay, false);
-
-        _this2.navigate();
-      });
+  images_animation(delay = null) {
+    if (delay == null) {
+      delay = this.initial_scroll_delay;
     }
-  }, {
-    key: "news_animation",
-    value: function news_animation() {
-      var _this3 = this;
 
-      var delay = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
-      console.log('news_animation');
-
-      if (delay == null) {
-        delay = this.initial_scroll_delay;
-      }
-
-      if (this.is_news_result_scrolls_end()) {
-        this.news_results_counter = 0;
-        this.scroll_down().then(function (value) {
-          return _this3.set_get_images_tab_timeout();
-        });
-      } else {
-        setTimeout(function () {
-          var _this4 = this;
-
-          this.scroll_down().then(function (value) {
-            return _this4.news_animation(0);
-          });
-        }.bind(this), delay);
-      }
-    }
-  }, {
-    key: "images_animation",
-    value: function images_animation() {
-      var _this5 = this;
-
-      var delay = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
-      console.log('images_animation');
-
-      if (delay == null) {
-        delay = this.initial_scroll_delay;
-      }
-
-      if (this.is_images_result_scrolls_end()) {
-        this.images_results_counter = 0;
-        this.scroll_down().then(function (value) {
-          return _this5.set_get_videos_tab_timeout();
-        });
-      } else {
-        setTimeout(function () {
-          var _this6 = this;
-
-          this.scroll_down().then(function (value) {
-            return _this6.images_animation(0);
-          });
-        }.bind(this), delay);
-      }
-    }
-  }, {
-    key: "videos_animation",
-    value: function videos_animation() {
-      var _this7 = this;
-
-      var delay = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
-      console.log('videos_animation');
-
-      if (delay == null) {
-        delay = this.initial_scroll_delay;
-      }
-
-      if (this.is_videos_result_scrolls_end()) {
-        this.videos_results_counter = 0;
-        this.scroll_down().then(function (value) {
-          return _this7.go_to_base_page();
-        });
-      } else {
-        setTimeout(function () {
-          var _this8 = this;
-
-          this.scroll_down().then(function (value) {
-            return _this8.videos_animation(0);
-          });
-        }.bind(this), delay);
-      }
-    }
-  }, {
-    key: "consent_animation",
-    value: function consent_animation() {
-      setTimeout(function () {
-        console.log("CLICKING!!!!");
-        var consent_button = document.querySelector('#bnp_btn_accept');
-
-        if (consent_button) {
-          consent_button.dispatchEvent(new MouseEvent('click', {
-            bubbles: true,
-            cancelable: true,
-            view: window
-          }));
-        }
-      }.bind(this), 100);
-    }
-  }, {
-    key: "is_collect_consent_page",
-    value: function is_collect_consent_page() {
-      console.log('Consent page detected: ', document.querySelector('#bnp_btn_accept') != null);
-      return document.querySelector('#bnp_btn_accept') != null;
-    }
-    /***************************************************************
-    This metnod is a replacement of the click simulation, it does not 
-    work with the AWS zombies in Chrome only.
-     The method is otherwise unnecessary. It will still work without
-    it. Basically the URL bar does not seem to be triggering the 
-    loading of a new page.
-    *****************************************************************/
-
-  }, {
-    key: "set_get_next_button_text_result_timeout",
-    value: function set_get_next_button_text_result_timeout() {
-      var _this9 = this;
-
-      return new Promise(
-      /*#__PURE__*/
-      function () {
-        var _ref = BingBot_asyncToGenerator(
-        /*#__PURE__*/
-        regeneratorRuntime.mark(function _callee(resolve, reject) {
-          return regeneratorRuntime.wrap(function _callee$(_context) {
-            while (1) {
-              switch (_context.prev = _context.next) {
-                case 0:
-                  setTimeout(function () {
-                    console.log("click_or_reload_promise");
-                    var button = this.get_search_button();
-
-                    var _href = window.location.protocol + '//' + window.location.hostname + document.querySelector('a.sb_pagN').getAttribute('href');
-
-                    this.force_location(_href); // this.click_or_reload_promise(button).then(
-                    //   value => 
-                    // );
-
-                    resolve(true);
-                  }.bind(_this9), _this9.next_delay);
-
-                case 1:
-                case "end":
-                  return _context.stop();
-              }
-            }
-          }, _callee);
-        }));
-
-        return function (_x, _x2) {
-          return _ref.apply(this, arguments);
-        };
-      }());
-    }
-  }, {
-    key: "force_location",
-    value: function force_location(_href) {
-      console.log('force location', _href);
-      setTimeout(function () {
-        window.location = _href;
-      }.bind(this), 1500);
-    }
-    /**************************************************************
-    END OF THE AWS
-    ***************************************************************/
-
-    /*
-    * For Bing, click as fast as possible to avoid the auto-suggestions
-    * Leaving the parameter just in case but it is fine to just ignore it
-    */
-
-  }, {
-    key: "set_get_search_button_timeout",
-    value: function set_get_search_button_timeout() {
-      var delay = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-      this.click_or_reload(this.get_search_button());
-    }
-  }, {
-    key: "get_search_input",
-    value: function get_search_input() {
-      return document.querySelector('input#sb_form_q');
-    }
-  }, {
-    key: "clear_autosuggestion_box",
-    value: function clear_autosuggestion_box() {
-      var el = document.querySelector("div#sw_as");
-
-      if (el) {
-        el.remove();
-      }
-    }
-  }, {
-    key: "is_text_result_page",
-    value: function is_text_result_page() {
-      return location.pathname.includes('/search') && !this.is_images_result_page() && !this.is_videos_result_page() && !this.is_news_result_page();
-    }
-  }, {
-    key: "is_news_result_page",
-    value: function is_news_result_page() {
-      return location.pathname.includes('/news/');
-    }
-  }, {
-    key: "is_images_result_page",
-    value: function is_images_result_page() {
-      return location.pathname.includes('/images/');
-    }
-  }, {
-    key: "is_videos_result_page",
-    value: function is_videos_result_page() {
-      if (location.pathname.includes('/videos/')) {
-        this.sub_scroll_waiting_for_more = 1500;
-        return true;
-      } else {
-        return false;
-      }
-    }
-  }, {
-    key: "get_search_button",
-    value: function get_search_button() {
-      return document.querySelector('input#sb_form_go');
-    }
-  }, {
-    key: "get_news_tab",
-    value: function get_news_tab() {
-      return document.querySelector("a[href*='/news/']");
-    }
-  }, {
-    key: "get_images_tab",
-    value: function get_images_tab() {
-      return document.querySelector("a[href*='/images/']");
-    }
-  }, {
-    key: "get_videos_tab",
-    value: function get_videos_tab() {
-      return document.querySelector("a[href*='/videos/']");
-    }
-  }, {
-    key: "get_next_button",
-    value: function get_next_button() {
-      console.log("Next Button", document.querySelector('a.sb_pagN'));
-      return document.querySelector('a.sb_pagN');
-    }
-  }, {
-    key: "get_text_result_page",
-    value: function get_text_result_page() {
-      var r = this.find_get_parameter('first');
-
-      if (r) {
-        return parseInt(r);
-      } else {
-        return 1;
-      }
-    }
-  }, {
-    key: "get_news_result_page",
-    value: function get_news_result_page() {
-      this.news_results_counter += 1;
-      return this.news_results_counter;
-    }
-  }, {
-    key: "get_images_result_page",
-    value: function get_images_result_page() {
-      this.images_results_counter += 1;
-      return this.images_results_counter;
-    }
-  }, {
-    key: "get_videos_result_page",
-    value: function get_videos_result_page() {
-      this.videos_results_counter += 1;
-      return this.videos_results_counter;
-    }
-    /**
-     * [onStart on start event]
-     * @param  {Function} fn
-     */
-
-  }, {
-    key: "onStart",
-    value: function onStart(fn) {
-      var _this10 = this;
-
-      if (this.debug) console.log('BingBot -> onStart()');
-      setTimeout(function () {
-        if (_this10.debug) console.log('Bing START!!!!');
-        fn(1000);
-      }, 500);
-    }
-  }]);
-
-  return BingBot;
-}(Bot_Bot); //class
-
-
-
-// CONCATENATED MODULE: ./src/content/bot/YahooBot.js
-function YahooBot_typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { YahooBot_typeof = function _typeof(obj) { return typeof obj; }; } else { YahooBot_typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return YahooBot_typeof(obj); }
-
-function YahooBot_classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function YahooBot_defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function YahooBot_createClass(Constructor, protoProps, staticProps) { if (protoProps) YahooBot_defineProperties(Constructor.prototype, protoProps); if (staticProps) YahooBot_defineProperties(Constructor, staticProps); return Constructor; }
-
-function YahooBot_possibleConstructorReturn(self, call) { if (call && (YahooBot_typeof(call) === "object" || typeof call === "function")) { return call; } return YahooBot_assertThisInitialized(self); }
-
-function YahooBot_getPrototypeOf(o) { YahooBot_getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return YahooBot_getPrototypeOf(o); }
-
-function YahooBot_assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function YahooBot_inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) YahooBot_setPrototypeOf(subClass, superClass); }
-
-function YahooBot_setPrototypeOf(o, p) { YahooBot_setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return YahooBot_setPrototypeOf(o, p); }
-
-
-
-var YahooBot_YahooBot =
-/*#__PURE__*/
-function (_Bot) {
-  YahooBot_inherits(YahooBot, _Bot);
-
-  function YahooBot(worker, extension) {
-    var _this;
-
-    YahooBot_classCallCheck(this, YahooBot);
-
-    _this = YahooBot_possibleConstructorReturn(this, YahooBot_getPrototypeOf(YahooBot).call(this, worker, extension));
-    _this.onStart = _this.onStart.bind(YahooBot_assertThisInitialized(_this));
-
-    if (_this.debug) {// use the defaults for debug in Bot
+    if (this.is_images_result_scrolls_end()) {
+      this.images_results_counter = 0;
+      this.scroll_down().then(value => this.set_get_videos_tab_timeout().then(value => this.set_navigate_timeout()));
     } else {
-      _this.scroll_images_reloads = 5;
-    }
-
-    _this.sub_scroll_waiting_for_more = 500;
-    return _this;
-  }
-  /**
-   * [start the tracker]
-   * @return {[type]} [description]
-   */
-
-
-  YahooBot_createClass(YahooBot, [{
-    key: "start",
-    value: function start() {
-      var _this2 = this;
-
-      if (this.debug) console.log('YahooBot -> start()');
-      this.onStart(function (delay) {
-        _this2.eventEmitter.emit(_this2.EVENT_NAMES.start, delay, false);
-
-        _this2.navigate();
-      });
-    }
-  }, {
-    key: "consent_animation",
-    value: function consent_animation() {
       setTimeout(function () {
-        var consent_form = document.querySelector('form.consent-form');
-
-        if (consent_form) {
-          document.querySelector('form.consent-form button[name=agree]').dispatchEvent(new MouseEvent('click'));
-        }
-      }.bind(this), 100);
-    }
-  }, {
-    key: "images_animation",
-    value: function images_animation() {
-      var extra_delay = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-
-      if (this.is_images_result_scrolls_end()) {
-        this.images_results_counter = 0;
-        setTimeout(function () {
-          var _this3 = this;
-
-          this.scroll_down().then(function (value) {
-            return _this3.set_get_videos_tab_timeout();
-          });
-        }.bind(this), this.initial_scroll_delay + extra_delay);
-      } else {
-        setTimeout(function () {
-          var _this4 = this;
-
-          this.scroll_down().then(function (value) {
-            return _this4.more_images_animation();
-          });
-        }.bind(this), this.initial_scroll_delay + extra_delay);
-      }
-    }
-  }, {
-    key: "videos_animation",
-    value: function videos_animation() {
-      var extra_delay = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-
-      if (this.is_videos_result_scrolls_end()) {
-        this.videos_results_counter = 0;
-        setTimeout(function () {
-          var _this5 = this;
-
-          this.scroll_down().then(function (value) {
-            return _this5.go_to_base_page();
-          });
-        }.bind(this), this.initial_scroll_delay + extra_delay);
-      } else {
-        setTimeout(function () {
-          var _this6 = this;
-
-          this.scroll_down().then(function (value) {
-            return _this6.more_videos_animation();
-          });
-        }.bind(this), this.initial_scroll_delay + extra_delay);
-      }
-    }
-  }, {
-    key: "get_more_videos_button",
-    value: function get_more_videos_button() {
-      return document.querySelector('section#search button.more');
-    }
-  }, {
-    key: "get_more_images_button",
-    value: function get_more_images_button() {
-      return document.querySelector('section#results button.more-res');
-    }
-  }, {
-    key: "get_search_input",
-    value: function get_search_input() {
-      var _input = document.querySelector('form[role=search] input'); // // US interface
-      // let _input = document.querySelector('form[role=search] input');
-      // if (_input == null) {
-      //   // DE interface
-      //   _input = document.querySelector('#header-search-input');
-      // }
-      // if (_input == null) {
-      //   // random shot
-      //   _input = document.querySelector('form input[type=text]');
-      // }
-
-
-      return _input;
-    }
-  }, {
-    key: "is_collect_consent_page",
-    value: function is_collect_consent_page() {
-      return location.pathname.includes('/collectConsent');
-    }
-  }, {
-    key: "is_text_result_page",
-    value: function is_text_result_page() {
-      return location.pathname.includes('/search') && !this.is_images_result_page() && !this.is_videos_result_page() && !this.is_news_result_page();
-    }
-  }, {
-    key: "is_news_result_page",
-    value: function is_news_result_page() {
-      return location.hostname.includes('news.search');
-    }
-  }, {
-    key: "is_images_result_page",
-    value: function is_images_result_page() {
-      return location.pathname.includes('/search/images');
-    }
-  }, {
-    key: "is_videos_result_page",
-    value: function is_videos_result_page() {
-      return location.pathname.includes('/search/video');
-    }
-  }, {
-    key: "get_search_button",
-    value: function get_search_button() {
-      var _button = document.querySelector('form[role=search] span[role=button]'); // // US interface
-      // let _button = document.querySelector('form[role=search] input[type=submit]');
-      // if (_button == null) {
-      //   // DE interface
-      //   _button = document.querySelector('#header-desktop-search-button');
-      // }
-      // if (_button == null) {
-      //   // random shot (first form, first button)
-      //   _button = document.querySelector('form button[type=button]');
-      // }
-      // if (_button == null) {
-      //   // random shot (first form, first button)
-      //   _button = document.querySelector('form input[type=submit]');
-      // }
-
-
-      return _button;
-    }
-  }, {
-    key: "get_images_tab",
-    value: function get_images_tab() {
-      return document.querySelector("a[href*='/search/images']");
-    }
-  }, {
-    key: "get_news_tab",
-    value: function get_news_tab() {
-      return document.querySelector("a[href*='news.search']");
-    }
-  }, {
-    key: "get_videos_tab",
-    value: function get_videos_tab() {
-      return document.querySelector("a[href*='/search/video']");
-    }
-  }, {
-    key: "get_next_button",
-    value: function get_next_button() {
-      return document.querySelector('a.next');
-    }
-  }, {
-    key: "get_next_button_news",
-    value: function get_next_button_news() {
-      return document.querySelector('a.next');
-    }
-  }, {
-    key: "get_text_result_page",
-    value: function get_text_result_page() {
-      var p = this.find_get_parameter('b');
-
-      if (p) {
-        return Math.floor(parseInt(p) / 10) + 1;
-      } else {
-        return 1;
-      }
-    }
-  }, {
-    key: "get_news_result_page",
-    value: function get_news_result_page() {
-      var p = this.find_get_parameter('b');
-
-      if (p) {
-        return Math.floor(parseInt(p) / 10) + 1;
-      } else {
-        return 1;
-      }
-    }
-  }, {
-    key: "get_images_result_page",
-    value: function get_images_result_page() {
-      this.images_results_counter += 1;
-      return this.images_results_counter;
-    }
-  }, {
-    key: "get_videos_result_page",
-    value: function get_videos_result_page() {
-      this.videos_results_counter += 1;
-      return this.videos_results_counter;
-    }
-    /**
-     * [onStart on start event]
-     * @param  {Function} fn
-     */
-
-  }, {
-    key: "onStart",
-    value: function onStart(fn) {
-      var _this7 = this;
-
-      if (this.debug) console.log('YahooBot -> onStart()');
-      setTimeout(function () {
-        if (_this7.debug) console.log('Yahoo START!!!!');
-        fn(1000);
-      }, 500);
-    }
-  }]);
-
-  return YahooBot;
-}(Bot_Bot); //class
-
-
-
-// CONCATENATED MODULE: ./src/content/bot/BaiduBot.js
-function BaiduBot_typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { BaiduBot_typeof = function _typeof(obj) { return typeof obj; }; } else { BaiduBot_typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return BaiduBot_typeof(obj); }
-
-function BaiduBot_classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function BaiduBot_defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function BaiduBot_createClass(Constructor, protoProps, staticProps) { if (protoProps) BaiduBot_defineProperties(Constructor.prototype, protoProps); if (staticProps) BaiduBot_defineProperties(Constructor, staticProps); return Constructor; }
-
-function BaiduBot_possibleConstructorReturn(self, call) { if (call && (BaiduBot_typeof(call) === "object" || typeof call === "function")) { return call; } return BaiduBot_assertThisInitialized(self); }
-
-function BaiduBot_getPrototypeOf(o) { BaiduBot_getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return BaiduBot_getPrototypeOf(o); }
-
-function BaiduBot_assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function BaiduBot_inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) BaiduBot_setPrototypeOf(subClass, superClass); }
-
-function BaiduBot_setPrototypeOf(o, p) { BaiduBot_setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return BaiduBot_setPrototypeOf(o, p); }
-
-
-
-var BaiduBot =
-/*#__PURE__*/
-function (_Bot) {
-  BaiduBot_inherits(BaiduBot, _Bot);
-
-  function BaiduBot(worker, extension) {
-    var _this;
-
-    BaiduBot_classCallCheck(this, BaiduBot);
-
-    _this = BaiduBot_possibleConstructorReturn(this, BaiduBot_getPrototypeOf(BaiduBot).call(this, worker, extension));
-    _this.onStart = _this.onStart.bind(BaiduBot_assertThisInitialized(_this));
-    _this.initial_scroll_delay = 3000;
-
-    if (_this.debug) {// use the defaults for debug in Bot
-    } else {
-      _this.result_text_pages = 5;
-      ;
-      _this.scroll_videos_reloads = 7;
-      _this.scroll_images_reloads = 7;
-    }
-
-    _this.sub_scroll_down_delay = 1000;
-    return _this;
-  }
-  /**
-   * [start the tracker]
-   * @return {[type]} [description]
-   */
-
-
-  BaiduBot_createClass(BaiduBot, [{
-    key: "start",
-    value: function start() {
-      var _this2 = this;
-
-      if (this.debug) console.log('BaiduBot -> start()');
-      this.onStart(function (delay) {
-        _this2.eventEmitter.emit(_this2.EVENT_NAMES.start, delay, false);
-
-        _this2.navigate();
-      });
-    }
-  }, {
-    key: "images_animation",
-    value: function images_animation() {
-      var _this3 = this;
-
-      var delay = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
-      console.log('images_animation');
-
-      if (delay == null) {
-        delay = this.initial_scroll_delay;
-      }
-
-      if (this.is_images_result_scrolls_end()) {
-        this.images_results_counter = 0;
-        this.scroll_down().then(function (value) {
-          return _this3.set_get_videos_tab_timeout().then(function (value) {
-            return _this3.set_navigate_timeout();
-          });
-        });
-      } else {
-        setTimeout(function () {
-          var _this4 = this;
-
-          this.scroll_down().then(function (value) {
-            return _this4.images_animation(500);
-          });
-        }.bind(this), delay);
-      }
-    }
-  }, {
-    key: "videos_animation",
-    value: function videos_animation() {
-      var _this5 = this;
-
-      var delay = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
-      console.log('videos_animation');
-
-      if (delay == null) {
-        delay = this.initial_scroll_delay;
-      }
-
-      if (this.is_videos_result_scrolls_end()) {
-        this.videos_results_counter = 0;
-        this.scroll_down().then(function (value) {
-          return _this5.go_to_base_page();
-        });
-      } else {
-        setTimeout(function () {
-          var _this6 = this;
-
-          this.scroll_down().then(function (value) {
-            return _this6.videos_animation(0);
-          });
-        }.bind(this), delay);
-      }
-    }
-  }, {
-    key: "set_get_search_button_timeout",
-    value: function set_get_search_button_timeout() {
-      var delay = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1000;
-      setTimeout(function () {
-        var _this7 = this;
-
-        this.click_or_reload_promise(this.get_search_button()).then(function (value) {
-          return _this7.set_navigate_timeout();
-        });
+        this.scroll_down().then(value => this.images_animation(0));
       }.bind(this), delay);
     }
-  }, {
-    key: "set_text_results_animation",
-    value: function set_text_results_animation(callback_end) {
+  }
+
+  videos_animation(delay = null) {
+    if (delay == null) {
+      delay = this.initial_scroll_delay;
+    }
+
+    if (this.is_videos_result_scrolls_end()) {
+      this.videos_results_counter = 0;
+      this.scroll_down().then(value => this.go_to_base_page());
+    } else {
       setTimeout(function () {
-        var _this8 = this;
+        this.scroll_down().then(value => this.videos_animation(0));
+      }.bind(this), delay);
+    }
+  }
 
-        this.scroll_down().then(function (value) {
-          return (// the callback needs to be bind again, so that it finds
-            // the methods of the object
-            callback_end.bind(_this8)().then(function (value) {
-              return _this8.set_navigate_timeout();
-            })
-          );
-        });
-      }.bind(this), this.initial_scroll_delay);
-    }
-  }, {
-    key: "get_search_input",
-    value: function get_search_input() {
-      return document.querySelector('input#kw');
-    }
-  }, {
-    key: "is_text_result_page",
-    value: function is_text_result_page() {
-      return location.pathname.includes('/s') && !this.is_images_result_page() && !this.is_videos_result_page() && !this.is_news_result_page();
-    }
-  }, {
-    key: "is_news_result_page",
-    value: function is_news_result_page() {
-      if (location.href.includes('tn=news')) {
-        return true;
-      } else {
-        return false;
-      }
-    }
-  }, {
-    key: "is_images_result_page",
-    value: function is_images_result_page() {
-      if (location.hostname.includes('image.')) {
-        this.sub_scroll_waiting_for_more = 3000;
-        return true;
-      } else {
-        return false;
-      }
-    }
-  }, {
-    key: "is_videos_result_page",
-    value: function is_videos_result_page() {
-      if (location.pathname.includes('/vsearch')) {
-        this.sub_scroll_waiting_for_more = 3000;
-        return true;
-      } else {
-        return false;
-      }
-    }
-  }, {
-    key: "get_search_button",
-    value: function get_search_button() {
-      return document.querySelector("form input#su");
-    }
-  }, {
-    key: "get_news_tab",
-    value: function get_news_tab() {
-      return document.querySelector("div.s_tab_inner a[href*='tn=news']");
-    }
-  }, {
-    key: "get_images_tab",
-    value: function get_images_tab() {
-      return document.querySelector("div.tab-wrapper a[href*='tn=baiduimage']");
-    }
-  }, {
-    key: "get_videos_tab",
-    value: function get_videos_tab() {
-      var tab = document.querySelector("a[name='i_video']");
-      tab.dispatchEvent(new MouseEvent('mousedown'));
-      return tab;
-    }
-  }, {
-    key: "get_next_button",
-    value: function get_next_button() {
-      var navs = document.querySelectorAll("div#page a.n");
+  get_search_input() {
+    return document.querySelector('#search_form_input_homepage');
+  }
 
-      if (navs) {
-        return navs[navs.length - 1];
+  is_text_result_page() {
+    return this.find_get_parameter('q') != null && !this.is_images_result_page() && !this.is_videos_result_page() && !this.is_news_result_page();
+  }
+
+  is_news_result_page() {
+    return this.find_get_parameter('ia') == 'news';
+  }
+
+  is_images_result_page() {
+    return this.find_get_parameter('ia') == 'images';
+  }
+
+  is_videos_result_page() {
+    return this.find_get_parameter('ia') == 'videos';
+  }
+
+  get_search_button() {
+    return document.querySelector('#search_button_homepage');
+  }
+
+  get_news_tab() {
+    return document.querySelector("#duckbar a.js-zci-link--news");
+  }
+
+  get_images_tab() {
+    return document.querySelector("#duckbar a.js-zci-link--images");
+  }
+
+  get_videos_tab() {
+    return document.querySelector("#duckbar a.js-zci-link--videos");
+  }
+
+  get_text_result_page() {
+    this.text_results_counter += 1;
+    return this.text_results_counter;
+  }
+
+  get_news_result_page() {
+    this.news_results_counter += 1;
+    return this.news_results_counter;
+  }
+
+  get_images_result_page() {
+    this.images_results_counter += 1;
+    return this.images_results_counter;
+  }
+
+  get_videos_result_page() {
+    this.videos_results_counter += 1;
+    return this.videos_results_counter;
+  }
+
+  scroll_down() {
+    return new Promise(async (resolve, reject) => {
+      let bottom = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      let _scroll = document.documentElement.scrollTop;
+      bottom = Math.min(bottom, _scroll + 7500);
+      console.log('_scroll (current):', _scroll);
+      console.log('bottom (target):', bottom);
+
+      while (_scroll < bottom) {
+        await this.sub_scroll_down(_scroll, _scroll + document.documentElement.clientHeight);
+        _scroll += document.documentElement.clientHeight;
+        window.scrollTo(0, _scroll);
+      }
+
+      resolve(true);
+    });
+  }
+  /**
+   * [onStart on start event]
+   * @param  {Function} fn
+   */
+
+
+  onStart(fn) {
+    if (this.debug) console.log('DuckDuckGoBot -> onStart()');
+    setTimeout(() => {
+      if (this.debug) console.log('DuckDuckGo START!!!!');
+      fn(1000);
+    }, 500);
+  }
+
+} //class
+// CONCATENATED MODULE: ./src/content/bot/YandexBot.js
+
+class YandexBot_YandexBot extends Bot_Bot {
+  constructor(worker, extension) {
+    super(worker, extension);
+    this.onStart = this.onStart.bind(this);
+
+    if (this.debug) {
+      this.result_text_pages = 1;
+      this.result_news_pages = 1;
+      this.scroll_text_reloads = 1;
+      this.scroll_news_reloads = 1;
+    } else {
+      this.result_text_pages = 1;
+      this.result_news_pages = 1;
+      this.scroll_text_reloads = 1;
+      this.scroll_news_reloads = 1;
+    }
+
+    this.initial_scroll_delay = 3000;
+  }
+  /**
+   * [start the tracker]
+   * @return {[type]} [description]
+   */
+
+
+  start() {
+    if (this.debug) console.log('YandexBot -> start()');
+    this.onStart(delay => {
+      this.eventEmitter.emit(this.EVENT_NAMES.start, delay, false);
+      this.navigate();
+    });
+  }
+
+  videos_animation(extra_delay = 0) {
+    if (this.is_videos_result_scrolls_end()) {
+      this.videos_results_counter = 0;
+      setTimeout(function () {
+        this.scroll_down().then(value => this.go_to_base_page());
+      }.bind(this), this.initial_scroll_delay + extra_delay);
+    } else {
+      setTimeout(function () {
+        this.scroll_down().then(value => this.more_videos_animation());
+      }.bind(this), this.initial_scroll_delay + extra_delay);
+    }
+  }
+
+  set_videos_results_animation(callback_end) {
+    setTimeout(function () {
+      this.scroll_down().then(value => this.timed_scroll_down(1000).then(value => // the callback needs to be bind again, so that it finds
+      // the methods of the object
+      callback_end.bind(this)()));
+    }.bind(this), this.initial_scroll_delay);
+  }
+
+  get_more_videos_button() {
+    return document.querySelector('div.more_last_yes button');
+  }
+
+  get_search_input() {
+    return document.querySelector('input#text');
+  }
+
+  consent_animation() {
+    setTimeout(function () {
+      let consent_button = document.querySelector('table button[data-id=button-all]');
+
+      if (consent_button) {
+        consent_button.dispatchEvent(new MouseEvent('click', {
+          bubbles: true,
+          cancelable: true,
+          view: window
+        }));
+      }
+    }.bind(this), 100);
+  }
+
+  is_collect_consent_page() {
+    console.log('Consent page detected: ', document.querySelector('table button[data-id=button-all]') != null);
+    return document.querySelector('table button[data-id=button-all]') != null;
+  }
+
+  is_text_result_page() {
+    console.log('is_text_result_page');
+    return location.pathname.includes('/search/');
+  }
+
+  is_news_result_page() {
+    console.log('is_news_result_page');
+    return location.hostname.includes('newssearch');
+  }
+
+  is_images_result_page() {
+    console.log('is_images_result_page');
+    return location.pathname.includes('/images/');
+  }
+
+  is_videos_result_page() {
+    console.log('is_videos_result_page');
+
+    if (location.pathname.includes('/video/')) {
+      this.sub_scroll_waiting_for_more = 3000;
+      this.sub_scroll_down_delay = 1000;
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  get_news_tab() {
+    let el = document.querySelector("a[href*='newssearch.']");
+    el.removeAttribute('target');
+    return el;
+  }
+
+  get_images_tab() {
+    let el = document.querySelector("a[href*='/images/']");
+    el.removeAttribute('target');
+    return el;
+  }
+
+  get_videos_tab() {
+    let el = document.querySelector("a[href*='/video/']");
+    el.removeAttribute('target');
+    return el;
+  }
+
+  get_search_button() {
+    return document.querySelector('div.search2__button button');
+  }
+
+  get_next_button() {
+    return document.querySelector('a.pager__item_kind_next');
+  }
+
+  get_next_button_news() {
+    let buttons = document.querySelectorAll('span.pager__group a.button');
+    return buttons[buttons.length - 1];
+  }
+
+  get_text_result_page() {
+    let p = this.find_get_parameter('p');
+
+    if (p) {
+      return parseInt(p) + 1;
+    } else {
+      return 1;
+    }
+  }
+
+  get_news_result_page() {
+    let p = this.find_get_parameter('p');
+
+    if (p) {
+      return parseInt(p) + 1;
+    } else {
+      return 1;
+    }
+  }
+
+  get_images_result_page() {
+    this.images_results_counter += 1;
+    return this.images_results_counter;
+  }
+
+  get_videos_result_page() {
+    this.videos_results_counter += 1;
+    return this.videos_results_counter;
+  } // get_videos_result_page(){
+  //   let p = this.find_get_parameter('p');
+  //   if (p){
+  //     return parseInt(p) + 1;
+  //   } else {
+  //     return 1;
+  //   }
+  // }
+
+  /**
+   * [onStart on start event]
+   * @param  {Function} fn
+   */
+
+
+  onStart(fn) {
+    if (this.debug) console.log('YandexBot -> onStart()');
+    setTimeout(() => {
+      if (this.debug) console.log('Yandex START!!!!');
+      fn(1000);
+    }, 500);
+  }
+
+} //class
+// CONCATENATED MODULE: ./src/content/bot/BingBot.js
+
+class BingBot_BingBot extends Bot_Bot {
+  constructor(worker, extension) {
+    super(worker, extension);
+    this.onStart = this.onStart.bind(this);
+
+    if (this.debug) {// use the defaults for debug in Bot
+    } else {
+      // for Bing it is better to track the number of results
+      this.result_text_pages = 50;
+      this.scroll_news_reloads = 10;
+      this.scroll_images_reloads = 10;
+      this.scroll_videos_reloads = 14;
+    }
+  }
+  /**
+   * [start the tracker]
+   * @return {[type]} [description]
+   */
+
+
+  start() {
+    if (this.debug) console.log('BingBot -> start()');
+    this.onStart(delay => {
+      this.eventEmitter.emit(this.EVENT_NAMES.start, delay, false);
+      this.navigate();
+    });
+  }
+
+  news_animation(delay = null) {
+    console.log('news_animation');
+
+    if (delay == null) {
+      delay = this.initial_scroll_delay;
+    }
+
+    if (this.is_news_result_scrolls_end()) {
+      this.news_results_counter = 0;
+      this.scroll_down().then(value => this.set_get_images_tab_timeout());
+    } else {
+      setTimeout(function () {
+        this.scroll_down().then(value => this.news_animation(0));
+      }.bind(this), delay);
+    }
+  }
+
+  images_animation(delay = null) {
+    console.log('images_animation');
+
+    if (delay == null) {
+      delay = this.initial_scroll_delay;
+    }
+
+    if (this.is_images_result_scrolls_end()) {
+      this.images_results_counter = 0;
+      this.scroll_down().then(value => this.set_get_videos_tab_timeout());
+    } else {
+      setTimeout(function () {
+        this.scroll_down().then(value => this.images_animation(0));
+      }.bind(this), delay);
+    }
+  }
+
+  videos_animation(delay = null) {
+    console.log('videos_animation');
+
+    if (delay == null) {
+      delay = this.initial_scroll_delay;
+    }
+
+    if (this.is_videos_result_scrolls_end()) {
+      this.videos_results_counter = 0;
+      this.scroll_down().then(value => this.go_to_base_page());
+    } else {
+      setTimeout(function () {
+        this.scroll_down().then(value => this.videos_animation(0));
+      }.bind(this), delay);
+    }
+  }
+
+  consent_animation() {
+    setTimeout(function () {
+      console.log("CLICKING!!!!");
+      let consent_button = document.querySelector('#bnp_btn_accept');
+
+      if (consent_button) {
+        consent_button.dispatchEvent(new MouseEvent('click', {
+          bubbles: true,
+          cancelable: true,
+          view: window
+        }));
+      }
+    }.bind(this), 100);
+  }
+
+  is_collect_consent_page() {
+    console.log('Consent page detected: ', document.querySelector('#bnp_btn_accept') != null);
+    return document.querySelector('#bnp_btn_accept') != null;
+  }
+  /***************************************************************
+  This metnod is a replacement of the click simulation, it does not 
+  work with the AWS zombies in Chrome only.
+   The method is otherwise unnecessary. It will still work without
+  it. Basically the URL bar does not seem to be triggering the 
+  loading of a new page.
+  *****************************************************************/
+
+
+  set_get_next_button_text_result_timeout() {
+    return new Promise(async (resolve, reject) => {
+      setTimeout(function () {
+        console.log("click_or_reload_promise");
+        let button = this.get_search_button();
+
+        let _href = window.location.protocol + '//' + window.location.hostname + document.querySelector('a.sb_pagN').getAttribute('href');
+
+        this.force_location(_href); // this.click_or_reload_promise(button).then(
+        //   value => 
+        // );
+
+        resolve(true);
+      }.bind(this), this.next_delay);
+    });
+  }
+
+  force_location(_href) {
+    console.log('force location', _href);
+    setTimeout(function () {
+      window.location = _href;
+    }.bind(this), 1500);
+  }
+  /**************************************************************
+  END OF THE AWS
+  ***************************************************************/
+
+  /*
+  * For Bing, click as fast as possible to avoid the auto-suggestions
+  * Leaving the parameter just in case but it is fine to just ignore it
+  */
+
+
+  set_get_search_button_timeout(delay = 0) {
+    this.click_or_reload(this.get_search_button());
+  }
+
+  get_search_input() {
+    return document.querySelector('input#sb_form_q');
+  }
+
+  clear_autosuggestion_box() {
+    let el = document.querySelector("div#sw_as");
+
+    if (el) {
+      el.remove();
+    }
+  }
+
+  is_text_result_page() {
+    return location.pathname.includes('/search') && !this.is_images_result_page() && !this.is_videos_result_page() && !this.is_news_result_page();
+  }
+
+  is_news_result_page() {
+    return location.pathname.includes('/news/');
+  }
+
+  is_images_result_page() {
+    return location.pathname.includes('/images/');
+  }
+
+  is_videos_result_page() {
+    if (location.pathname.includes('/videos/')) {
+      this.sub_scroll_waiting_for_more = 1500;
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  get_search_button() {
+    return document.querySelector('input#sb_form_go');
+  }
+
+  get_news_tab() {
+    return document.querySelector("a[href*='/news/']");
+  }
+
+  get_images_tab() {
+    return document.querySelector("a[href*='/images/']");
+  }
+
+  get_videos_tab() {
+    return document.querySelector("a[href*='/videos/']");
+  }
+
+  get_next_button() {
+    console.log("Next Button", document.querySelector('a.sb_pagN'));
+    return document.querySelector('a.sb_pagN');
+  }
+
+  get_text_result_page() {
+    let r = this.find_get_parameter('first');
+
+    if (r) {
+      return parseInt(r);
+    } else {
+      return 1;
+    }
+  }
+
+  get_news_result_page() {
+    this.news_results_counter += 1;
+    return this.news_results_counter;
+  }
+
+  get_images_result_page() {
+    this.images_results_counter += 1;
+    return this.images_results_counter;
+  }
+
+  get_videos_result_page() {
+    this.videos_results_counter += 1;
+    return this.videos_results_counter;
+  }
+  /**
+   * [onStart on start event]
+   * @param  {Function} fn
+   */
+
+
+  onStart(fn) {
+    if (this.debug) console.log('BingBot -> onStart()');
+    setTimeout(() => {
+      if (this.debug) console.log('Bing START!!!!');
+      fn(1000);
+    }, 500);
+  }
+
+} //class
+// CONCATENATED MODULE: ./src/content/bot/YahooBot.js
+
+class YahooBot_YahooBot extends Bot_Bot {
+  constructor(worker, extension) {
+    super(worker, extension);
+    this.onStart = this.onStart.bind(this);
+
+    if (this.debug) {// use the defaults for debug in Bot
+    } else {
+      this.scroll_images_reloads = 5;
+    }
+
+    this.sub_scroll_waiting_for_more = 500;
+  }
+  /**
+   * [start the tracker]
+   * @return {[type]} [description]
+   */
+
+
+  start() {
+    if (this.debug) console.log('YahooBot -> start()');
+    this.onStart(delay => {
+      this.eventEmitter.emit(this.EVENT_NAMES.start, delay, false);
+      this.navigate();
+    });
+  }
+
+  consent_animation() {
+    setTimeout(function () {
+      let consent_form = document.querySelector('form.consent-form');
+
+      if (consent_form) {
+        document.querySelector('form.consent-form button[name=agree]').dispatchEvent(new MouseEvent('click'));
+      }
+    }.bind(this), 100);
+  }
+
+  images_animation(extra_delay = 0) {
+    if (this.is_images_result_scrolls_end()) {
+      this.images_results_counter = 0;
+      setTimeout(function () {
+        this.scroll_down().then(value => this.set_get_videos_tab_timeout());
+      }.bind(this), this.initial_scroll_delay + extra_delay);
+    } else {
+      setTimeout(function () {
+        this.scroll_down().then(value => this.more_images_animation());
+      }.bind(this), this.initial_scroll_delay + extra_delay);
+    }
+  }
+
+  videos_animation(extra_delay = 0) {
+    if (this.is_videos_result_scrolls_end()) {
+      this.videos_results_counter = 0;
+      setTimeout(function () {
+        this.scroll_down().then(value => this.go_to_base_page());
+      }.bind(this), this.initial_scroll_delay + extra_delay);
+    } else {
+      setTimeout(function () {
+        this.scroll_down().then(value => this.more_videos_animation());
+      }.bind(this), this.initial_scroll_delay + extra_delay);
+    }
+  }
+
+  get_more_videos_button() {
+    return document.querySelector('section#search button.more');
+  }
+
+  get_more_images_button() {
+    return document.querySelector('section#results button.more-res');
+  }
+
+  get_search_input() {
+    let _input = document.querySelector('form[role=search] input'); // // US interface
+    // let _input = document.querySelector('form[role=search] input');
+    // if (_input == null) {
+    //   // DE interface
+    //   _input = document.querySelector('#header-search-input');
+    // }
+    // if (_input == null) {
+    //   // random shot
+    //   _input = document.querySelector('form input[type=text]');
+    // }
+
+
+    return _input;
+  }
+
+  is_collect_consent_page() {
+    return location.pathname.includes('/collectConsent');
+  }
+
+  is_text_result_page() {
+    return location.pathname.includes('/search') && !this.is_images_result_page() && !this.is_videos_result_page() && !this.is_news_result_page();
+  }
+
+  is_news_result_page() {
+    return location.hostname.includes('news.search');
+  }
+
+  is_images_result_page() {
+    return location.pathname.includes('/search/images');
+  }
+
+  is_videos_result_page() {
+    return location.pathname.includes('/search/video');
+  }
+
+  get_search_button() {
+    let _button = document.querySelector('form[role=search] span[role=button]'); // // US interface
+    // let _button = document.querySelector('form[role=search] input[type=submit]');
+    // if (_button == null) {
+    //   // DE interface
+    //   _button = document.querySelector('#header-desktop-search-button');
+    // }
+    // if (_button == null) {
+    //   // random shot (first form, first button)
+    //   _button = document.querySelector('form button[type=button]');
+    // }
+    // if (_button == null) {
+    //   // random shot (first form, first button)
+    //   _button = document.querySelector('form input[type=submit]');
+    // }
+
+
+    return _button;
+  }
+
+  get_images_tab() {
+    return document.querySelector("a[href*='/search/images']");
+  }
+
+  get_news_tab() {
+    return document.querySelector("a[href*='news.search']");
+  }
+
+  get_videos_tab() {
+    return document.querySelector("a[href*='/search/video']");
+  }
+
+  get_next_button() {
+    return document.querySelector('a.next');
+  }
+
+  get_next_button_news() {
+    return document.querySelector('a.next');
+  }
+
+  get_text_result_page() {
+    let p = this.find_get_parameter('b');
+
+    if (p) {
+      return Math.floor(parseInt(p) / 10) + 1;
+    } else {
+      return 1;
+    }
+  }
+
+  get_news_result_page() {
+    let p = this.find_get_parameter('b');
+
+    if (p) {
+      return Math.floor(parseInt(p) / 10) + 1;
+    } else {
+      return 1;
+    }
+  }
+
+  get_images_result_page() {
+    this.images_results_counter += 1;
+    return this.images_results_counter;
+  }
+
+  get_videos_result_page() {
+    this.videos_results_counter += 1;
+    return this.videos_results_counter;
+  }
+  /**
+   * [onStart on start event]
+   * @param  {Function} fn
+   */
+
+
+  onStart(fn) {
+    if (this.debug) console.log('YahooBot -> onStart()');
+    setTimeout(() => {
+      if (this.debug) console.log('Yahoo START!!!!');
+      fn(1000);
+    }, 500);
+  }
+
+} //class
+// CONCATENATED MODULE: ./src/content/bot/BaiduBot.js
+
+class BaiduBot_BaiduBot extends Bot_Bot {
+  constructor(worker, extension) {
+    super(worker, extension);
+    this.onStart = this.onStart.bind(this);
+    this.initial_scroll_delay = 3000;
+
+    if (this.debug) {// use the defaults for debug in Bot
+    } else {
+      this.result_text_pages = 5;
+      ;
+      this.scroll_videos_reloads = 7;
+      this.scroll_images_reloads = 7;
+    }
+
+    this.sub_scroll_down_delay = 1000;
+  }
+  /**
+   * [start the tracker]
+   * @return {[type]} [description]
+   */
+
+
+  start() {
+    if (this.debug) console.log('BaiduBot -> start()');
+    this.onStart(delay => {
+      this.eventEmitter.emit(this.EVENT_NAMES.start, delay, false);
+      this.navigate();
+    });
+  }
+
+  images_animation(delay = null) {
+    console.log('images_animation');
+
+    if (delay == null) {
+      delay = this.initial_scroll_delay;
+    }
+
+    if (this.is_images_result_scrolls_end()) {
+      this.images_results_counter = 0;
+      this.scroll_down().then(value => this.set_get_videos_tab_timeout().then(value => this.set_navigate_timeout()));
+    } else {
+      setTimeout(function () {
+        this.scroll_down().then(value => this.images_animation(500));
+      }.bind(this), delay);
+    }
+  }
+
+  videos_animation(delay = null) {
+    console.log('videos_animation');
+
+    if (delay == null) {
+      delay = this.initial_scroll_delay;
+    }
+
+    if (this.is_videos_result_scrolls_end()) {
+      this.videos_results_counter = 0;
+      this.scroll_down().then(value => this.go_to_base_page());
+    } else {
+      setTimeout(function () {
+        this.scroll_down().then(value => this.videos_animation(0));
+      }.bind(this), delay);
+    }
+  }
+
+  set_get_search_button_timeout(delay = 1000) {
+    setTimeout(function () {
+      this.click_or_reload_promise(this.get_search_button()).then(value => this.set_navigate_timeout());
+    }.bind(this), delay);
+  }
+
+  set_text_results_animation(callback_end) {
+    setTimeout(function () {
+      this.scroll_down().then(value => // the callback needs to be bind again, so that it finds
+      // the methods of the object
+      callback_end.bind(this)().then(value => this.set_navigate_timeout()));
+    }.bind(this), this.initial_scroll_delay);
+  }
+
+  get_search_input() {
+    return document.querySelector('input#kw');
+  }
+
+  is_text_result_page() {
+    return location.pathname.includes('/s') && !this.is_images_result_page() && !this.is_videos_result_page() && !this.is_news_result_page();
+  }
+
+  is_news_result_page() {
+    if (location.href.includes('tn=news')) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  is_images_result_page() {
+    if (location.hostname.includes('image.')) {
+      this.sub_scroll_waiting_for_more = 3000;
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  is_videos_result_page() {
+    if (location.pathname.includes('/vsearch')) {
+      this.sub_scroll_waiting_for_more = 3000;
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  get_search_button() {
+    return document.querySelector("form input#su");
+  }
+
+  get_news_tab() {
+    return document.querySelector("div.s_tab_inner a[href*='tn=news']");
+  }
+
+  get_images_tab() {
+    return document.querySelector("div.tab-wrapper a[href*='tn=baiduimage']");
+  }
+
+  get_videos_tab() {
+    let tab = document.querySelector("a[name='i_video']");
+    tab.dispatchEvent(new MouseEvent('mousedown'));
+    return tab;
+  }
+
+  get_next_button() {
+    let navs = document.querySelectorAll("div#page a.n");
+
+    if (navs) {
+      return navs[navs.length - 1];
+    } else {
+      return null;
+    }
+  }
+
+  is_news_loaded() {
+    //assume that things are loaded for news
+    // see baidu for an example of implementing this properly
+    // this did not work because some queries only produce one page of news
+    // return document.querySelector("div#page a.n") != null;
+    return true;
+  }
+
+  get_next_button_news() {
+    let navs = document.querySelectorAll("div#page a.n");
+    let p = this.find_get_parameter('pn'); // not first page
+
+    if (p) {
+      if (navs.length == 2) {
+        return navs[1];
       } else {
         return null;
       }
-    }
-  }, {
-    key: "is_news_loaded",
-    value: function is_news_loaded() {
-      //assume that things are loaded for news
-      // see baidu for an example of implementing this properly
-      // this did not work because some queries only produce one page of news
-      // return document.querySelector("div#page a.n") != null;
-      return true;
-    }
-  }, {
-    key: "get_next_button_news",
-    value: function get_next_button_news() {
-      var navs = document.querySelectorAll("div#page a.n");
-      var p = this.find_get_parameter('pn'); // not first page
-
-      if (p) {
-        if (navs.length == 2) {
-          return navs[1];
+    } // first page
+    else {
+        if (navs) {
+          return navs[navs.length - 1];
         } else {
           return null;
         }
-      } // first page
-      else {
-          if (navs) {
-            return navs[navs.length - 1];
-          } else {
-            return null;
-          }
-        }
-    }
-  }, {
-    key: "get_text_result_page",
-    value: function get_text_result_page() {
-      var p = this.find_get_parameter('pn');
-
-      if (p) {
-        return Math.floor(parseInt(p) / 10) + 1;
-      } else {
-        return 1;
       }
-    }
-  }, {
-    key: "get_news_result_page",
-    value: function get_news_result_page() {
-      var p = this.find_get_parameter('pn');
-
-      if (p) {
-        return Math.floor(parseInt(p) / 10) + 1;
-      } else {
-        return 1;
-      }
-    }
-  }, {
-    key: "get_images_result_page",
-    value: function get_images_result_page() {
-      console.log("\n\n");
-      console.log(this.images_results_counter);
-      console.log("\n\n");
-      this.images_results_counter += 1;
-      return this.images_results_counter;
-    }
-  }, {
-    key: "get_videos_result_page",
-    value: function get_videos_result_page() {
-      console.log("\n\n");
-      console.log(this.videos_results_counter);
-      console.log("\n\n");
-      this.videos_results_counter += 1;
-      return this.videos_results_counter;
-    }
-    /**
-     * [onStart on start event]
-     * @param  {Function} fn
-     */
-
-  }, {
-    key: "onStart",
-    value: function onStart(fn) {
-      var _this9 = this;
-
-      if (this.debug) console.log('BaiduBot -> onStart()');
-      setTimeout(function () {
-        if (_this9.debug) console.log('Baidu START!!!!');
-        fn(1500);
-      }, 1000);
-    }
-  }]);
-
-  return BaiduBot;
-}(Bot_Bot); //class
-
-
-
-// CONCATENATED MODULE: ./src/content/bot/SoBot.js
-function SoBot_typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { SoBot_typeof = function _typeof(obj) { return typeof obj; }; } else { SoBot_typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return SoBot_typeof(obj); }
-
-function SoBot_classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function SoBot_defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function SoBot_createClass(Constructor, protoProps, staticProps) { if (protoProps) SoBot_defineProperties(Constructor.prototype, protoProps); if (staticProps) SoBot_defineProperties(Constructor, staticProps); return Constructor; }
-
-function SoBot_possibleConstructorReturn(self, call) { if (call && (SoBot_typeof(call) === "object" || typeof call === "function")) { return call; } return SoBot_assertThisInitialized(self); }
-
-function SoBot_getPrototypeOf(o) { SoBot_getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return SoBot_getPrototypeOf(o); }
-
-function SoBot_assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function SoBot_inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) SoBot_setPrototypeOf(subClass, superClass); }
-
-function SoBot_setPrototypeOf(o, p) { SoBot_setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return SoBot_setPrototypeOf(o, p); }
-
-
-
-var SoBot =
-/*#__PURE__*/
-function (_Bot) {
-  SoBot_inherits(SoBot, _Bot);
-
-  function SoBot(worker, extension) {
-    var _this;
-
-    SoBot_classCallCheck(this, SoBot);
-
-    _this = SoBot_possibleConstructorReturn(this, SoBot_getPrototypeOf(SoBot).call(this, worker, extension));
-    _this.onStart = _this.onStart.bind(SoBot_assertThisInitialized(_this));
-
-    if (_this.debug) {// use the defaults for debug in Bot
-    } else {
-      _this.result_text_pages = 5;
-      _this.result_videos_pages = 5;
-      _this.scroll_images_reloads = 10;
-    }
-
-    _this.initial_scroll_delay = 2000;
-    _this.sub_scroll_down_delay = 1000;
-    return _this;
   }
-  /**
-   * [start the tracker]
-   * @return {[type]} [description]
-   */
 
+  get_text_result_page() {
+    let p = this.find_get_parameter('pn');
 
-  SoBot_createClass(SoBot, [{
-    key: "start",
-    value: function start() {
-      var _this2 = this;
-
-      if (this.debug) console.log('SoBot -> start()');
-      this.onStart(function (delay) {
-        _this2.eventEmitter.emit(_this2.EVENT_NAMES.start, delay, false);
-
-        _this2.navigate();
-      });
-    }
-  }, {
-    key: "set_videos_results_animation",
-    value: function set_videos_results_animation(callback_end) {
-      setTimeout(function () {
-        var _this3 = this;
-
-        this.scroll_down().then(function (value) {
-          return _this3.timed_scroll_down(500).then(function (value) {
-            return (// the callback needs to be bind again, so that it finds
-              // the methods of the object
-              callback_end.bind(_this3)()
-            );
-          });
-        });
-      }.bind(this), this.initial_scroll_delay);
-    }
-  }, {
-    key: "set_text_results_animation",
-    value: function set_text_results_animation(callback_end) {
-      setTimeout(function () {
-        var _this4 = this;
-
-        this.scroll_down().then(function (value) {
-          return (// the callback needs to be bind again, so that it finds
-            // the methods of the object
-            callback_end.bind(_this4)().then(function (value) {
-              return _this4.set_navigate_timeout();
-            })
-          );
-        });
-      }.bind(this), this.initial_scroll_delay);
-    }
-  }, {
-    key: "get_search_input",
-    value: function get_search_input() {
-      return document.querySelector('input#input');
-    }
-  }, {
-    key: "is_text_result_page",
-    value: function is_text_result_page() {
-      return window.location.pathname == '/s';
-    }
-  }, {
-    key: "is_images_result_page",
-    value: function is_images_result_page() {
-      if (window.location.pathname == '/i') {
-        this.sub_scroll_waiting_for_more = 3000;
-        return true;
-      } else {
-        return false;
-      }
-    }
-  }, {
-    key: "is_videos_result_page",
-    value: function is_videos_result_page() {
-      return window.location.pathname == '/v';
-    }
-  }, {
-    key: "get_search_button",
-    value: function get_search_button() {
-      return document.querySelector('input#search-button');
-    }
-  }, {
-    key: "get_images_tab",
-    value: function get_images_tab() {
-      return document.querySelector("div#tabs-wrap a[href*='/i']");
-    }
-  }, {
-    key: "get_videos_tab",
-    value: function get_videos_tab() {
-      return document.querySelector("div.sitenav a[href*='/v']");
-    }
-  }, {
-    key: "get_next_button",
-    value: function get_next_button() {
-      return document.querySelector('a#snext');
-    }
-  }, {
-    key: "get_next_button_videos",
-    value: function get_next_button_videos() {
-      return document.querySelector("a.js-next");
-    }
-  }, {
-    key: "get_text_result_page",
-    value: function get_text_result_page() {
-      var _start = this.find_get_parameter('pn');
-
-      if (_start) {
-        return parseInt(_start);
-      } else {
-        return 1;
-      }
-    }
-  }, {
-    key: "get_images_result_page",
-    value: function get_images_result_page() {
-      this.images_results_counter += 1;
-      console.log('\n\n', this.images_results_counter, '\n\n');
-      return this.images_results_counter;
-    }
-  }, {
-    key: "get_videos_result_page",
-    value: function get_videos_result_page() {
-      var _start = this.find_get_parameter('pageno');
-
-      if (_start) {
-        return parseInt(_start);
-      } else {
-        return 1;
-      }
-    }
-    /**
-     * [onStart on start event]
-     * @param  {Function} fn
-     */
-
-  }, {
-    key: "onStart",
-    value: function onStart(fn) {
-      var _this5 = this;
-
-      if (this.debug) console.log('SoBot -> onStart()');
-      setTimeout(function () {
-        if (_this5.debug) console.log('So START!!!!');
-        fn(1000);
-      }, 500);
-    }
-  }]);
-
-  return SoBot;
-}(Bot_Bot); //class
-
-
-
-// CONCATENATED MODULE: ./src/content/bot/SogouBot.js
-function SogouBot_typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { SogouBot_typeof = function _typeof(obj) { return typeof obj; }; } else { SogouBot_typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return SogouBot_typeof(obj); }
-
-function SogouBot_classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function SogouBot_defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function SogouBot_createClass(Constructor, protoProps, staticProps) { if (protoProps) SogouBot_defineProperties(Constructor.prototype, protoProps); if (staticProps) SogouBot_defineProperties(Constructor, staticProps); return Constructor; }
-
-function SogouBot_possibleConstructorReturn(self, call) { if (call && (SogouBot_typeof(call) === "object" || typeof call === "function")) { return call; } return SogouBot_assertThisInitialized(self); }
-
-function SogouBot_getPrototypeOf(o) { SogouBot_getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return SogouBot_getPrototypeOf(o); }
-
-function SogouBot_assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function SogouBot_inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) SogouBot_setPrototypeOf(subClass, superClass); }
-
-function SogouBot_setPrototypeOf(o, p) { SogouBot_setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return SogouBot_setPrototypeOf(o, p); }
-
-
-
-var SogouBot =
-/*#__PURE__*/
-function (_Bot) {
-  SogouBot_inherits(SogouBot, _Bot);
-
-  function SogouBot(worker, extension) {
-    var _this;
-
-    SogouBot_classCallCheck(this, SogouBot);
-
-    _this = SogouBot_possibleConstructorReturn(this, SogouBot_getPrototypeOf(SogouBot).call(this, worker, extension));
-    _this.onStart = _this.onStart.bind(SogouBot_assertThisInitialized(_this));
-
-    if (_this.debug) {// use the defaults for debug in Bot
+    if (p) {
+      return Math.floor(parseInt(p) / 10) + 1;
     } else {
-      _this.result_text_pages = 5;
-      _this.result_videos_pages = 5;
-      _this.scroll_images_reloads = 6;
-    }
-
-    return _this;
-  }
-  /**
-   * [start the tracker]
-   * @return {[type]} [description]
-   */
-
-
-  SogouBot_createClass(SogouBot, [{
-    key: "start",
-    value: function start() {
-      var _this2 = this;
-
-      if (this.debug) console.log('SogouBot -> start()');
-      this.onStart(function (delay) {
-        _this2.eventEmitter.emit(_this2.EVENT_NAMES.start, delay, false);
-
-        _this2.navigate();
-      });
-    }
-  }, {
-    key: "set_text_results_animation",
-    value: function set_text_results_animation(callback_end) {
-      setTimeout(function () {
-        var _this3 = this;
-
-        this.scroll_down().then(function (value) {
-          return _this3.timed_scroll_down(2000).then(function (value) {
-            return (// the callback needs to be bind again, so that it finds
-              // the methods of the object
-              callback_end.bind(_this3)().then(function (value) {
-                return _this3.set_navigate_timeout();
-              })
-            );
-          });
-        });
-      }.bind(this), this.initial_scroll_delay);
-    }
-  }, {
-    key: "set_videos_results_animation",
-    value: function set_videos_results_animation(callback_end) {
-      setTimeout(function () {
-        var _this4 = this;
-
-        this.scroll_down().then(function (value) {
-          return (// the callback needs to be bind again, so that it finds
-            // the methods of the object
-            callback_end.bind(_this4)().then(function (value) {
-              return _this4.set_navigate_timeout();
-            })
-          );
-        });
-      }.bind(this), this.initial_scroll_delay);
-    }
-  }, {
-    key: "get_search_input",
-    value: function get_search_input() {
-      return document.querySelector('input#query');
-    }
-  }, {
-    key: "is_text_result_page",
-    value: function is_text_result_page() {
-      return window.location.pathname == '/web';
-    }
-  }, {
-    key: "is_images_result_page",
-    value: function is_images_result_page() {
-      return window.location.pathname == '/pics';
-    }
-  }, {
-    key: "is_videos_result_page",
-    value: function is_videos_result_page() {
-      return window.location.pathname == '/v';
-    }
-  }, {
-    key: "get_search_button",
-    value: function get_search_button() {
-      return document.querySelector('input#stb');
-    }
-  }, {
-    key: "get_images_tab",
-    value: function get_images_tab() {
-      return document.querySelector("a[href*='/pics']");
-    }
-  }, {
-    key: "get_videos_tab",
-    value: function get_videos_tab() {
-      return document.querySelector("a[href*='/v']");
-    }
-  }, {
-    key: "get_next_button",
-    value: function get_next_button() {
-      return document.querySelector('a#sogou_next');
-    }
-  }, {
-    key: "get_next_button_videos",
-    value: function get_next_button_videos() {
-      // HACK: change the URL
-      var _url = new URL(location.href);
-
-      _url.searchParams.set('vpage', this.get_videos_result_page() + 1);
-
-      history.pushState('', '', _url.search);
-      return document.querySelector('a.btn_pg.btn_nxt');
-    }
-  }, {
-    key: "get_text_result_page",
-    value: function get_text_result_page() {
-      var _start = this.find_get_parameter('page');
-
-      if (_start) {
-        return parseInt(_start);
-      } else {
-        return 1;
-      }
-    }
-  }, {
-    key: "get_images_result_page",
-    value: function get_images_result_page() {
-      this.images_results_counter += 1;
-      return this.images_results_counter;
-    }
-  }, {
-    key: "get_videos_result_page",
-    value: function get_videos_result_page() {
-      var _start = document.querySelector('a.btn_pg.btn_pg_num.on');
-
-      if (_start) {
-        var _val = _start.getAttribute('data-num');
-
-        if (_val) {
-          return parseInt(_val);
-        }
-      }
-
-      console.warn('data-num not found');
       return 1;
     }
-    /**
-     * [onStart on start event]
-     * @param  {Function} fn
-     */
+  }
 
-  }, {
-    key: "onStart",
-    value: function onStart(fn) {
-      var _this5 = this;
+  get_news_result_page() {
+    let p = this.find_get_parameter('pn');
 
-      if (this.debug) console.log('SogouBot -> onStart()');
-      setTimeout(function () {
-        if (_this5.debug) console.log('Sogou START!!!!');
-        fn(1000);
-      }, 500);
+    if (p) {
+      return Math.floor(parseInt(p) / 10) + 1;
+    } else {
+      return 1;
     }
-  }]);
+  }
 
-  return SogouBot;
-}(Bot_Bot); //class
+  get_images_result_page() {
+    console.log("\n\n");
+    console.log(this.images_results_counter);
+    console.log("\n\n");
+    this.images_results_counter += 1;
+    return this.images_results_counter;
+  }
+
+  get_videos_result_page() {
+    console.log("\n\n");
+    console.log(this.videos_results_counter);
+    console.log("\n\n");
+    this.videos_results_counter += 1;
+    return this.videos_results_counter;
+  }
+  /**
+   * [onStart on start event]
+   * @param  {Function} fn
+   */
 
 
+  onStart(fn) {
+    if (this.debug) console.log('BaiduBot -> onStart()');
+    setTimeout(() => {
+      if (this.debug) console.log('Baidu START!!!!');
+      fn(1500);
+    }, 1000);
+  }
 
+} //class
+// CONCATENATED MODULE: ./src/content/bot/SoBot.js
+
+class SoBot_SoBot extends Bot_Bot {
+  constructor(worker, extension) {
+    super(worker, extension);
+    this.onStart = this.onStart.bind(this);
+
+    if (this.debug) {// use the defaults for debug in Bot
+    } else {
+      this.result_text_pages = 5;
+      this.result_videos_pages = 5;
+      this.scroll_images_reloads = 10;
+    }
+
+    this.initial_scroll_delay = 2000;
+    this.sub_scroll_down_delay = 1000;
+  }
+  /**
+   * [start the tracker]
+   * @return {[type]} [description]
+   */
+
+
+  start() {
+    if (this.debug) console.log('SoBot -> start()');
+    this.onStart(delay => {
+      this.eventEmitter.emit(this.EVENT_NAMES.start, delay, false);
+      this.navigate();
+    });
+  }
+
+  set_videos_results_animation(callback_end) {
+    setTimeout(function () {
+      this.scroll_down().then(value => this.timed_scroll_down(500).then(value => // the callback needs to be bind again, so that it finds
+      // the methods of the object
+      callback_end.bind(this)()));
+    }.bind(this), this.initial_scroll_delay);
+  }
+
+  set_text_results_animation(callback_end) {
+    setTimeout(function () {
+      this.scroll_down().then(value => // the callback needs to be bind again, so that it finds
+      // the methods of the object
+      callback_end.bind(this)().then(value => this.set_navigate_timeout()));
+    }.bind(this), this.initial_scroll_delay);
+  }
+
+  get_search_input() {
+    return document.querySelector('input#input');
+  }
+
+  is_text_result_page() {
+    return window.location.pathname == '/s';
+  }
+
+  is_images_result_page() {
+    if (window.location.pathname == '/i') {
+      this.sub_scroll_waiting_for_more = 3000;
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  is_videos_result_page() {
+    return window.location.pathname == '/v';
+  }
+
+  get_search_button() {
+    return document.querySelector('input#search-button');
+  }
+
+  get_images_tab() {
+    return document.querySelector("div#tabs-wrap a[href*='/i']");
+  }
+
+  get_videos_tab() {
+    return document.querySelector("div.sitenav a[href*='/v']");
+  }
+
+  get_next_button() {
+    return document.querySelector('a#snext');
+  }
+
+  get_next_button_videos() {
+    return document.querySelector("a.js-next");
+  }
+
+  get_text_result_page() {
+    let _start = this.find_get_parameter('pn');
+
+    if (_start) {
+      return parseInt(_start);
+    } else {
+      return 1;
+    }
+  }
+
+  get_images_result_page() {
+    this.images_results_counter += 1;
+    console.log('\n\n', this.images_results_counter, '\n\n');
+    return this.images_results_counter;
+  }
+
+  get_videos_result_page() {
+    let _start = this.find_get_parameter('pageno');
+
+    if (_start) {
+      return parseInt(_start);
+    } else {
+      return 1;
+    }
+  }
+  /**
+   * [onStart on start event]
+   * @param  {Function} fn
+   */
+
+
+  onStart(fn) {
+    if (this.debug) console.log('SoBot -> onStart()');
+    setTimeout(() => {
+      if (this.debug) console.log('So START!!!!');
+      fn(1000);
+    }, 500);
+  }
+
+} //class
+// CONCATENATED MODULE: ./src/content/bot/SogouBot.js
+
+class SogouBot_SogouBot extends Bot_Bot {
+  constructor(worker, extension) {
+    super(worker, extension);
+    this.onStart = this.onStart.bind(this);
+
+    if (this.debug) {// use the defaults for debug in Bot
+    } else {
+      this.result_text_pages = 5;
+      this.result_videos_pages = 5;
+      this.scroll_images_reloads = 6;
+    }
+  }
+  /**
+   * [start the tracker]
+   * @return {[type]} [description]
+   */
+
+
+  start() {
+    if (this.debug) console.log('SogouBot -> start()');
+    this.onStart(delay => {
+      this.eventEmitter.emit(this.EVENT_NAMES.start, delay, false);
+      this.navigate();
+    });
+  }
+
+  set_text_results_animation(callback_end) {
+    setTimeout(function () {
+      this.scroll_down().then(value => this.timed_scroll_down(2000).then(value => // the callback needs to be bind again, so that it finds
+      // the methods of the object
+      callback_end.bind(this)().then(value => this.set_navigate_timeout())));
+    }.bind(this), this.initial_scroll_delay);
+  }
+
+  set_videos_results_animation(callback_end) {
+    setTimeout(function () {
+      this.scroll_down().then(value => // the callback needs to be bind again, so that it finds
+      // the methods of the object
+      callback_end.bind(this)().then(value => this.set_navigate_timeout()));
+    }.bind(this), this.initial_scroll_delay);
+  }
+
+  get_search_input() {
+    return document.querySelector('input#query');
+  }
+
+  is_text_result_page() {
+    return window.location.pathname == '/web';
+  }
+
+  is_images_result_page() {
+    return window.location.pathname == '/pics';
+  }
+
+  is_videos_result_page() {
+    return window.location.pathname == '/v';
+  }
+
+  get_search_button() {
+    return document.querySelector('input#stb');
+  }
+
+  get_images_tab() {
+    return document.querySelector("a[href*='/pics']");
+  }
+
+  get_videos_tab() {
+    return document.querySelector("a[href*='/v']");
+  }
+
+  get_next_button() {
+    return document.querySelector('a#sogou_next');
+  }
+
+  get_next_button_videos() {
+    // HACK: change the URL
+    let _url = new URL(location.href);
+
+    _url.searchParams.set('vpage', this.get_videos_result_page() + 1);
+
+    history.pushState('', '', _url.search);
+    return document.querySelector('a.btn_pg.btn_nxt');
+  }
+
+  get_text_result_page() {
+    let _start = this.find_get_parameter('page');
+
+    if (_start) {
+      return parseInt(_start);
+    } else {
+      return 1;
+    }
+  }
+
+  get_images_result_page() {
+    this.images_results_counter += 1;
+    return this.images_results_counter;
+  }
+
+  get_videos_result_page() {
+    let _start = document.querySelector('a.btn_pg.btn_pg_num.on');
+
+    if (_start) {
+      let _val = _start.getAttribute('data-num');
+
+      if (_val) {
+        return parseInt(_val);
+      }
+    }
+
+    console.warn('data-num not found');
+    return 1;
+  }
+  /**
+   * [onStart on start event]
+   * @param  {Function} fn
+   */
+
+
+  onStart(fn) {
+    if (this.debug) console.log('SogouBot -> onStart()');
+    setTimeout(() => {
+      if (this.debug) console.log('Sogou START!!!!');
+      fn(1000);
+    }, 500);
+  }
+
+} //class
 // CONCATENATED MODULE: ./src/content/bot/BasePageBot.js
-function BasePageBot_typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { BasePageBot_typeof = function _typeof(obj) { return typeof obj; }; } else { BasePageBot_typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return BasePageBot_typeof(obj); }
 
-function BasePageBot_asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
-
-function BasePageBot_asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { BasePageBot_asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { BasePageBot_asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
-
-function BasePageBot_classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function BasePageBot_defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function BasePageBot_createClass(Constructor, protoProps, staticProps) { if (protoProps) BasePageBot_defineProperties(Constructor.prototype, protoProps); if (staticProps) BasePageBot_defineProperties(Constructor, staticProps); return Constructor; }
-
-function BasePageBot_possibleConstructorReturn(self, call) { if (call && (BasePageBot_typeof(call) === "object" || typeof call === "function")) { return call; } return BasePageBot_assertThisInitialized(self); }
-
-function BasePageBot_getPrototypeOf(o) { BasePageBot_getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return BasePageBot_getPrototypeOf(o); }
-
-function BasePageBot_assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function BasePageBot_inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) BasePageBot_setPrototypeOf(subClass, superClass); }
-
-function BasePageBot_setPrototypeOf(o, p) { BasePageBot_setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return BasePageBot_setPrototypeOf(o, p); }
-
-
-
-var BasePageBot =
-/*#__PURE__*/
-function (_Bot) {
-  BasePageBot_inherits(BasePageBot, _Bot);
-
-  function BasePageBot(worker, extension) {
-    var _this;
-
-    BasePageBot_classCallCheck(this, BasePageBot);
-
-    _this = BasePageBot_possibleConstructorReturn(this, BasePageBot_getPrototypeOf(BasePageBot).call(this, worker, extension));
-    _this.onStart = _this.onStart.bind(BasePageBot_assertThisInitialized(_this));
-    return _this;
+class BasePageBot_BasePageBot extends Bot_Bot {
+  constructor(worker, extension) {
+    super(worker, extension);
+    this.onStart = this.onStart.bind(this);
   }
   /**
    * [start the tracker]
@@ -13478,121 +12127,50 @@ function (_Bot) {
    */
 
 
-  BasePageBot_createClass(BasePageBot, [{
-    key: "start",
-    value: function start() {
-      var _this2 = this;
+  start() {
+    if (this.debug) console.log('BasePageBot -> start()');
+    this.onStart(delay => {
+      this.eventEmitter.emit(this.EVENT_NAMES.start, delay, false);
+      this.navigate();
+    });
+  }
 
-      if (this.debug) console.log('BasePageBot -> start()');
-      this.onStart(function (delay) {
-        _this2.eventEmitter.emit(_this2.EVENT_NAMES.start, delay, false);
+  async navigate() {
+    console.log('navigate', location.href);
+    this.set_go_to_next_engine();
+  }
 
-        _this2.navigate();
-      });
-    }
-  }, {
-    key: "navigate",
-    value: function () {
-      var _navigate = BasePageBot_asyncToGenerator(
-      /*#__PURE__*/
-      regeneratorRuntime.mark(function _callee() {
-        return regeneratorRuntime.wrap(function _callee$(_context) {
-          while (1) {
-            switch (_context.prev = _context.next) {
-              case 0:
-                console.log('navigate', location.href);
-                this.set_go_to_next_engine();
+  set_go_to_next_engine() {
+    this.clear_browser().then(value => this.go_to_next_engine());
+  }
 
-              case 2:
-              case "end":
-                return _context.stop();
-            }
-          }
-        }, _callee, this);
-      }));
-
-      return function navigate() {
-        return _navigate.apply(this, arguments);
-      };
-    }()
-  }, {
-    key: "set_go_to_next_engine",
-    value: function set_go_to_next_engine() {
-      var _this3 = this;
-
-      this.clear_browser().then(function (value) {
-        return _this3.go_to_next_engine();
-      });
-    }
-  }, {
-    key: "go_to_next_engine",
-    value: function go_to_next_engine() {
-      console.log('Go to next engine');
-      setTimeout(function () {
-        this.extension.go_to_next_engine(); // give enough time to complete the process
-      }.bind(this), 5000);
-    }
-    /**
-     * [onStart on start event]
-     * @param  {Function} fn
-     */
-
-  }, {
-    key: "onStart",
-    value: function onStart(fn) {
-      var _this4 = this;
-
-      if (this.debug) console.log('BasePageBot -> onStart()');
-      setTimeout(function () {
-        if (_this4.debug) console.log('BasePage START!!!!');
-        fn(1000);
-      }, 500);
-    }
-  }]);
-
-  return BasePageBot;
-}(Bot_Bot); //class
+  go_to_next_engine() {
+    console.log('Go to next engine');
+    setTimeout(function () {
+      this.extension.go_to_next_engine(); // give enough time to complete the process
+    }.bind(this), 5000);
+  }
+  /**
+   * [onStart on start event]
+   * @param  {Function} fn
+   */
 
 
+  onStart(fn) {
+    if (this.debug) console.log('BasePageBot -> onStart()');
+    setTimeout(() => {
+      if (this.debug) console.log('BasePage START!!!!');
+      fn(1000);
+    }, 500);
+  }
 
+} //class
 // CONCATENATED MODULE: ./src/content/bot/CaptchaBot.js
-function CaptchaBot_typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { CaptchaBot_typeof = function _typeof(obj) { return typeof obj; }; } else { CaptchaBot_typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return CaptchaBot_typeof(obj); }
 
-function CaptchaBot_asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
-
-function CaptchaBot_asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { CaptchaBot_asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { CaptchaBot_asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
-
-function CaptchaBot_classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function CaptchaBot_defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function CaptchaBot_createClass(Constructor, protoProps, staticProps) { if (protoProps) CaptchaBot_defineProperties(Constructor.prototype, protoProps); if (staticProps) CaptchaBot_defineProperties(Constructor, staticProps); return Constructor; }
-
-function CaptchaBot_possibleConstructorReturn(self, call) { if (call && (CaptchaBot_typeof(call) === "object" || typeof call === "function")) { return call; } return CaptchaBot_assertThisInitialized(self); }
-
-function CaptchaBot_getPrototypeOf(o) { CaptchaBot_getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return CaptchaBot_getPrototypeOf(o); }
-
-function CaptchaBot_assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function CaptchaBot_inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) CaptchaBot_setPrototypeOf(subClass, superClass); }
-
-function CaptchaBot_setPrototypeOf(o, p) { CaptchaBot_setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return CaptchaBot_setPrototypeOf(o, p); }
-
-
-
-var CaptchaBot =
-/*#__PURE__*/
-function (_Bot) {
-  CaptchaBot_inherits(CaptchaBot, _Bot);
-
-  function CaptchaBot(worker, extension) {
-    var _this;
-
-    CaptchaBot_classCallCheck(this, CaptchaBot);
-
-    _this = CaptchaBot_possibleConstructorReturn(this, CaptchaBot_getPrototypeOf(CaptchaBot).call(this, worker, extension));
-    _this.onStart = _this.onStart.bind(CaptchaBot_assertThisInitialized(_this));
-    return _this;
+class CaptchaBot_CaptchaBot extends Bot_Bot {
+  constructor(worker, extension) {
+    super(worker, extension);
+    this.onStart = this.onStart.bind(this);
   }
   /**
    * [start the tracker]
@@ -13600,107 +12178,42 @@ function (_Bot) {
    */
 
 
-  CaptchaBot_createClass(CaptchaBot, [{
-    key: "start",
-    value: function start() {
-      var _this2 = this;
+  start() {
+    if (this.debug) console.log('CaptchaBot -> start()');
+    this.onStart(delay => {
+      this.eventEmitter.emit(this.EVENT_NAMES.start, delay, false);
+      this.navigate();
+    });
+  }
 
-      if (this.debug) console.log('CaptchaBot -> start()');
-      this.onStart(function (delay) {
-        _this2.eventEmitter.emit(_this2.EVENT_NAMES.start, delay, false);
-
-        _this2.navigate();
-      });
-    }
-  }, {
-    key: "navigate",
-    value: function () {
-      var _navigate = CaptchaBot_asyncToGenerator(
-      /*#__PURE__*/
-      regeneratorRuntime.mark(function _callee() {
-        return regeneratorRuntime.wrap(function _callee$(_context) {
-          while (1) {
-            switch (_context.prev = _context.next) {
-              case 0:
-                console.log('navigate', location.href);
-                console.log('Go to base page:', new Date());
-                setTimeout(function () {
-                  this.extension.go_to_base_page();
-                }.bind(this), 60000);
-
-              case 3:
-              case "end":
-                return _context.stop();
-            }
-          }
-        }, _callee, this);
-      }));
-
-      return function navigate() {
-        return _navigate.apply(this, arguments);
-      };
-    }()
-    /**
-     * [onStart on start event]
-     * @param  {Function} fn
-     */
-
-  }, {
-    key: "onStart",
-    value: function onStart(fn) {
-      var _this3 = this;
-
-      if (this.debug) console.log('CaptchaBot -> onStart()');
-      setTimeout(function () {
-        if (_this3.debug) console.log('Captcha START!!!!');
-        fn(1000);
-      }, 500);
-    }
-  }]);
-
-  return CaptchaBot;
-}(Bot_Bot); //class
+  async navigate() {
+    console.log('navigate', location.href);
+    console.log('Go to base page:', new Date());
+    setTimeout(function () {
+      this.extension.go_to_base_page();
+    }.bind(this), 60000);
+  }
+  /**
+   * [onStart on start event]
+   * @param  {Function} fn
+   */
 
 
+  onStart(fn) {
+    if (this.debug) console.log('CaptchaBot -> onStart()');
+    setTimeout(() => {
+      if (this.debug) console.log('Captcha START!!!!');
+      fn(1000);
+    }, 500);
+  }
 
+} //class
 // CONCATENATED MODULE: ./src/content/bot/YandexCaptchaBot.js
-function YandexCaptchaBot_typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { YandexCaptchaBot_typeof = function _typeof(obj) { return typeof obj; }; } else { YandexCaptchaBot_typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return YandexCaptchaBot_typeof(obj); }
 
-function YandexCaptchaBot_asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
-
-function YandexCaptchaBot_asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { YandexCaptchaBot_asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { YandexCaptchaBot_asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
-
-function YandexCaptchaBot_classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function YandexCaptchaBot_defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function YandexCaptchaBot_createClass(Constructor, protoProps, staticProps) { if (protoProps) YandexCaptchaBot_defineProperties(Constructor.prototype, protoProps); if (staticProps) YandexCaptchaBot_defineProperties(Constructor, staticProps); return Constructor; }
-
-function YandexCaptchaBot_possibleConstructorReturn(self, call) { if (call && (YandexCaptchaBot_typeof(call) === "object" || typeof call === "function")) { return call; } return YandexCaptchaBot_assertThisInitialized(self); }
-
-function YandexCaptchaBot_getPrototypeOf(o) { YandexCaptchaBot_getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return YandexCaptchaBot_getPrototypeOf(o); }
-
-function YandexCaptchaBot_assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function YandexCaptchaBot_inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) YandexCaptchaBot_setPrototypeOf(subClass, superClass); }
-
-function YandexCaptchaBot_setPrototypeOf(o, p) { YandexCaptchaBot_setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return YandexCaptchaBot_setPrototypeOf(o, p); }
-
-
-
-var YandexCaptchaBot =
-/*#__PURE__*/
-function (_Bot) {
-  YandexCaptchaBot_inherits(YandexCaptchaBot, _Bot);
-
-  function YandexCaptchaBot(worker, extension) {
-    var _this;
-
-    YandexCaptchaBot_classCallCheck(this, YandexCaptchaBot);
-
-    _this = YandexCaptchaBot_possibleConstructorReturn(this, YandexCaptchaBot_getPrototypeOf(YandexCaptchaBot).call(this, worker, extension));
-    _this.onStart = _this.onStart.bind(YandexCaptchaBot_assertThisInitialized(_this));
-    return _this;
+class YandexCaptchaBot_YandexCaptchaBot extends Bot_Bot {
+  constructor(worker, extension) {
+    super(worker, extension);
+    this.onStart = this.onStart.bind(this);
   }
   /**
    * [start the tracker]
@@ -13708,111 +12221,44 @@ function (_Bot) {
    */
 
 
-  YandexCaptchaBot_createClass(YandexCaptchaBot, [{
-    key: "start",
-    value: function start() {
-      var _this2 = this;
+  start() {
+    if (this.debug) console.log('YandexCaptchaBot -> start()');
+    this.onStart(delay => {
+      this.eventEmitter.emit(this.EVENT_NAMES.start, delay, false);
+      this.navigate();
+    });
+  }
 
-      if (this.debug) console.log('YandexCaptchaBot -> start()');
-      this.onStart(function (delay) {
-        _this2.eventEmitter.emit(_this2.EVENT_NAMES.start, delay, false);
+  async navigate() {
+    console.log('navigate', location.href);
+    console.log('Go to Yandex Base page:', new Date());
+    await this.extension.set_iter_step('yandex_captcha');
+    setTimeout(async function () {
+      let iter = await this.extension.get_iter_step('yandex_captcha');
 
-        _this2.navigate();
-      });
-    }
-  }, {
-    key: "navigate",
-    value: function () {
-      var _navigate = YandexCaptchaBot_asyncToGenerator(
-      /*#__PURE__*/
-      regeneratorRuntime.mark(function _callee2() {
-        return regeneratorRuntime.wrap(function _callee2$(_context2) {
-          while (1) {
-            switch (_context2.prev = _context2.next) {
-              case 0:
-                console.log('navigate', location.href);
-                console.log('Go to Yandex Base page:', new Date());
-                _context2.next = 4;
-                return this.extension.set_iter_step('yandex_captcha');
-
-              case 4:
-                setTimeout(
-                /*#__PURE__*/
-                YandexCaptchaBot_asyncToGenerator(
-                /*#__PURE__*/
-                regeneratorRuntime.mark(function _callee() {
-                  var iter;
-                  return regeneratorRuntime.wrap(function _callee$(_context) {
-                    while (1) {
-                      switch (_context.prev = _context.next) {
-                        case 0:
-                          _context.next = 2;
-                          return this.extension.get_iter_step('yandex_captcha');
-
-                        case 2:
-                          iter = _context.sent;
-
-                          if (iter < this.step_attempts) {
-                            this.extension.resume_search_from('/images/search?text=');
-                          } else {
-                            this.extension.go_to_base_page();
-                          }
-
-                        case 4:
-                        case "end":
-                          return _context.stop();
-                      }
-                    }
-                  }, _callee, this);
-                })).bind(this), 60000);
-
-              case 5:
-              case "end":
-                return _context2.stop();
-            }
-          }
-        }, _callee2, this);
-      }));
-
-      return function navigate() {
-        return _navigate.apply(this, arguments);
-      };
-    }()
-    /**
-     * [onStart on start event]
-     * @param  {Function} fn
-     */
-
-  }, {
-    key: "onStart",
-    value: function onStart(fn) {
-      var _this3 = this;
-
-      if (this.debug) console.log('YandexCaptchaBot -> onStart()');
-      setTimeout(function () {
-        if (_this3.debug) console.log('YandexCaptcha START!!!!');
-        fn(1000);
-      }, 500);
-    }
-  }]);
-
-  return YandexCaptchaBot;
-}(Bot_Bot); //class
+      if (iter < this.step_attempts) {
+        this.extension.resume_search_from('/images/search?text=');
+      } else {
+        this.extension.go_to_base_page();
+      }
+    }.bind(this), 60000);
+  }
+  /**
+   * [onStart on start event]
+   * @param  {Function} fn
+   */
 
 
+  onStart(fn) {
+    if (this.debug) console.log('YandexCaptchaBot -> onStart()');
+    setTimeout(() => {
+      if (this.debug) console.log('YandexCaptcha START!!!!');
+      fn(1000);
+    }, 500);
+  }
 
+} //class
 // CONCATENATED MODULE: ./src/content/ContentHandler.js
-function ContentHandler_typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { ContentHandler_typeof = function _typeof(obj) { return typeof obj; }; } else { ContentHandler_typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return ContentHandler_typeof(obj); }
-
-function ContentHandler_asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
-
-function ContentHandler_asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { ContentHandler_asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { ContentHandler_asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
-
-function ContentHandler_classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function ContentHandler_defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function ContentHandler_createClass(Constructor, protoProps, staticProps) { if (protoProps) ContentHandler_defineProperties(Constructor.prototype, protoProps); if (staticProps) ContentHandler_defineProperties(Constructor, staticProps); return Constructor; }
 
 
 
@@ -13827,17 +12273,11 @@ function ContentHandler_createClass(Constructor, protoProps, staticProps) { if (
 
 
 
-
-
-var ContentHandler_ContentHandler =
-/*#__PURE__*/
-function () {
+class ContentHandler_ContentHandler {
   /**
    * [constructor]
    */
-  function ContentHandler() {
-    ContentHandler_classCallCheck(this, ContentHandler);
-
+  constructor() {
     this.isListeningToBackend = false;
     this.browser = window.hasOwnProperty('chrome') ? chrome : browser;
     this.debug = false;
@@ -13850,430 +12290,330 @@ function () {
    */
 
 
-  ContentHandler_createClass(ContentHandler, [{
-    key: "_getBot",
-    value: function _getBot() {
-      console.log(this.settings);
-      console.log(new URL(this.settings['dummy_server']).hostname);
-      console.log(new URL(this.settings['server']).hostname);
-      var hostname_parts = window.location.hostname.split('.');
-      var locationstr = window.location.toString();
+  _getBot() {
+    console.log(this.settings);
+    console.log(new URL(this.settings['dummy_server']).hostname);
+    console.log(new URL(this.settings['server']).hostname);
+    let hostname_parts = window.location.hostname.split('.');
+    let locationstr = window.location.toString();
 
-      if (hostname_parts.length > 1) {
-        var str = hostname_parts[hostname_parts.length - 2];
+    if (hostname_parts.length > 1) {
+      let str = hostname_parts[hostname_parts.length - 2];
 
-        if (locationstr.includes('captcha')) {
-          if (str == 'yandex') {
-            if (this.debug) console.log('YandexCaptchaBot');
-            return YandexCaptchaBot;
-          } else {
-            return CaptchaBot;
-          }
-        }
-
-        if (str == 'google') {
-          console.log('google'); // check second level domain for google
-
-          if (hostname_parts.length > 2) {
-            str = hostname_parts[hostname_parts.length - 3];
-
-            if (str == 'consent') {
-              if (this.debug) console.log('GoogleConsentBot');
-              return GoogleConsentBot_GoogleBot;
-            } else if (str == 'scholar') {
-              //if (this.debug) console.log('YandexBot');
-              //return YandexBot;
-              return null;
-            }
-          } // otherwise default to google
-
-
-          if (this.debug) console.log('GoogleBot');
-          return GoogleBot;
-        } else if (str == 'duckduckgo') {
-          if (this.debug) console.log('DuckDuckGoBot');
-          return DuckDuckGoBot;
-        } else if (str == 'yandex') {
-          if (this.debug) console.log('YandexBot');
-          return YandexBot;
-        } else if (str == 'bing') {
-          if (this.debug) console.log('BingBot');
-          return BingBot;
-        } else if (str == 'yahoo') {
-          // check second level domain for yahoo
-          if (hostname_parts.length > 2) {
-            str = hostname_parts[hostname_parts.length - 3];
-
-            if (str == 'consent') {
-              if (this.debug) console.log('YahooConsentBot');
-              return YahooBot;
-            }
-          }
-
-          if (this.debug) console.log('YahooBot');
-          return YahooBot_YahooBot;
-        } else if (str == 'baidu') {
-          if (this.debug) console.log('BaiduBot');
-          return BaiduBot;
-        } else if (str == 'so' || str == '360kan') {
-          if (this.debug) console.log('SoBot');
-          return SoBot;
-        } else if (str == 'sogou') {
-          if (this.debug) console.log('SogouBot');
-          return SogouBot;
-        } else if (this._clean_www(window.location.hostname) == new URL(this.settings['server']).hostname) {
-          if (this.debug) console.log('BasePageBot');
-          return BasePageBot;
-        }
-      }
-
-      if (this._clean_www(window.location.hostname) == new URL(this.settings['dummy_server']).hostname) {
-        if (this.debug) console.log('BasePageBot');
-        return BasePageBot;
-      }
-
-      if (this.debug) console.log('Bot');
-      return null;
-    }
-    /**
-     * [get parameter from background]
-     * @return {Promise<object>}
-     */
-
-  }, {
-    key: "_getParam",
-    value: function _getParam() {
-      var _this = this;
-
-      return new Promise(function (resolve, reject) {
-        if (_this.debug) console.log('sendMessage("on_start")');
-
-        _this.browser.runtime.sendMessage('on_start', function (response) {
-          if (_this.browser.runtime.lastError) {
-            /*ignore when the background is not listening*/
-            ;
-          }
-
-          _this.settings = response;
-          resolve(response);
-        });
-      });
-    }
-  }, {
-    key: "get_engine_url",
-    value: function get_engine_url() {
-      return location.protocol + '//' + location.hostname;
-    }
-  }, {
-    key: "steady",
-    value: function steady() {
-      var _this2 = this;
-
-      return new Promise(function (resolve, reject) {
-        if (_this2.debug) console.log('sendMessage("steady")');
-        console.log(_this2.get_engine_url());
-
-        _this2.browser.runtime.sendMessage({
-          'steady': true,
-          'engine': _this2.get_engine_url()
-        }, function (response) {
-          if (_this2.browser.runtime.lastError) {
-            /*ignore when the background is not listening*/
-            ; // console.log(this.browser.runtime.lastError);
-          }
-
-          resolve(response);
-        });
-      });
-    }
-  }, {
-    key: "clear_browser",
-    value: function clear_browser() {
-      var _this3 = this;
-
-      return new Promise(function (resolve, reject) {
-        if (_this3.debug) console.log('sendMessage("clear_browser")');
-
-        _this3.browser.runtime.sendMessage({
-          'clear_browser': true
-        }, function (response) {
-          if (_this3.browser.runtime.lastError) {
-            /*ignore when the background is not listening*/
-            ; // console.log(this.browser.runtime.lastError);
-          }
-
-          resolve(response);
-        });
-      });
-    }
-  }, {
-    key: "set_iter_step",
-    value: function set_iter_step(step) {
-      var _this4 = this;
-
-      return new Promise(function (resolve, reject) {
-        if (_this4.debug) console.log('sendMessage("set_iter_step")');
-
-        _this4.browser.runtime.sendMessage({
-          'set_iter_step': true,
-          'step': step
-        }, function (response) {
-          if (_this4.browser.runtime.lastError) {
-            /*ignore when the background is not listening*/
-            ; // console.log(this.browser.runtime.lastError);
-          }
-
-          resolve(response['iterator']);
-        });
-      });
-    }
-  }, {
-    key: "get_iter_step",
-    value: function get_iter_step(step) {
-      var _this5 = this;
-
-      return new Promise(function (resolve, reject) {
-        if (_this5.debug) console.log('sendMessage("get_iter_step")');
-
-        _this5.browser.runtime.sendMessage({
-          'get_iter_step': true,
-          'step': step
-        }, function (response) {
-          if (_this5.browser.runtime.lastError) {
-            /*ignore when the background is not listening*/
-            ; // console.log(this.browser.runtime.lastError);
-          }
-
-          resolve(response['iterator']);
-        });
-      });
-    }
-  }, {
-    key: "go_to_base_page",
-    value: function go_to_base_page() {
-      var _this6 = this;
-
-      return new Promise(function (resolve, reject) {
-        if (_this6.debug) console.log('sendMessage("get_base_page")');
-
-        _this6.browser.runtime.sendMessage({
-          'get_base_page': true
-        }, function (response) {
-          if (_this6.browser.runtime.lastError) {
-            /*ignore when the background is not listening*/
-            ; // console.log(this.browser.runtime.lastError);
-          }
-
-          window.location.replace(response.base_page);
-          resolve(response);
-        });
-      });
-    }
-  }, {
-    key: "resume_search_from",
-    value: function resume_search_from(path_suffix) {
-      var _this7 = this;
-
-      return new Promise(function (resolve, reject) {
-        if (_this7.debug) console.log('sendMessage("get_base_page")');
-
-        _this7.browser.runtime.sendMessage({
-          'get_current_search': true
-        }, function (response) {
-          if (_this7.browser.runtime.lastError) {
-            /*ignore when the background is not listening*/
-            ; // console.log(this.browser.runtime.lastError);
-          }
-
-          window.location.replace(response.current_engine + path_suffix + response.current_keyword);
-          resolve(response);
-        });
-      });
-    }
-  }, {
-    key: "go_to_next_engine",
-    value: function go_to_next_engine() {
-      var _this8 = this;
-
-      return new Promise(function (resolve, reject) {
-        if (_this8.debug) console.log('sendMessage("get_next_engine")');
-
-        _this8.browser.runtime.sendMessage({
-          'get_next_engine': true
-        }, function (response) {
-          if (_this8.browser.runtime.lastError) {
-            /*ignore when the background is not listening*/
-            ; // console.log(this.browser.runtime.lastError);
-          }
-
-          window.location.replace(response.next_engine);
-          resolve(response);
-        });
-      });
-    }
-  }, {
-    key: "_clean_www",
-    value: function _clean_www(hostname) {
-      if (hostname.startsWith('www.')) {
-        return hostname.substr(4);
-      } else {
-        return hostname;
-      }
-    }
-  }, {
-    key: "onBackendMessage",
-    value: function onBackendMessage(message, sender, sendResponse) {
-      if (this.debug) console.log(message);
-
-      if (message.action == 'init') {
-        if (this.debug) console.log('onBackendMessage: init');
-
-        if (this.bot == null) {
-          this.init();
-        }
-
-        sendResponse(true);
-      } else if (message.action == 'search') {
-        if (this.debug) console.log('onBackendMessage: search');
-        var engine_hostname = new URL(message.engine).hostname;
-        /**
-        This check happens now in the backend, so it should never enter in the else part.
-        Leaving if for now, but it could be replaced by simply:
-        this.bot.search(message.keyword, message.engine);
-        **/
-
-        if (this._clean_www(location.hostname) == this._clean_www(engine_hostname) && location.pathname == '/') {
-          this.bot.search(message.keyword, message.engine);
-          sendResponse(true);
+      if (locationstr.includes('captcha')) {
+        if (str == 'yandex') {
+          if (this.debug) console.log('YandexCaptchaBot');
+          return YandexCaptchaBot_YandexCaptchaBot;
         } else {
-          console.log('not main page', this._clean_www(location.hostname), this._clean_www(engine_hostname));
-          window.location.replace(message.engine);
-          sendResponse(false);
+          return CaptchaBot_CaptchaBot;
         }
       }
-    }
-    /**
-     * [create the tracker and start the event listeners for fetching the data]
-     */
 
-  }, {
-    key: "createBot",
-    value: function createBot() {
-      var _this9 = this;
+      if (str == 'google') {
+        console.log('google'); // check second level domain for google
 
-      if (this.debug) console.log('-> createBot()');
+        if (hostname_parts.length > 2) {
+          str = hostname_parts[hostname_parts.length - 3];
 
-      var Bot = this._getBot();
-
-      if (Bot != null) {
-        this.bot = new Bot(this);
-        this.bot.eventEmitter.on('onNewURL', function () {
-          _this9.init();
-        });
-        this.bot.eventEmitter.on('onStart',
-        /*#__PURE__*/
-        function () {
-          var _ref = ContentHandler_asyncToGenerator(
-          /*#__PURE__*/
-          regeneratorRuntime.mark(function _callee(delay) {
-            return regeneratorRuntime.wrap(function _callee$(_context) {
-              while (1) {
-                switch (_context.prev = _context.next) {
-                  case 0:
-                    if (_this9.debug) console.log('onStart this.sendMessage');
-
-                  case 1:
-                  case "end":
-                    return _context.stop();
-                }
-              }
-            }, _callee);
-          }));
-
-          return function (_x) {
-            return _ref.apply(this, arguments);
-          };
-        }()); // connect to the backend
-
-        this.browser.runtime.connect({
-          name: "content_handler_connection"
-        }).onDisconnect.addListener(function (externalPort) {
-          if (this.debug) console.log(externalPort);
-
-          if (this.init_timer) {
-            clearTimeout(this.init_timer);
+          if (str == 'consent') {
+            if (this.debug) console.log('GoogleConsentBot');
+            return GoogleConsentBot_GoogleBot;
+          } else if (str == 'scholar') {
+            //if (this.debug) console.log('YandexBot');
+            //return YandexBot;
+            return null;
           }
-        }.bind(this));
-        this.bot.start();
+        } // otherwise default to google
+
+
+        if (this.debug) console.log('GoogleBot');
+        return GoogleBot_GoogleBot;
+      } else if (str == 'duckduckgo') {
+        if (this.debug) console.log('DuckDuckGoBot');
+        return DuckDuckGoBot_DuckDuckGoBot;
+      } else if (str == 'yandex') {
+        if (this.debug) console.log('YandexBot');
+        return YandexBot_YandexBot;
+      } else if (str == 'bing') {
+        if (this.debug) console.log('BingBot');
+        return BingBot_BingBot;
+      } else if (str == 'yahoo') {
+        // check second level domain for yahoo
+        if (hostname_parts.length > 2) {
+          str = hostname_parts[hostname_parts.length - 3];
+
+          if (str == 'consent') {
+            if (this.debug) console.log('YahooConsentBot');
+            return YahooConsentBot_YahooBot;
+          }
+        }
+
+        if (this.debug) console.log('YahooBot');
+        return YahooBot_YahooBot;
+      } else if (str == 'baidu') {
+        if (this.debug) console.log('BaiduBot');
+        return BaiduBot_BaiduBot;
+      } else if (str == 'so' || str == '360kan') {
+        if (this.debug) console.log('SoBot');
+        return SoBot_SoBot;
+      } else if (str == 'sogou') {
+        if (this.debug) console.log('SogouBot');
+        return SogouBot_SogouBot;
+      } else if (this._clean_www(window.location.hostname) == new URL(this.settings['server']).hostname) {
+        if (this.debug) console.log('BasePageBot');
+        return BasePageBot_BasePageBot;
       }
     }
-    /**
-     * [initalizate the contenthandler]
-     */
 
-  }, {
-    key: "init",
-    value: function () {
-      var _init = ContentHandler_asyncToGenerator(
-      /*#__PURE__*/
-      regeneratorRuntime.mark(function _callee2() {
-        var _this10 = this;
+    if (this._clean_www(window.location.hostname) == new URL(this.settings['dummy_server']).hostname) {
+      if (this.debug) console.log('BasePageBot');
+      return BasePageBot_BasePageBot;
+    }
 
-        var param;
-        return regeneratorRuntime.wrap(function _callee2$(_context2) {
-          while (1) {
-            switch (_context2.prev = _context2.next) {
-              case 0:
-                if (!this.isListeningToBackend) {
-                  this.browser.runtime.onMessage.addListener(this.onBackendMessage);
-                  this.isListeningToBackend = true;
-                }
-
-                _context2.prev = 1;
-                _context2.next = 4;
-                return this._getParam();
-
-              case 4:
-                param = _context2.sent;
-
-                if (ContentHandler_typeof(param) == 'object') {
-                  this.createBot();
-                }
-
-                _context2.next = 12;
-                break;
-
-              case 8:
-                _context2.prev = 8;
-                _context2.t0 = _context2["catch"](1);
-                this.init_timer = setTimeout(function () {
-                  return _this10.init();
-                }, 2000);
-                console.log(_context2.t0);
-
-              case 12:
-              case "end":
-                return _context2.stop();
-            }
-          }
-        }, _callee2, this, [[1, 8]]);
-      }));
-
-      return function init() {
-        return _init.apply(this, arguments);
-      };
-    }()
-  }]);
-
-  return ContentHandler;
-}(); //class
+    if (this.debug) console.log('Bot');
+    return null;
+  }
+  /**
+   * [get parameter from background]
+   * @return {Promise<object>}
+   */
 
 
+  _getParam() {
+    return new Promise((resolve, reject) => {
+      if (this.debug) console.log('sendMessage("on_start")');
+      this.browser.runtime.sendMessage('on_start', response => {
+        if (this.browser.runtime.lastError) {
+          /*ignore when the background is not listening*/
+          ;
+        }
 
+        this.settings = response;
+        resolve(response);
+      });
+    });
+  }
+
+  get_engine_url() {
+    return location.protocol + '//' + location.hostname;
+  }
+
+  steady() {
+    return new Promise((resolve, reject) => {
+      if (this.debug) console.log('sendMessage("steady")');
+      console.log(this.get_engine_url());
+      this.browser.runtime.sendMessage({
+        'steady': true,
+        'engine': this.get_engine_url()
+      }, response => {
+        if (this.browser.runtime.lastError) {
+          /*ignore when the background is not listening*/
+          ; // console.log(this.browser.runtime.lastError);
+        }
+
+        resolve(response);
+      });
+    });
+  }
+
+  clear_browser() {
+    return new Promise((resolve, reject) => {
+      if (this.debug) console.log('sendMessage("clear_browser")');
+      this.browser.runtime.sendMessage({
+        'clear_browser': true
+      }, response => {
+        if (this.browser.runtime.lastError) {
+          /*ignore when the background is not listening*/
+          ; // console.log(this.browser.runtime.lastError);
+        }
+
+        resolve(response);
+      });
+    });
+  }
+
+  set_iter_step(step) {
+    return new Promise((resolve, reject) => {
+      if (this.debug) console.log('sendMessage("set_iter_step")');
+      this.browser.runtime.sendMessage({
+        'set_iter_step': true,
+        'step': step
+      }, response => {
+        if (this.browser.runtime.lastError) {
+          /*ignore when the background is not listening*/
+          ; // console.log(this.browser.runtime.lastError);
+        }
+
+        resolve(response['iterator']);
+      });
+    });
+  }
+
+  get_iter_step(step) {
+    return new Promise((resolve, reject) => {
+      if (this.debug) console.log('sendMessage("get_iter_step")');
+      this.browser.runtime.sendMessage({
+        'get_iter_step': true,
+        'step': step
+      }, response => {
+        if (this.browser.runtime.lastError) {
+          /*ignore when the background is not listening*/
+          ; // console.log(this.browser.runtime.lastError);
+        }
+
+        resolve(response['iterator']);
+      });
+    });
+  }
+
+  go_to_base_page() {
+    return new Promise((resolve, reject) => {
+      if (this.debug) console.log('sendMessage("get_base_page")');
+      this.browser.runtime.sendMessage({
+        'get_base_page': true
+      }, response => {
+        if (this.browser.runtime.lastError) {
+          /*ignore when the background is not listening*/
+          ; // console.log(this.browser.runtime.lastError);
+        }
+
+        window.location.replace(response.base_page);
+        resolve(response);
+      });
+    });
+  }
+
+  resume_search_from(path_suffix) {
+    return new Promise((resolve, reject) => {
+      if (this.debug) console.log('sendMessage("get_base_page")');
+      this.browser.runtime.sendMessage({
+        'get_current_search': true
+      }, response => {
+        if (this.browser.runtime.lastError) {
+          /*ignore when the background is not listening*/
+          ; // console.log(this.browser.runtime.lastError);
+        }
+
+        window.location.replace(response.current_engine + path_suffix + response.current_keyword);
+        resolve(response);
+      });
+    });
+  }
+
+  go_to_next_engine() {
+    return new Promise((resolve, reject) => {
+      if (this.debug) console.log('sendMessage("get_next_engine")');
+      this.browser.runtime.sendMessage({
+        'get_next_engine': true
+      }, response => {
+        if (this.browser.runtime.lastError) {
+          /*ignore when the background is not listening*/
+          ; // console.log(this.browser.runtime.lastError);
+        }
+
+        window.location.replace(response.next_engine);
+        resolve(response);
+      });
+    });
+  }
+
+  _clean_www(hostname) {
+    if (hostname.startsWith('www.')) {
+      return hostname.substr(4);
+    } else {
+      return hostname;
+    }
+  }
+
+  onBackendMessage(message, sender, sendResponse) {
+    if (this.debug) console.log(message);
+
+    if (message.action == 'init') {
+      if (this.debug) console.log('onBackendMessage: init');
+
+      if (this.bot == null) {
+        this.init();
+      }
+
+      sendResponse(true);
+    } else if (message.action == 'search') {
+      if (this.debug) console.log('onBackendMessage: search');
+      let engine_hostname = new URL(message.engine).hostname;
+      /**
+      This check happens now in the backend, so it should never enter in the else part.
+      Leaving if for now, but it could be replaced by simply:
+      this.bot.search(message.keyword, message.engine);
+      **/
+
+      if (this._clean_www(location.hostname) == this._clean_www(engine_hostname) && location.pathname == '/') {
+        this.bot.search(message.keyword, message.engine);
+        sendResponse(true);
+      } else {
+        console.log('not main page', this._clean_www(location.hostname), this._clean_www(engine_hostname));
+        window.location.replace(message.engine);
+        sendResponse(false);
+      }
+    }
+  }
+  /**
+   * [create the tracker and start the event listeners for fetching the data]
+   */
+
+
+  createBot() {
+    if (this.debug) console.log('-> createBot()');
+
+    const Bot = this._getBot();
+
+    if (Bot != null) {
+      this.bot = new Bot(this);
+      this.bot.eventEmitter.on('onNewURL', () => {
+        this.init();
+      });
+      this.bot.eventEmitter.on('onStart', async delay => {
+        if (this.debug) console.log('onStart this.sendMessage');
+      }); // connect to the backend
+
+      this.browser.runtime.connect({
+        name: "content_handler_connection"
+      }).onDisconnect.addListener(function (externalPort) {
+        if (this.debug) console.log(externalPort);
+
+        if (this.init_timer) {
+          clearTimeout(this.init_timer);
+        }
+      }.bind(this));
+      this.bot.start();
+    }
+  }
+  /**
+   * [initalizate the contenthandler]
+   */
+
+
+  async init() {
+    if (!this.isListeningToBackend) {
+      this.browser.runtime.onMessage.addListener(this.onBackendMessage);
+      this.isListeningToBackend = true;
+    }
+
+    try {
+      let param = await this._getParam();
+
+      if (typeof param == 'object') {
+        this.createBot();
+      }
+    } catch (e) {
+      this.init_timer = setTimeout(() => this.init(), 2000);
+      console.log(e);
+    }
+  }
+
+} //class
 // CONCATENATED MODULE: ./src/content/index.js
 
 
-var content = new ContentHandler_ContentHandler();
+let content = new ContentHandler_ContentHandler();
 content.init();
 
 /***/ })

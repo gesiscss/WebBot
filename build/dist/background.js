@@ -9915,7 +9915,7 @@ class Configuration {
       }).catch(err => {
         //if (this.debug) console.log('_fetchQueryTerms: ', err);
         console.log("Failed fetching the queryterms");
-        resolve(['DUMMY']); //resolve(false);
+        resolve(['Sage Concept Grant', 'elections']); //resolve(false);
       });
     });
   }
@@ -9964,7 +9964,7 @@ class Configuration {
         //if (this.debug) console.log('_fetchEngines: ', err);
         console.log("Failed fetching the engines"); //resolve(false);
 
-        resolve(['https://google.com', 'https://baidu.com', 'https://duckduckgo.com', 'https://bing.com', 'https://yandex.com', 'https://search.yahoo.com']);
+        resolve(['https://google.com', 'https://duckduckgo.com', 'https://bing.com', 'https://yandex.com', 'https://search.yahoo.com', 'https://baidu.com']);
       });
     });
   }
@@ -10221,12 +10221,12 @@ class Extension_Extension {
     }.bind(this), next_timestamp + this.search_ticks - now.getTime());
     console.log('Next Browsing Cleaning:', new Date(next_timestamp + this.clear_browser_lapse));
     this.next_clear_browser = setTimeout(function () {
-      if (this.next_check_engine) {
-        // removing the check because the cleaning the browser should redirect
-        console.log("Removing Check Engine Event (this.next_check_engine)");
-        clearTimeout(this.next_check_engine);
-      }
-
+      // 20220529: not sure why this event would be removed
+      // if (this.next_check_engine){
+      // removing the check because the cleaning the browser should redirect
+      // console.log("Removing Check Engine Event (this.next_check_engine)");
+      // clearTimeout(this.next_check_engine);
+      // }
       this.trigger_clear_browser();
     }.bind(this), next_timestamp + this.clear_browser_lapse - now.getTime());
     console.log('Next Check Engine Event:', new Date(next_timestamp + this.check_engine_lapse));
