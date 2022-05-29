@@ -31,7 +31,7 @@ export default class Configuration {
         .catch(err => {
           //if (this.debug) console.log('_fetchQueryTerms: ', err);
           console.log("Failed fetching the queryterms");
-          resolve(['Sage Concept Grant']);
+          resolve(['Sage Concept Grant', 'elections']);
           //resolve(false);
         })
     });
