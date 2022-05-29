@@ -11759,7 +11759,7 @@ class BaiduBot_BaiduBot extends Bot_Bot {
   }
 
   get_images_tab() {
-    return document.querySelector("div.tab-wrapper a[href*='tn=baiduimage']");
+    return document.querySelector("div.s_tab_inner a[href*='tn=baiduimage']");
   }
 
   get_videos_tab() {
@@ -11794,6 +11794,7 @@ class BaiduBot_BaiduBot extends Bot_Bot {
       if (navs.length == 2) {
         return navs[1];
       } else {
+        debugger;
         return null;
       }
     } // first page
