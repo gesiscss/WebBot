@@ -85,33 +85,8 @@ export default class GoogleBot extends Bot{
   }
 
   get_consent_button(){
-    let b = document.querySelector('#zV9nZe');
-
-    // german
-    if (!b){
-      console.log('default consent button not detected, trying german')
-      b = Array.from(document.querySelectorAll('button')).find(el => el.textContent === 'Ich stimme zu');
-    }
-    // spanish
-    if (!b){
-      b = Array.from(document.querySelectorAll('button')).find(el => el.textContent === 'Acepto');
-    }
-    // english
-    if (!b){
-      b = Array.from(document.querySelectorAll('button')).find(el => el.textContent === 'I agree');
-    }
-    // French
-    if (!b){
-      b = Array.from(document.querySelectorAll('button')).find(el => el.textContent === "J'accepte");
-    }
-    // portuguese
-    if (!b){
-      b = Array.from(document.querySelectorAll('button')).find(el => el.textContent === 'Aceito');
-    }
-
-    
+    let b = document.querySelector('#L2AGLb'); // same ID is used in all languages
     return b;
-
   }
 
   is_collect_consent_page(){
