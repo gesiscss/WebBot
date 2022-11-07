@@ -3,7 +3,8 @@ const path = require("path");
 const fs = require('fs');
 const webpack = require('webpack');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const MinifyPlugin = require("babel-minify-webpack-plugin");
+const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
+const TerserPlugin = require("terser-webpack-plugin");
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const DIST_FOLDER = path.resolve('build', 'dist', 'page');
@@ -71,7 +72,6 @@ module.exports = env => {
               loader: MiniCssExtractPlugin.loader,
               options: {
                 publicPath: '../',
-                minimize: true
               }
             },
             "css-loader"
@@ -113,7 +113,10 @@ module.exports = env => {
          chunks: 'all',
          maxInitialRequests: Infinity,
          minSize: 0
-      }
+      },
+      minimizer: [
+        new CssMinimizerPlugin(),
+      ],
     }
   };
 
@@ -121,7 +124,7 @@ module.exports = env => {
   if(process.env.npm_lifecycle_script.includes('production')){
     console.log('MODE: Production', process.env.npm_lifecycle_script);
     delete options.devtool;
-    options.plugins.push(new MinifyPlugin());
+    options.plugins.push(new TerserPlugin());
   }
 
   return options;
