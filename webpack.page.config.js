@@ -35,7 +35,15 @@ module.exports = env => {
         {
           test: /\.(js|jsx)$/,
           exclude: /node_modules/,
-          use: 'babel-loader'
+          use: [
+            {
+              loader: 'babel-loader',
+              options: {
+                cacheDirectory: true,
+                presets: ["@babel/preset-env", "@babel/preset-react"],
+              }
+            }
+          ]
         },
         {
           test: /\.js$/,
@@ -46,10 +54,15 @@ module.exports = env => {
             resolvePath('node_modules/dom7'),
             resolvePath('node_modules/ssr-window')
           ],
-          loader: 'babel-loader?cacheDirectory=true',
-          options: {
-              presets: ["@babel/preset-env"]
-          }
+          use: [
+            {
+              loader: 'babel-loader',
+              options: {
+                cacheDirectory: true,
+                presets: ["@babel/preset-env", "@babel/preset-react"],
+              }
+            }
+          ]
         },
         {
   				test: /\.css$/,
