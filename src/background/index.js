@@ -3,6 +3,8 @@ import Transfer from './Transfer';
 import Configuration from './Configuration';
 import ExtensionHandler from './ExtensionHandler';
 import settings from '../lib/settings';
+//import '../lib/single-file/chrome-browser-polyfill';
+//import '../lib/single-file/single-file-background';
 
 
 

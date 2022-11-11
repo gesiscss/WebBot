@@ -491,7 +491,12 @@ clear_browser(){
         let _next_engine = this.get_next_engine();
         console.log('get_next_engine', _next_engine)
         sendResponse({'next_engine': _next_engine});
-      } 
+      } else if (msg.hasOwnProperty('download_page')){
+        const blob = new Blob([msg.content], {type: "text/html"})
+        const pageData = {url: URL.createObjectURL(blob), filename: 'webbot/' + msg.filename}
+        xbrowser.downloads.download(pageData)
+        sendResponse({});
+      }
       if (this.debug) console.log('<- _onContentMessage');
       return true;
   }

@@ -10789,6 +10789,16 @@ class Extension {
       sendResponse({
         'next_engine': _next_engine
       });
+    } else if (msg.hasOwnProperty('download_page')) {
+      const blob = new Blob([msg.content], {
+        type: "text/html"
+      });
+      const pageData = {
+        url: URL.createObjectURL(blob),
+        filename: 'webbot/' + msg.filename
+      };
+      xbrowser.downloads.download(pageData);
+      sendResponse({});
     }
     if (this.debug) console.log('<- _onContentMessage');
     return true;
@@ -10944,6 +10954,9 @@ settings.getBrowser = () => {
 
 
 
+
+//import '../lib/single-file/chrome-browser-polyfill';
+//import '../lib/single-file/single-file-background';
 
 async function load_navlists(xbrowser) {
   return {

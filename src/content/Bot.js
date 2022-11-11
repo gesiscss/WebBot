@@ -1,11 +1,18 @@
 import EventEmitter from 'eventemitter3';
 
+//import './single_file/chrome-browser-polyfill';
+//import './single_file/single-file-frames';
+//import './single_file/single-file-extension-frames';
+//import './single_file/single-file-bootstrap';
+//import './single_file/single-file-extension-core';
+import * as singlefile from '../lib/single-file/single-file';
 
 export default class Bot {
 
   constructor(extension) {
 
     this.extension = extension;
+    this.browser = window.hasOwnProperty('chrome') ? chrome : browser;
 
     this.EVENT_NAMES = {
       'data': 'onData',
@@ -59,6 +66,8 @@ export default class Bot {
     this.consent_checks = 5;
     this.step = '';
     this.step_attempts = 5;
+
+    this.download = true;
 
   }
 
@@ -386,7 +395,8 @@ export default class Bot {
   };
 
   set_videos_results_animation(callback_end){
-    setTimeout(function(){
+    setTimeout(async function(){
+      if (this.download) await this.download_page()
       this.scroll_down().then( value => 
         // the callback needs to be bind again, so that it finds
         // the methods of the object
@@ -396,7 +406,8 @@ export default class Bot {
   }
 
   set_text_results_animation(callback_end){
-    setTimeout(function(){
+    setTimeout(async function(){
+      if (this.download) await this.download_page()
       this.scroll_down().then( value => 
         // the callback needs to be bind again, so that it finds
         // the methods of the object
@@ -406,7 +417,8 @@ export default class Bot {
   }
 
   set_news_results_animation(callback_end){
-    setTimeout(function(){
+    setTimeout(async function(){
+      if (this.download) await this.download_page()
       this.scroll_down().then( value => 
         // the callback needs to be bind again, so that it finds
         // the methods of the object
@@ -711,6 +723,31 @@ export default class Bot {
           }
         }.bind(this), this.sub_scroll_down_chunk_delay);
       }.bind(this), this.sub_scroll_down_delay);
+    });
+  }
+
+  async download_page() {
+    console.log('capturing using SingleFile...');
+    const { content, title, filename } = await singlefile.getPageData({
+      removeHiddenElements: true,
+      removeUnusedStyles: true,
+      removeUnusedFonts: true,
+      removeImports: true,
+      blockScripts: true,
+      blockAudios: true,
+      blockVideos: true,
+      compressHTML: true,
+      removeAlternativeFonts: true,
+      removeAlternativeMedias: true,
+      removeAlternativeImages: true,
+      groupDuplicateImages: true,
+      filenameTemplate: "{page-title} ({date-iso} {time-locale}).html"
+    });
+    this.browser.runtime.sendMessage({'download_page': true, 'content': content, 'filename': filename}, (response) => {
+      if(this.browser.runtime.lastError) {
+        /*ignore when the background is not listening*/;
+        // console.log(this.browser.runtime.lastError);
+      }
     });
   }
 
