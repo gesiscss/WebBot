@@ -10733,7 +10733,8 @@ class Extension {
       sendResponse({
         'clear_browser_flag': this.config.settings.clear_browser,
         'dummy_server': this.config.settings.dummy_server,
-        'server': this.config.settings.server
+        'server': this.config.settings.server,
+        'download_pages': this.config.settings.download_pages
       });
     } else if (msg.hasOwnProperty('steady')) {
       console.log('engine:', this.engine);

@@ -1,10 +1,4 @@
 import EventEmitter from 'eventemitter3';
-
-//import './single_file/chrome-browser-polyfill';
-//import './single_file/single-file-frames';
-//import './single_file/single-file-extension-frames';
-//import './single_file/single-file-bootstrap';
-//import './single_file/single-file-extension-core';
 import * as singlefile from '../lib/single-file/single-file';
 
 export default class Bot {
@@ -66,8 +60,6 @@ export default class Bot {
     this.consent_checks = 5;
     this.step = '';
     this.step_attempts = 5;
-
-    this.download = true;
 
   }
 
@@ -396,7 +388,7 @@ export default class Bot {
 
   set_videos_results_animation(callback_end){
     setTimeout(async function(){
-      if (this.download) await this.download_page()
+      if (this.extension.settings['download_pages']) await this.download_page()
       this.scroll_down().then( value => 
         // the callback needs to be bind again, so that it finds
         // the methods of the object
@@ -407,7 +399,7 @@ export default class Bot {
 
   set_text_results_animation(callback_end){
     setTimeout(async function(){
-      if (this.download) await this.download_page()
+      if (this.extension.settings['download_pages']) await this.download_page()
       this.scroll_down().then( value => 
         // the callback needs to be bind again, so that it finds
         // the methods of the object
@@ -418,7 +410,7 @@ export default class Bot {
 
   set_news_results_animation(callback_end){
     setTimeout(async function(){
-      if (this.download) await this.download_page()
+      if (this.extension.settings['download_pages']) await this.download_page()
       this.scroll_down().then( value => 
         // the callback needs to be bind again, so that it finds
         // the methods of the object

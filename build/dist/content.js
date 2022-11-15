@@ -20400,12 +20400,6 @@ var single_file = __webpack_require__(3542);
 ;// CONCATENATED MODULE: ./src/content/Bot.js
 
 
-//import './single_file/chrome-browser-polyfill';
-//import './single_file/single-file-frames';
-//import './single_file/single-file-extension-frames';
-//import './single_file/single-file-bootstrap';
-//import './single_file/single-file-extension-core';
-
 class Bot {
   constructor(extension) {
     this.extension = extension;
@@ -20452,7 +20446,6 @@ class Bot {
     this.consent_checks = 5;
     this.step = '';
     this.step_attempts = 5;
-    this.download = true;
   }
 
   /**
@@ -20714,7 +20707,7 @@ class Bot {
   }
   set_videos_results_animation(callback_end) {
     setTimeout(async function () {
-      if (this.download) await this.download_page();
+      if (this.extension.settings['download_pages']) await this.download_page();
       this.scroll_down().then(value =>
       // the callback needs to be bind again, so that it finds
       // the methods of the object
@@ -20723,7 +20716,7 @@ class Bot {
   }
   set_text_results_animation(callback_end) {
     setTimeout(async function () {
-      if (this.download) await this.download_page();
+      if (this.extension.settings['download_pages']) await this.download_page();
       this.scroll_down().then(value =>
       // the callback needs to be bind again, so that it finds
       // the methods of the object
@@ -20732,7 +20725,7 @@ class Bot {
   }
   set_news_results_animation(callback_end) {
     setTimeout(async function () {
-      if (this.download) await this.download_page();
+      if (this.extension.settings['download_pages']) await this.download_page();
       this.scroll_down().then(value =>
       // the callback needs to be bind again, so that it finds
       // the methods of the object
