@@ -10802,6 +10802,9 @@ class Extension {
     return new Promise((resolve, reject) => {
       xbrowser.runtime.onMessage.addListener(this._onContentMessage);
       xbrowser.runtime.onConnect.addListener(this._onConnectPopup);
+      xbrowser.browserAction.onClicked.addListener(() => {
+        xbrowser.runtime.openOptionsPage();
+      });
       this.getAllTabsIds().then(tabIds => {
         for (let id of tabIds) {
           this.tabs[id] = new Tab();

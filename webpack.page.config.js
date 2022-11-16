@@ -105,6 +105,15 @@ module.exports = env => {
           'theme-color': '#000000'
         },
         filename: path.resolve(__dirname, 'build', 'index.html')
+      }),
+      new HtmlWebpackPlugin({
+        title: 'Options Page',
+        template: 'src/options.html',
+        meta: {
+          'viewport': 'width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui, viewport-fit=cover',
+          'theme-color': '#000000'
+        },
+        filename: path.resolve(__dirname, 'build', 'options.html')
       })
     ],
     optimization : {

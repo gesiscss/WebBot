@@ -506,6 +506,7 @@ clear_browser(){
       xbrowser.runtime.onMessage.addListener(this._onContentMessage);
       xbrowser.runtime.onConnect.addListener(this._onConnectPopup);
 
+      xbrowser.browserAction.onClicked.addListener(() => {xbrowser.runtime.openOptionsPage();});
 
       this.getAllTabsIds().then(tabIds => {
         for (let id of tabIds){
