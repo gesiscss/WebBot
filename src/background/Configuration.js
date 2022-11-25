@@ -92,7 +92,7 @@ export default class Configuration {
   }
 
   getBasePage(){
-    return this.settings.dummy_server + 'bot/nextround';
+    return '/nextround.html'
   }
 
 

@@ -477,9 +477,12 @@ clear_browser(){
         let _iterator = this.step_iterators[msg.step];
         console.log('get_iter_step', msg.step, _iterator);
         sendResponse({'iterator': _iterator});
-      } else if (msg.hasOwnProperty('get_base_page')){
+      } else if (msg.hasOwnProperty('go_to_base_page')){
         let _basepage = this.config.getBasePage();
-        console.log('get_base_page', _basepage)
+        console.log('go_to_base_page', _basepage)
+        xbrowser.tabs.update(this.search_tab_id, {
+          'url': this.config.getBasePage()
+        })
         sendResponse({'base_page': _basepage});
       } else if (msg.hasOwnProperty('get_current_search')){
         console.log('get_current_search:', this.engine, this.keyword)

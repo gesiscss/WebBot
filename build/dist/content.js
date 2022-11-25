@@ -12456,23 +12456,31 @@ class ContentHandler {
   }
   go_to_base_page() {
     return new Promise((resolve, reject) => {
-      if (this.debug) console.log('sendMessage("get_base_page")');
+      if (this.debug) console.log('sendMessage("go_to_base_page")');
       this.browser.runtime.sendMessage({
-        'get_base_page': true
+        'go_to_base_page': true
       }, response => {
         if (this.browser.runtime.lastError) {
-          /*ignore when the background is not listening*/;
+          // ignore when the background is not listening;
           // console.log(this.browser.runtime.lastError);
         }
-
-        window.location.replace(response.base_page);
         resolve(response);
       });
+
+      // alternative redirection, but with browser-specific URLs
+      // needs "nextround.html" under "web_accessible_resources" in manifest
+
+      /*if (window.hasOwnProperty('chrome')) {
+        window.location.replace('chrome-extension://'+this.browser.runtime.id+'/nextround.html');
+      } else {
+        window.location.replace('moz-extension://'+this.browser.i18n.getMessage("@@extension_id")+'/nextround.html');
+      }*/
     });
   }
+
   resume_search_from(path_suffix) {
     return new Promise((resolve, reject) => {
-      if (this.debug) console.log('sendMessage("get_base_page")');
+      if (this.debug) console.log('sendMessage("get_current_search")');
       this.browser.runtime.sendMessage({
         'get_current_search': true
       }, response => {

@@ -113,7 +113,18 @@ module.exports = env => {
           'viewport': 'width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui, viewport-fit=cover',
           'theme-color': '#000000'
         },
-        filename: path.resolve(__dirname, 'build', 'options.html')
+        filename: path.resolve(__dirname, 'build', 'options.html'),
+        chunks: []
+      }),
+      new HtmlWebpackPlugin({
+        title: 'Next Round Page',
+        template: 'src/nextround.html',
+        meta: {
+          'viewport': 'width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui, viewport-fit=cover',
+          'theme-color': '#000000'
+        },
+        filename: path.resolve(__dirname, 'build', 'nextround.html'),
+        chunks: [],
       })
     ],
     optimization : {
