@@ -106,15 +106,20 @@ export default class ContentHandler {
       } else if(str =='sogou'){
         if (this.debug) console.log('SogouBot');
         return SogouBot;
-      } else if( this._clean_www(window.location.hostname) ==(new URL(this.settings['server'])).hostname){
+      } else if (this._clean_www(window.location.hostname) ==(new URL(this.settings['server'])).hostname){
         if (this.debug) console.log('BasePageBot');
         return BasePageBot;
       }
     }
 
-    if( this._clean_www(window.location.hostname) ==(new URL(this.settings['dummy_server'])).hostname){
+    if (this._clean_www(window.location.hostname) ==(new URL(this.settings['dummy_server'])).hostname){
+      // Base Page on (micro-)server
       if (this.debug) console.log('BasePageBot');
       return BasePageBot;
+    } else if (window.location.hostname == this.browser.i18n.getMessage("@@extension_id")) {
+      // Base Page included with the extension
+      if (this.debug) console.log('BasePageBot');
+      return BasePageBot
     }
 
     if (this.debug) console.log('Bot');

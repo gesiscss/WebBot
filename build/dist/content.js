@@ -12364,6 +12364,11 @@ class ContentHandler {
       }
     }
     if (this._clean_www(window.location.hostname) == new URL(this.settings['dummy_server']).hostname) {
+      // Base Page on (micro-)server
+      if (this.debug) console.log('BasePageBot');
+      return BasePageBot;
+    } else if (window.location.hostname == this.browser.i18n.getMessage("@@extension_id")) {
+      // Base Page included with the extension
       if (this.debug) console.log('BasePageBot');
       return BasePageBot;
     }
