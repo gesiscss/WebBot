@@ -7,7 +7,7 @@
     "url": "git://github.com/gesiscss/WebBot"
   },
   "scripts": {
-    "start": "npm run live:build:small",
+    "start": "npm run live:build:big",
     "live:build:small": "nodemon --watch src --exec \"npm run start:background && npm run start:content\"",
     "live:build:big": "nodemon --watch src --exec \"npm run start:background && npm run start:content && npm run start:page\"",
     "live:build:page": "nodemon --watch src/page --exec \"npm run start:page\"",

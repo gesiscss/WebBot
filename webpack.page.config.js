@@ -99,22 +99,12 @@ module.exports = env => {
       new MiniCssExtractPlugin({ filename: 'page-style.css' }),
       new HtmlWebpackPlugin({
         title: 'Extension App',
-        template: 'src/index.html',
+        template: 'src/page/index.html',
         meta: {
           'viewport': 'width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui, viewport-fit=cover',
           'theme-color': '#000000'
         },
         filename: path.resolve(__dirname, 'build', 'index.html')
-      }),
-      new HtmlWebpackPlugin({
-        title: 'Options Page',
-        template: 'src/options.html',
-        meta: {
-          'viewport': 'width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui, viewport-fit=cover',
-          'theme-color': '#000000'
-        },
-        filename: path.resolve(__dirname, 'build', 'options.html'),
-        chunks: []
       }),
       new HtmlWebpackPlugin({
         title: 'Next Round Page',
@@ -124,10 +114,10 @@ module.exports = env => {
           'theme-color': '#000000'
         },
         filename: path.resolve(__dirname, 'build', 'nextround.html'),
-        chunks: [],
+        chunks: [], // don't automatically add any js to the base page
       })
     ],
-    optimization : {
+    optimization: {
       runtimeChunk : false,
       splitChunks: {
          chunks: 'all',
@@ -137,6 +127,11 @@ module.exports = env => {
       minimizer: [
         new CssMinimizerPlugin(),
       ],
+    },
+    performance: {
+      // ignore warnings for sizes if not minified
+      // maxAssetSize: 1000000,
+      // maxEntrypointSize: 1000000,
     }
   };
 
@@ -144,7 +139,7 @@ module.exports = env => {
   if(process.env.npm_lifecycle_script.includes('production')){
     console.log('MODE: Production', process.env.npm_lifecycle_script);
     delete options.devtool;
-    options.plugins.push(new TerserPlugin());
+    options.plugins.push(new TerserPlugin()); //enable to minify output
   }
 
   return options;

@@ -17,7 +17,7 @@
 
   "browser_action": {},
   "options_ui": {
-    "page": "options.html",
+    "page": "index.html",
     "browser_style": true
   },  
 

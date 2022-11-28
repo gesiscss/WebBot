@@ -1,0 +1,24 @@
+.box {
+    background-color: #f1f5f9;
+    border-radius: 0.3rem;
+    padding: 0.3rem;
+    margin: 0.2rem 0.2rem 0 0;
+    width: auto;
+    float: left;
+}
+table {
+    border-collapse: collapse;
+    margin: 0;
+    padding: 0;
+}
+td {
+    border-bottom: 1px #cbd5e1 dashed;
+    padding: 1rem 0 1rem 0;
+}
+.lastrow{
+    border-bottom: none;
+    min-width: 7rem
+}
+textarea, input[type=text] {
+    width: 20rem
+}

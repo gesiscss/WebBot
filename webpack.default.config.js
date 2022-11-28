@@ -3,6 +3,7 @@ const path = require("path");
 const DIST_FOLDER = path.resolve('build', 'dist');
 const DIST_DIR = path.resolve(__dirname, DIST_FOLDER);
 
+const TerserPlugin = require("terser-webpack-plugin");
 
 module.exports = env => {
   const FILENAME = env.NODE_ENV? env.NODE_ENV : 'default';
@@ -46,6 +47,7 @@ module.exports = env => {
   if(process.env.npm_lifecycle_script.includes('production')){
     console.log('MODE: Production', process.env.npm_lifecycle_script);
     delete options.devtool;
+    options.plugins.push(new TerserPlugin()); //enable to minify output
   }
 
   return options;
