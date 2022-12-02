@@ -22,3 +22,6 @@ td {
 textarea, input[type=text] {
     width: 20rem
 }
+.checklabel, input[type=checkbox] {
+    cursor: pointer;
+}

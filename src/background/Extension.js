@@ -67,16 +67,66 @@ export default class Extension {
   }
 
 
-clear_browser(){
-  console.log("-> Extension.clear_browser()");
-  this.config.clear_browser()
+  clear_browser(){
+    console.log("-> Extension.clear_browser()");
+    this.config.clear_browser()
 
-  if (this.next_clear_browser){
-    console.log("Removing Browser Event (this.next_clear_browser)");
-    clearTimeout(this.next_clear_browser);
+    if (this.next_clear_browser){
+      console.log("Removing Browser Event (this.next_clear_browser)");
+      clearTimeout(this.next_clear_browser);
+    }
   }
-}
 
+  set_settings(settings){
+    if (this.debug) {
+      console.log('before:')
+      console.log('this.keywords:', this.keywords, 'this.keyword_iterator:', this.keyword_iterator)
+      console.log('this.engines:', this.engines)
+      console.log('this.config.settings:', this.config.settings)
+      console.log('after:')
+    }
+
+    this.keywords = settings.queryTerms.split(',').map((term) => term.trim())
+    this.keyword_iterator = 0
+    console.log(this.keywords, this.keyword_iterator)
+
+    this.engines = settings.searchEngines.filter(({active}) => active).map(({url}) => url)
+    console.log(this.engines)
+    
+    if (!settings.useServer) this.config.settings.server = ''
+    else this.config.settings.server = settings.server
+
+    this.config.settings.clear_browser = settings.clearBrowser
+    this.config.settings.download = settings.download
+    this.config.settings.close_inactive_tabs = settings.closeInactiveTabs
+    this.config.settings.search_ticks_mins = settings.searchTicksMins
+    console.log(this.config.settings)
+  }
+
+  get_settings(){
+    let searchEngines = [ // augment list of search engine urls with names and activations
+      {name: 'Google', url: 'https://google.com', active: false},
+      {name: 'DuckDuckGo', url: 'https://duckduckgo.com', active: false},
+      {name: 'Bing', url: 'https://bing.com', active: false},
+      {name: 'Yandex', url: 'https://yandex.com', active: false},
+      {name: 'Yahoo', url: 'https://search.yahoo.com', active: false},
+      {name: 'Baidu', url: 'https://baidu.com', active: false}
+    ]
+    for (let i in this.engines) {
+      searchEngines = searchEngines.map(({name, url, active}) => url == this.engines[i] ? {name, url, active: true} : {name, url, active})
+    }
+
+    return {
+      queryTerms: this.keywords.join(', '),
+      searchEngines: searchEngines,
+      clearBrowser: this.config.settings.clearBrowser ? this.config.settings.clearBrowser : false,
+      download: this.config.settings.download ? this.config.settings.download : false,
+      closeInactiveTabs: this.config.settings.close_inactive_tabs ? this.config.settings.close_inactive_tabs : false,
+      searchTicksMins: this.config.settings.search_ticks_mins ? this.config.settings.search_ticks_mins : 5,
+      server: this.config.settings.server ? this.config.settings.server : '',
+      useServer: this.config.settings.server == '' ? false : true
+    }
+  }
 
   /**
    * [_onConnectedPopup listen when the extension popup is open]
@@ -464,6 +514,7 @@ clear_browser(){
       } else if (msg.hasOwnProperty('clear_browser')){
         this.clear_browser();
         sendResponse(true);
+      
       } else if (msg.hasOwnProperty('set_iter_step')){
         if (msg.step in this.step_iterators){
           this.step_iterators[msg.step] += 1;
@@ -473,10 +524,12 @@ clear_browser(){
         let _iterator = this.step_iterators[msg.step];
         console.log('set_iter_step', msg.step, _iterator);
         sendResponse({'iterator': _iterator});
+      
       } else if (msg.hasOwnProperty('get_iter_step')){
         let _iterator = this.step_iterators[msg.step];
         console.log('get_iter_step', msg.step, _iterator);
         sendResponse({'iterator': _iterator});
+      
       } else if (msg.hasOwnProperty('go_to_base_page')){
         let _basepage = this.config.getBasePage();
         console.log('go_to_base_page', _basepage)
@@ -484,17 +537,32 @@ clear_browser(){
           'url': this.config.getBasePage()
         })
         sendResponse({'base_page': _basepage});
+      
       } else if (msg.hasOwnProperty('get_current_search')){
         console.log('get_current_search:', this.engine, this.keyword)
         sendResponse({
           'current_engine': this.engine,
           'current_keyword': this.keyword
         });
+      
       } else if (msg.hasOwnProperty('get_next_engine')){
         let _next_engine = this.get_next_engine();
         console.log('get_next_engine', _next_engine)
         sendResponse({'next_engine': _next_engine});
-      } 
+      
+      } else if (msg.hasOwnProperty('update_settings')){
+        // TODO: implement the updating of the settings
+        if (!msg.hasOwnProperty('settings')) sendResponse(false)
+        else {
+          console.log('updating settings')
+          this.set_settings(msg.settings)
+          sendResponse(true)
+        }
+      } else if (msg.hasOwnProperty('get_settings')){
+        console.log('getting settings')
+        sendResponse(this.get_settings())
+      }
+
       if (this.debug) console.log('<- _onContentMessage');
       return true;
   }
