@@ -17,26 +17,24 @@ class LocalSettings extends Component {
 
   render() {
     return (
-      <table>
-        <tbody>
-          <tr>
-            <td><label>Search Engines</label></td>
-            <td>
-                {
-                  this.props.searchEngines.map(({name, active}) =>
-                    <div className="box" key={name.toLowerCase()}>
-                      <input type="checkbox" defaultChecked={active} name={name.toLowerCase()} id={name.toLowerCase()} onChange={this.handleCheckbox} />
-                      <label className="checklabel" htmlFor={name.toLowerCase()}>{name}</label>
-                    </div>)
-                }
-            </td>
-          </tr>
-          <tr>
-            <td className="lastrow"><label htmlFor="queryterms">Query Terms</label></td>
-            <td className="lastrow"><textarea id="queryterms" defaultValue={this.props.queryTerms} onChange={this.handleText} /></td>
-          </tr>
-        </tbody>
-      </table>
+      <tbody>
+        <tr>
+          <td><label>Search Engines</label></td>
+          <td>
+              {
+                this.props.searchEngines.map(({name, active}) =>
+                  <div className="box" key={name.toLowerCase()}>
+                    <input type="checkbox" defaultChecked={active} name={name.toLowerCase()} id={name.toLowerCase()} onChange={this.handleCheckbox} />
+                    <label className="checklabel" htmlFor={name.toLowerCase()}>{name}</label>
+                  </div>)
+              }
+          </td>
+        </tr>
+        <tr>
+          <td className="lastrow"><label htmlFor="queryterms">Query Terms</label></td>
+          <td className="lastrow"><textarea id="queryterms" defaultValue={this.props.queryTerms} onChange={this.handleText} /></td>
+        </tr>
+      </tbody>
     )
   }
 }

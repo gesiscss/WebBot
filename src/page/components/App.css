@@ -22,6 +22,11 @@ td {
 textarea, input[type=text] {
     width: 20rem
 }
-.checklabel, input[type=checkbox] {
+.checklabel, .radiolabel, input[type="checkbox"], input[type="radio"] {
     cursor: pointer;
+    vertical-align: middle;
+}
+
+input[type="radio"] {
+    vertical-align: top;
 }
