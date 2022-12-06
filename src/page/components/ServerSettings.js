@@ -5,12 +5,22 @@ class ServerSettings extends Component {
     super(props)
   }
 
+  handleServerChange = (e) => {
+    this.props.onServerChange({server: e.target.value})
+  }
+
   render() {
     return (
       <tbody>
         <tr>
           <td className="lastrow"><label htmlFor="server">Server</label></td>
-          <td className="lastrow"><input type="text" defaultValue={this.props.server} /></td>
+          <td className="lastrow">
+            <input
+              type="text"
+              defaultValue={this.props.server}
+              onChange={this.handleServerChange}
+              placeholder="http://example.com/"
+            /></td>
         </tr>
       </tbody>
     )

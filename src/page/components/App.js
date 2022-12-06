@@ -2,6 +2,8 @@ import React, { Component, useEffect } from 'react'
 import './App.css'
 import LocalSettings from './LocalSettings'
 import ServerSettings from './ServerSettings'
+import LocalServerSwitch from './LocalServerSwitch'
+import OptionalSettings from './OptionalSettings'
 
 class App extends Component {
   constructor() {
@@ -38,30 +40,19 @@ class App extends Component {
     });
   }
 
-  handleQueryTermsChange = (queryTerms) => {
-    this.setState({settings: {...this.state.settings, queryTerms}})
-  }
-
-  handleEngineChange = ({engineName, engineActive}) => {
-    let searchEngines = this.state.settings.searchEngines.map(
-      ({name, url, active}) =>
-        name.toLowerCase() == engineName
-          ? {name, url, active: engineActive}
-          : {name, url, active}
-    )
-    this.setState({settings: {...this.state.settings, searchEngines}})
-  }
-
-  handleServerChange = (server) => {
-    this.setState({settings: {...this.state.settings, server}})
-  }
-
-  handleConfigChange = (e) => {
-    const useServer = e.target.value == 'server' ? true : false
-    this.setState({settings: {...this.state.settings, useServer}})
+  updateSettings = (settings) => {
+    this.setState({settings: {...this.state.settings, ...settings}}) // merge the objects and reassign into state
   }
 
   handleSubmit = () => {
+    if (this.state.settings.useServer) {
+      try {new URL(this.state.settings.server)} // if a server shall be used, make sure it's a valid URL
+      catch(e) {
+        this.setState({updatingMessage: 'error'})
+        return
+      }
+    }
+    if (!this.state.settings.useServer) this.updateSettings({server: ''})
     new Promise((resolve, reject)=>{
       this.browser.runtime.sendMessage({'update_settings': true, settings: this.state.settings}, (response) => {
         if(this.browser.runtime.lastError || !response) {
@@ -84,50 +75,32 @@ class App extends Component {
   }
 
   render() {
-    const searchEngines = this.state.settings.searchEngines
-    const queryTerms = this.state.settings.queryTerms
-    const server = this.state.settings.server
-    const useServer = this.state.settings.useServer
+    const settings = this.state.settings
+    const Message = this.Message
+    const options = {
+      clearBrowser: {name: 'Clear Browser Data', value: settings.clearBrowser},
+      closeInactiveTabs: {name: 'Close Inactive Tabs', value: settings.closeInactiveTabs},
+      download: {name: 'Save Pages', value: settings.download}
+    }
 
     return (
       <form onSubmit={this.handleSubmit}>
         <table>
-          <tbody>
-            <tr>
-              <td><label htmlFor="serverSwitch">Configuration</label></td>
-              <td>
-                <div className="box">
-                  <input
-                    type="radio" name="serverSwitch" id="localConfig" value="local"
-                    defaultChecked={!this.state.settings.useServer}
-                    onChange={this.handleConfigChange}
-                  />
-                  <label htmlFor="localConfig" className="radiolabel">Local</label>
-                </div>
-                <div className="box">
-                  <input
-                    type="radio" name="serverSwitch" id="serverConfig" value="server"
-                    defaultChecked={this.state.settings.useServer}
-                    onChange={this.handleConfigChange}
-                  />
-                  <label htmlFor="serverConfig" className="radiolabel">Server</label>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-          {useServer
-            ? <ServerSettings server={server} onServerChange={this.handleServerChange} />
+          <OptionalSettings options={options} onOptionsChange={this.updateSettings}/>
+          <LocalServerSwitch useServer={settings.useServer} onConfigChange={this.updateSettings} />
+          {settings.useServer
+            ? <ServerSettings server={settings.server} onServerChange={this.updateSettings} />
             : <LocalSettings
-                searchEngines={searchEngines}
-                queryTerms={queryTerms}
-                onEngineChange={this.handleEngineChange}
-                onQueryTermsChange={this.handleQueryTermsChange}
+                searchEngines={settings.searchEngines}
+                queryTerms={settings.queryTerms}
+                onEngineChange={this.updateSettings}
+                onQueryTermsChange={this.updateSettings}
               />
           }  
         </table>
         <input type="button" value="Update Settings" onClick={this.handleSubmit}/>
-        {this.state.updatingMessage == 'success' ? <this.Message color='darkgreen'>Settings Updated</ this.Message> : null}
-        {this.state.updatingMessage == 'error' ? <this.Message color='darkred'>Error while updating</this.Message> : null}
+        {this.state.updatingMessage == 'success' ? <Message color='darkgreen'>Settings Updated</ Message> : null}
+        {this.state.updatingMessage == 'error' ? <Message color='darkred'>Error while updating</ Message> : null}
       </form>
     )
   }

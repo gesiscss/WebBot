@@ -1,8 +1,8 @@
 .box {
-    background-color: #f1f5f9;
+    background-color: #f3f4f6;
     border-radius: 0.3rem;
     padding: 0.3rem;
-    margin: 0.2rem 0.2rem 0 0;
+    margin: 0.2rem 0.4rem 0.2rem 0;
     width: auto;
     float: left;
 }
@@ -14,19 +14,20 @@ table {
 td {
     border-bottom: 1px #cbd5e1 dashed;
     padding: 1rem 0 1rem 0;
+    vertical-align: middle;
 }
 .lastrow{
     border-bottom: none;
-    min-width: 7rem
+    min-width: 8rem
 }
 textarea, input[type=text] {
     width: 20rem
 }
+textarea {
+    height: 7rem
+}
 .checklabel, .radiolabel, input[type="checkbox"], input[type="radio"] {
     cursor: pointer;
     vertical-align: middle;
-}
-
-input[type="radio"] {
-    vertical-align: top;
+    margin: 0.15rem
 }
