@@ -19,7 +19,7 @@ class ServerSettings extends Component {
               type="text"
               defaultValue={this.props.server}
               onChange={this.handleServerChange}
-              placeholder="http://example.com/"
+              placeholder="http://example.com:8000/"
             /></td>
         </tr>
       </tbody>

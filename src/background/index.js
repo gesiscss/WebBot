@@ -76,13 +76,11 @@ function load_settings_from_storage() {
     'engines': [],
   }
  
-  // load data if server is used, save data if server could be reached
+  // load data if server is used, returns [] if server could not be reached
   if (restored_settings.useServer) {
     console.log('Loading engines & keywords from server:', base_settings.server)
-    const queryTerms = await config.getQueryTerms()
-    if (queryTerms) navlists['keywords'] = queryTerms
-    const engines = await config.getEngines()
-    if (engines) navlists['engines'] = engines
+    navlists['keywords'] = await config.getQueryTerms()
+    navlists['engines'] = await config.getEngines()
   }
   // otherwise restore keywords and engines from localStorage
   else {

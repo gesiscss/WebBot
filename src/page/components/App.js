@@ -9,7 +9,6 @@ class App extends Component {
   constructor() {
     super()
     
-    // TODO: persist settings in localStorage
     this.browser = window.hasOwnProperty('chrome') ? chrome : browser // browser-specific messaging
     
     this.state = {

@@ -78,6 +78,10 @@ export default class Extension {
   }
 
   set_settings(settings){
+    
+    const reload_server = this.config.settings.server != settings.server
+    const clear_browser = settings.clearBrowser & !this.config.settings.clear_browser
+
     if (this.debug) {
       console.log('before:')
       console.log('this.keywords:', this.keywords, 'this.keyword_iterator:', this.keyword_iterator)
@@ -91,9 +95,9 @@ export default class Extension {
 
     this.engines = settings.searchEngines.filter(({active}) => active).map(({url}) => url)
     console.log(this.engines)
-    
-    if (!settings.useServer) this.config.settings.server = ''
-    else this.config.settings.server = settings.server
+
+    if (!settings.useServer) settings.server = ''
+    this.config.settings.server = settings.server
 
     this.config.settings.clear_browser = settings.clearBrowser
     this.config.settings.download = settings.download
@@ -105,6 +109,31 @@ export default class Extension {
       window.localStorage.setItem('extension_settings', JSON.stringify(settings))
       console.log('persisted settings in localStorage')
     } catch(err) {console.warn(err)}
+
+    // reload engines and keywords if server changed
+    if (reload_server) {
+      console.log('reloading engines and keywords from server')
+      new Promise((resolve, reject) => {
+        this.config.getEngines().then(engines => {
+          this.engines = engines
+          console.log('got engines:', engines)
+          resolve()
+        })
+      })
+      new Promise((resolve, reject) => {
+        this.config.getQueryTerms().then(keywords => {
+          this.keywords = keywords
+          console.log('got keywords:', keywords)
+          resolve()
+        })
+      })
+    }
+
+    // clear browser after clearing was turned on
+    if (clear_browser) {
+      console.log('clearing browser now')
+      this.config.clear_browser()
+    }
 
     if (this.debug) {
       console.log('after:')

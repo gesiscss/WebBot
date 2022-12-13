@@ -31,7 +31,7 @@ export default class Configuration {
         .catch(err => {
           //if (this.debug) console.log('_fetchQueryTerms: ', err);
           console.warn("Failed fetching the queryterms");
-          resolve(['Sage Concept Grant', 'elections']);
+          resolve([]); // ['Sage Concept Grant', 'elections']
           //resolve(false);
         })
     });
@@ -57,7 +57,7 @@ export default class Configuration {
         .catch(err => {
           //if (this.debug) console.log('_fetchQueryTerms: ', err);
           console.warn("Failed fetching the urllist");
-          resolve(['example.com']);
+          resolve([]); // ['example.com']
           //resolve(false);
         })
     });
@@ -84,9 +84,10 @@ export default class Configuration {
           //if (this.debug) console.log('_fetchEngines: ', err);
           console.warn("Failed fetching the engines");
           //resolve(false);
-          resolve(['https://google.com', 'https://duckduckgo.com', 
+          resolve([]);
+          /* ['https://google.com', 'https://duckduckgo.com', 
             'https://bing.com', 'https://yandex.com', 
-            'https://search.yahoo.com', 'https://baidu.com']);
+            'https://search.yahoo.com', 'https://baidu.com'] */
         })
     });
   }
