@@ -23,7 +23,6 @@
 
   "background": {
     "scripts": [
-      "defined/settings.js",
       "dist/background.js"
     ],
     "persistent": true

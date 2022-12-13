@@ -49,7 +49,7 @@ export default class Transfer {
         }
       }).catch(err => {
         //if (this.debug) console.log('Failed to Fetch JSON: ', url);
-        console.log(err);
+        //console.log(err);
         reject({
           message: '_fetch: ' + err.message,
           code: '500',

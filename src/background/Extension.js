@@ -35,8 +35,8 @@ export default class Extension {
     this.keyword_iterator = 0;
     this.keywords = navlists['keywords'];
     this.engines = navlists['engines'];
-    console.log(this.keywords);
-    console.log(this.engines);
+    console.log('using keywords:', this.keywords);
+    console.log('using engines:', this.engines);
 
     this.engine = '';
     this.keyword = '';
@@ -83,7 +83,6 @@ export default class Extension {
       console.log('this.keywords:', this.keywords, 'this.keyword_iterator:', this.keyword_iterator)
       console.log('this.engines:', this.engines)
       console.log('this.config.settings:', this.config.settings)
-      console.log('after:')
     }
 
     this.keywords = settings.queryTerms.split(',').map((term) => term.trim())
@@ -100,7 +99,17 @@ export default class Extension {
     this.config.settings.download = settings.download
     this.config.settings.close_inactive_tabs = settings.closeInactiveTabs
     this.config.settings.search_ticks_mins = settings.searchTicksMins
-    console.log(this.config.settings)
+
+    // save the settings to localStorage, if possible
+    try {
+      window.localStorage.setItem('extension_settings', JSON.stringify(settings))
+      console.log('persisted settings in localStorage')
+    } catch(err) {console.warn(err)}
+
+    if (this.debug) {
+      console.log('after:')
+      console.log(this.config.settings)
+    }
   }
 
   get_settings(){
@@ -119,7 +128,7 @@ export default class Extension {
     return {
       queryTerms: this.keywords.join(', '),
       searchEngines: searchEngines,
-      clearBrowser: this.config.settings.clearBrowser ? this.config.settings.clearBrowser : false,
+      clearBrowser: this.config.settings.clear_browser ? this.config.settings.clear_browser : false,
       download: this.config.settings.download ? this.config.settings.download : false,
       closeInactiveTabs: this.config.settings.close_inactive_tabs ? this.config.settings.close_inactive_tabs : false,
       searchTicksMins: this.config.settings.search_ticks_mins ? this.config.settings.search_ticks_mins : 5,
@@ -484,7 +493,7 @@ export default class Extension {
       if(msg==='on_start'){
         sendResponse({
           'clear_browser_flag': this.config.settings.clear_browser,
-          'dummy_server': this.config.settings.dummy_server,
+          //'dummy_server': this.config.settings.dummy_server,
           'server': this.config.settings.server
         });
       }else if (msg.hasOwnProperty('steady')){
