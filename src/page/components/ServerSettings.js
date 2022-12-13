@@ -13,7 +13,10 @@ class ServerSettings extends Component {
     return (
       <tbody>
         <tr>
-          <td className="lastrow"><label htmlFor="server">Server</label></td>
+          <td className="lastrow">
+            <label htmlFor="server">Server</label>
+            <div className="tooltip" data-title="Server (full URL) to query for search engines and query terms.">?</div>
+          </td>
           <td className="lastrow">
             <input
               type="text"

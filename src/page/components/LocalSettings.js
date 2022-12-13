@@ -43,7 +43,11 @@ class LocalSettings extends Component {
           </td>
         </tr>
         <tr>
-          <td className="lastrow"><label htmlFor="queryterms">Query Terms</label></td>
+          <td className="lastrow">
+            <label htmlFor="queryterms">Query Terms</label>
+            <div className="tooltip" data-title="Comma-seperated list of terms to query. Each term is queried once by a selected search engine.
+            To query the same term by multiple search engines, repeat the term for each engine.">?</div>
+          </td>
           <td className="lastrow">
             <textarea
               id="queryterms"

@@ -31,3 +31,30 @@ textarea {
     vertical-align: middle;
     margin: 0.15rem
 }
+.tooltip {
+    border-radius: 9999px;
+    background-color: #f3f4f6;
+    color: #6b7280;
+    position: relative;
+    margin-left: 0.4rem;
+    width: 0.9rem;
+    height: 0.9rem;
+    cursor: default;
+    text-align: center;
+    vertical-align: center;
+    display: inline-block;
+    border: solid 1px #6b7280;
+}
+.tooltip:hover::after {
+    content: attr(data-title);
+    padding: 0.3rem;
+    width: 20rem;
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    color: black;
+    background-color: white;
+    border: solid 1px #9ca3af;
+    border-radius: 0.15rem;
+    text-align: left;
+}

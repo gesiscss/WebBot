@@ -13,7 +13,11 @@ class LocalServerSwitch extends Component {
     return (
       <tbody>
         <tr>
-          <td><label htmlFor="serverSwitch">Configuration</label></td>
+          <td>
+            <label htmlFor="serverSwitch">Configuration</label>
+            <div className="tooltip" data-title="Switch to Server configuration type to automatically gather
+            lists of search engines and query terms from a server.">?</div>
+          </td>
           <td>
             <div className="box">
               <input
