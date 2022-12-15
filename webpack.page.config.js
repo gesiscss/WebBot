@@ -29,7 +29,7 @@ module.exports = env => {
   cleanDistFolder(DIST_FOLDER);
   
   let options = {
-    entry: ['babel-polyfill', './src/page/index.js'],
+    entry: ['./src/page/index.js'],
     //mode: 'production',
     module: {
       rules: [
@@ -130,8 +130,8 @@ module.exports = env => {
     },
     performance: {
       // ignore warnings for sizes if not minified
-      // maxAssetSize: 1000000,
-      // maxEntrypointSize: 1000000,
+      maxAssetSize: 1000000,
+      maxEntrypointSize: 1000000,
     }
   };
 

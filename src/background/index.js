@@ -1,4 +1,3 @@
-import "babel-polyfill"
 import Transfer from './Transfer';
 import Configuration from './Configuration';
 import ExtensionHandler from './ExtensionHandler';
