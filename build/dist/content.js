@@ -20509,16 +20509,19 @@ class Bot {
       this.set_news_results_animation(this.set_get_next_button_news_result_timeout);
     }
   }
-  images_animation(delay = null) {
-    if (delay == null) {
-      delay = this.initial_scroll_delay;
-    }
+  async images_animation(delay = null) {
+    if (delay == null) delay = this.initial_scroll_delay;
     if (this.is_images_result_scrolls_end()) {
       this.images_results_counter = 0;
-      this.scroll_down().then(value => this.set_get_videos_tab_timeout());
+      await this.scroll_down();
+      // download image results page only after scrolling all the way to the bottom (continuously loading additional images)
+      // in contrast, text results etc. are saved at the bottom of each results page
+      if (this.extension.settings['download_pages']) await this.download_page();
+      this.set_get_videos_tab_timeout();
     } else {
-      setTimeout(function () {
-        this.scroll_down().then(value => this.images_animation(0));
+      setTimeout(async function () {
+        await this.scroll_down();
+        this.images_animation(0);
       }.bind(this), delay);
     }
   }
@@ -20707,29 +20710,32 @@ class Bot {
   }
   set_videos_results_animation(callback_end) {
     setTimeout(async function () {
+      await this.scroll_down();
+      // capture at the bottom of the page because of lazy loading images
       if (this.extension.settings['download_pages']) await this.download_page();
-      this.scroll_down().then(value =>
       // the callback needs to be bind again, so that it finds
       // the methods of the object
-      callback_end.bind(this)());
+      await callback_end.bind(this)();
     }.bind(this), this.initial_scroll_delay);
   }
   set_text_results_animation(callback_end) {
     setTimeout(async function () {
+      await this.scroll_down();
+      // capture at the bottom of the page because of lazy loading images
       if (this.extension.settings['download_pages']) await this.download_page();
-      this.scroll_down().then(value =>
       // the callback needs to be bind again, so that it finds
       // the methods of the object
-      callback_end.bind(this)());
+      await callback_end.bind(this)();
     }.bind(this), this.initial_scroll_delay);
   }
   set_news_results_animation(callback_end) {
     setTimeout(async function () {
+      await this.scroll_down();
+      // capture at the bottom of the page because of lazy loading images
       if (this.extension.settings['download_pages']) await this.download_page();
-      this.scroll_down().then(value =>
       // the callback needs to be bind again, so that it finds
       // the methods of the object
-      callback_end.bind(this)());
+      await callback_end.bind(this)();
     }.bind(this), this.initial_scroll_delay);
   }
   set_get_next_button_text_result_timeout() {
