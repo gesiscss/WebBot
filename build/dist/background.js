@@ -10796,7 +10796,7 @@ class Extension {
       });
       const pageData = {
         url: URL.createObjectURL(blob),
-        filename: 'webbot/' + msg.filename
+        filename: 'webbot/' + this.engine.split('//')[1] + '_' + this.keyword + '_' + msg.filename_suffix
       };
       xbrowser.downloads.download(pageData);
       sendResponse({});

@@ -494,7 +494,10 @@ clear_browser(){
         sendResponse({'next_engine': _next_engine});
       } else if (msg.hasOwnProperty('download_page')){
         const blob = new Blob([msg.content], {type: "text/html"})
-        const pageData = {url: URL.createObjectURL(blob), filename: 'webbot/' + msg.filename}
+        const pageData = {
+          url: URL.createObjectURL(blob),
+          filename: 'webbot/' + this.engine.split('//')[1] + '_' + this.keyword + '_' + msg.filename_suffix
+        }
         xbrowser.downloads.download(pageData)
         sendResponse({});
       }

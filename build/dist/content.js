@@ -20516,7 +20516,7 @@ class Bot {
       await this.scroll_down();
       // download image results page only after scrolling all the way to the bottom (continuously loading additional images)
       // in contrast, text results etc. are saved at the bottom of each results page
-      if (this.extension.settings['download_pages']) await this.download_page();
+      if (this.extension.settings['download_pages']) await this.download_page('images');
       this.set_get_videos_tab_timeout();
     } else {
       setTimeout(async function () {
@@ -20712,7 +20712,7 @@ class Bot {
     setTimeout(async function () {
       await this.scroll_down();
       // capture at the bottom of the page because of lazy loading images
-      if (this.extension.settings['download_pages']) await this.download_page();
+      if (this.extension.settings['download_pages']) await this.download_page('videos');
       // the callback needs to be bind again, so that it finds
       // the methods of the object
       await callback_end.bind(this)();
@@ -20722,7 +20722,7 @@ class Bot {
     setTimeout(async function () {
       await this.scroll_down();
       // capture at the bottom of the page because of lazy loading images
-      if (this.extension.settings['download_pages']) await this.download_page();
+      if (this.extension.settings['download_pages']) await this.download_page('text');
       // the callback needs to be bind again, so that it finds
       // the methods of the object
       await callback_end.bind(this)();
@@ -20732,7 +20732,7 @@ class Bot {
     setTimeout(async function () {
       await this.scroll_down();
       // capture at the bottom of the page because of lazy loading images
-      if (this.extension.settings['download_pages']) await this.download_page();
+      if (this.extension.settings['download_pages']) await this.download_page('news');
       // the callback needs to be bind again, so that it finds
       // the methods of the object
       await callback_end.bind(this)();
@@ -21004,7 +21004,10 @@ class Bot {
       }.bind(this), this.sub_scroll_down_delay);
     });
   }
-  async download_page() {
+  async download_page(page_type) {
+    page_type = page_type ? page_type + '_' : ''; // if available, specify which type of page is downloaded
+
+    // capture the page with SingleFile plugin
     console.log('capturing using SingleFile...');
     const {
       content,
@@ -21023,17 +21026,14 @@ class Bot {
       removeAlternativeMedias: true,
       removeAlternativeImages: true,
       groupDuplicateImages: true,
-      filenameTemplate: "{page-title} ({date-iso} {time-locale}).html"
+      filenameTemplate: page_type + "{date-iso}_{time-locale}.html" // also available: {page-title}
     });
+
+    // send captured page as blob to backend to store into downloads folder
     this.browser.runtime.sendMessage({
       'download_page': true,
       'content': content,
-      'filename': filename
-    }, response => {
-      if (this.browser.runtime.lastError) {
-        /*ignore when the background is not listening*/;
-        // console.log(this.browser.runtime.lastError);
-      }
+      'filename_suffix': filename
     });
   }
 
