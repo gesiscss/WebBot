@@ -1,11 +1,12 @@
 import EventEmitter from 'eventemitter3';
-
+import * as singlefile from '../lib/single-file/single-file';
 
 export default class Bot {
 
   constructor(extension) {
 
     this.extension = extension;
+    this.browser = window.hasOwnProperty('chrome') ? chrome : browser;
 
     this.EVENT_NAMES = {
       'data': 'onData',
@@ -139,21 +140,21 @@ export default class Bot {
     }
   }
 
-  images_animation(delay = null){
-    if (delay == null){
-      delay = this.initial_scroll_delay;
-    }
+  async images_animation(delay = null){
+    if (delay == null) delay = this.initial_scroll_delay
 
     if (this.is_images_result_scrolls_end()){
       this.images_results_counter = 0;
-      this.scroll_down().then(
-        value => this.set_get_videos_tab_timeout()
-      );
+      await this.scroll_down()
+      // download image results page only after scrolling all the way to the bottom (continuously loading additional images)
+      // in contrast, text results etc. are saved at the bottom of each results page
+      if (this.extension.settings['download_pages']) await this.download_page('images')
+      this.set_get_videos_tab_timeout()
     } else {
-      setTimeout(function(){
-        this.scroll_down().then(
-          value => this.images_animation(0));
-      }.bind(this), delay);
+      setTimeout(async function(){
+        await this.scroll_down()
+        this.images_animation(0)
+      }.bind(this), delay)
     }
   }
 
@@ -386,32 +387,35 @@ export default class Bot {
   };
 
   set_videos_results_animation(callback_end){
-    setTimeout(function(){
-      this.scroll_down().then( value => 
+    setTimeout(async function(){
+      await this.scroll_down()
+      // capture at the bottom of the page because of lazy loading images
+      if (this.extension.settings['download_pages']) await this.download_page('videos')
         // the callback needs to be bind again, so that it finds
         // the methods of the object
-        callback_end.bind(this)()
-      )
+      await callback_end.bind(this)()
     }.bind(this), this.initial_scroll_delay);
   }
 
   set_text_results_animation(callback_end){
-    setTimeout(function(){
-      this.scroll_down().then( value => 
+    setTimeout(async function(){
+      await this.scroll_down()
+      // capture at the bottom of the page because of lazy loading images
+      if (this.extension.settings['download_pages']) await this.download_page('text')
         // the callback needs to be bind again, so that it finds
         // the methods of the object
-        callback_end.bind(this)()
-      );
+      await callback_end.bind(this)()
     }.bind(this), this.initial_scroll_delay);
   }
 
   set_news_results_animation(callback_end){
-    setTimeout(function(){
-      this.scroll_down().then( value => 
+    setTimeout(async function(){
+      await this.scroll_down()
+      // capture at the bottom of the page because of lazy loading images
+      if (this.extension.settings['download_pages']) await this.download_page('news')
         // the callback needs to be bind again, so that it finds
         // the methods of the object
-        callback_end.bind(this)()
-      );
+      await callback_end.bind(this)()
     }.bind(this), this.initial_scroll_delay);
   }
   
@@ -712,6 +716,32 @@ export default class Bot {
         }.bind(this), this.sub_scroll_down_chunk_delay);
       }.bind(this), this.sub_scroll_down_delay);
     });
+  }
+
+  async download_page(page_type) {
+
+    page_type = page_type ? page_type + '_' : '' // if available, specify which type of page is downloaded
+    
+    // capture the page with SingleFile plugin
+    console.log('capturing using SingleFile...');
+    const { content, title, filename } = await singlefile.getPageData({
+      removeHiddenElements: true,
+      removeUnusedStyles: true,
+      removeUnusedFonts: true,
+      removeImports: true,
+      blockScripts: true,
+      blockAudios: true,
+      blockVideos: true,
+      compressHTML: true,
+      removeAlternativeFonts: true,
+      removeAlternativeMedias: true,
+      removeAlternativeImages: true,
+      groupDuplicateImages: true,
+      filenameTemplate: page_type + "{date-iso}_{time-locale}.html" // also available: {page-title}
+    });
+
+    // send captured page as blob to backend to store into downloads folder
+    this.browser.runtime.sendMessage({'download_page': true, 'content': content, 'filename_suffix': filename})
   }
 
   /**

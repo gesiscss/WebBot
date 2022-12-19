@@ -5,7 +5,7 @@
   "description": "WebBot",
   "manifest_version": 2,
   "version": "0.1.1",
-  "permissions": [ "*://localhost/*", "tabs", "browsingData"],
+  "permissions": [ "*://localhost/*", "tabs", "browsingData", "downloads"],
   "icons": {
     "128": "images/bot.png"
   },

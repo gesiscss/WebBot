@@ -40,6 +40,11 @@ module.exports = env => {
         //   },
         // })
       ],
+    },
+    performance: {
+      // ignore warnings for sizes if not minified
+      maxAssetSize: 1000000,
+      maxEntrypointSize: 1000000,
     }
   };
 

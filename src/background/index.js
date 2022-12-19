@@ -29,7 +29,7 @@ function load_settings_from_storage() {
       searchTicksMins: 5,
       clearBrowser: false,
       closeInactiveTabs: false,
-      download: false,
+      downloadPages: false,
     }
   }
 
@@ -39,7 +39,7 @@ function load_settings_from_storage() {
     search_ticks_mins: restored_settings.searchTicksMins,
     clear_browser: restored_settings.clearBrowser,
     close_inactive_tabs: restored_settings.closeInactiveTabs,
-    download: restored_settings.download,
+    download_pages: restored_settings.downloadPages,
   }
 
   //console.log('base_settings', base_settings)

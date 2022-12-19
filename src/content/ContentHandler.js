@@ -13,7 +13,6 @@ import CaptchaBot from './bot/CaptchaBot';
 import YandexCaptchaBot from './bot/YandexCaptchaBot';
 
 
-
 import Bot from './Bot';
 
 
@@ -26,7 +25,7 @@ export default class ContentHandler {
     this.isListeningToBackend = false;
 
     this.browser = window.hasOwnProperty('chrome') ? chrome : browser;
-    this.debug = false;
+    this.debug = true; //false;
     this.onBackendMessage = this.onBackendMessage.bind(this);
     this.settings = {}
     

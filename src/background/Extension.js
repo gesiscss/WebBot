@@ -100,7 +100,7 @@ export default class Extension {
     this.config.settings.server = settings.server
 
     this.config.settings.clear_browser = settings.clearBrowser
-    this.config.settings.download = settings.download
+    this.config.settings.download_pages = settings.downloadPages
     this.config.settings.close_inactive_tabs = settings.closeInactiveTabs
     this.config.settings.search_ticks_mins = settings.searchTicksMins
 
@@ -158,7 +158,7 @@ export default class Extension {
       queryTerms: this.keywords.join(', '),
       searchEngines: searchEngines,
       clearBrowser: this.config.settings.clear_browser ? this.config.settings.clear_browser : false,
-      download: this.config.settings.download ? this.config.settings.download : false,
+      downloadPages: this.config.settings.download_pages ? this.config.settings.download_pages : false,
       closeInactiveTabs: this.config.settings.close_inactive_tabs ? this.config.settings.close_inactive_tabs : false,
       searchTicksMins: this.config.settings.search_ticks_mins ? this.config.settings.search_ticks_mins : 5,
       server: this.config.settings.server ? this.config.settings.server : '',
@@ -523,7 +523,8 @@ export default class Extension {
         sendResponse({
           'clear_browser_flag': this.config.settings.clear_browser,
           //'dummy_server': this.config.settings.dummy_server,
-          'server': this.config.settings.server
+          'server': this.config.settings.server,
+          'download_pages': this.config.settings.download_pages
         });
       }else if (msg.hasOwnProperty('steady')){
 
@@ -599,8 +600,16 @@ export default class Extension {
       } else if (msg.hasOwnProperty('get_settings')){
         console.log('getting settings')
         sendResponse(this.get_settings())
-      }
 
+      } else if (msg.hasOwnProperty('download_page')){
+        const blob = new Blob([msg.content], {type: "text/html"})
+        const pageData = {
+          url: URL.createObjectURL(blob),
+          filename: 'webbot/' + this.engine.split('//')[1] + '_' + this.keyword + '_' + msg.filename_suffix
+        }
+        xbrowser.downloads.download(pageData)
+        sendResponse({});
+      }
       if (this.debug) console.log('<- _onContentMessage');
       return true;
   }

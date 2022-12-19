@@ -21,7 +21,7 @@ class App extends Component {
         searchTicksMins: 5,
         clearBrowser: false,
         closeInactiveTabs: false,
-        download: false,
+        downloadPages: false,
       }
     }
   }
@@ -79,7 +79,7 @@ class App extends Component {
     const options = {
       clearBrowser: {name: 'Clear Browser Data', value: settings.clearBrowser},
       closeInactiveTabs: {name: 'Close Inactive Tabs', value: settings.closeInactiveTabs},
-      download: {name: 'Save Pages', value: settings.download}
+      downloadPages: {name: 'Save Pages', value: settings.downloadPages}
     }
 
     return (
