@@ -391,8 +391,8 @@ export default class Bot {
       await this.scroll_down()
       // capture at the bottom of the page because of lazy loading images
       if (this.extension.settings['download_pages']) await this.download_page('videos')
-        // the callback needs to be bind again, so that it finds
-        // the methods of the object
+      // the callback needs to be bind again, so that it finds
+      // the methods of the object
       await callback_end.bind(this)()
     }.bind(this), this.initial_scroll_delay);
   }
@@ -402,8 +402,8 @@ export default class Bot {
       await this.scroll_down()
       // capture at the bottom of the page because of lazy loading images
       if (this.extension.settings['download_pages']) await this.download_page('text')
-        // the callback needs to be bind again, so that it finds
-        // the methods of the object
+      // the callback needs to be bind again, so that it finds
+      // the methods of the object
       await callback_end.bind(this)()
     }.bind(this), this.initial_scroll_delay);
   }
@@ -413,8 +413,8 @@ export default class Bot {
       await this.scroll_down()
       // capture at the bottom of the page because of lazy loading images
       if (this.extension.settings['download_pages']) await this.download_page('news')
-        // the callback needs to be bind again, so that it finds
-        // the methods of the object
+      // the callback needs to be bind again, so that it finds
+      // the methods of the object
       await callback_end.bind(this)()
     }.bind(this), this.initial_scroll_delay);
   }
