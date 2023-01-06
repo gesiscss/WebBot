@@ -3,6 +3,10 @@ import Configuration from './Configuration';
 import ExtensionHandler from './ExtensionHandler';
 //import settings from '../lib/settings';
 
+// import SingleFile's background page to handle frames etc.
+import * as singleFilePolyfill from '../lib/single-file/chrome-browser-polyfill'
+import * as singleFileBackground from '../lib/single-file/single-file-background'
+
 function load_settings_from_storage() {
 
   // try to load settings from localStorage
