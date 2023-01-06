@@ -18,7 +18,7 @@ td {
 }
 .lastrow{
     border-bottom: none;
-    min-width: 8rem
+    min-width: 10rem
 }
 textarea, input[type=text] {
     width: 20rem
@@ -37,8 +37,10 @@ textarea {
     color: #6b7280;
     position: relative;
     margin-left: 0.4rem;
-    width: 0.9rem;
-    height: 0.9rem;
+    width: 15px;
+    height: 15px;
+    font-size: 12px;
+    line-height: 1rem;
     cursor: default;
     text-align: center;
     vertical-align: center;
