@@ -101,6 +101,7 @@ export default class Extension {
 
     this.config.settings.clear_browser = settings.clearBrowser
     this.config.settings.download_pages = settings.downloadPages
+    this.config.settings.downloads_folder = settings.downloadsFolder
     this.config.settings.close_inactive_tabs = settings.closeInactiveTabs
     this.config.settings.search_ticks_mins = settings.searchTicksMins
 
@@ -159,6 +160,7 @@ export default class Extension {
       searchEngines: searchEngines,
       clearBrowser: this.config.settings.clear_browser ? this.config.settings.clear_browser : false,
       downloadPages: this.config.settings.download_pages ? this.config.settings.download_pages : false,
+      downloadsFolder: this.config.settings.downloads_folder ? this.config.settings.downloads_folder: '',
       closeInactiveTabs: this.config.settings.close_inactive_tabs ? this.config.settings.close_inactive_tabs : false,
       searchTicksMins: this.config.settings.search_ticks_mins ? this.config.settings.search_ticks_mins : 5,
       server: this.config.settings.server ? this.config.settings.server : '',
@@ -605,7 +607,8 @@ export default class Extension {
         const blob = new Blob([msg.content], {type: "text/html"})
         const pageData = {
           url: URL.createObjectURL(blob),
-          filename: 'webbot/' + this.engine.split('//')[1] + '_' + this.keyword + '_' + msg.filename_suffix
+          filename:
+            this.config.settings.downloads_folder + '/' + this.engine.split('//')[1] + '_' + this.keyword + '_' + msg.filename_suffix
         }
         xbrowser.downloads.download(pageData)
         sendResponse(true);

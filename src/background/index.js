@@ -34,6 +34,7 @@ function load_settings_from_storage() {
       clearBrowser: false,
       closeInactiveTabs: false,
       downloadPages: false,
+      downloadsFolder: 'webbot'
     }
   }
 
@@ -44,6 +45,7 @@ function load_settings_from_storage() {
     clear_browser: restored_settings.clearBrowser,
     close_inactive_tabs: restored_settings.closeInactiveTabs,
     download_pages: restored_settings.downloadPages,
+    downloads_folder: restored_settings.downloadsFolder
   }
 
   //console.log('base_settings', base_settings)

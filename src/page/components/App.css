@@ -13,7 +13,7 @@ table {
 }
 td {
     border-bottom: 1px #cbd5e1 dashed;
-    padding: 1rem 0 1rem 0;
+    padding: 0.5rem 0 0.5rem 0;
     vertical-align: middle;
 }
 .lastrow{
@@ -21,7 +21,7 @@ td {
     min-width: 10rem
 }
 textarea, input[type=text] {
-    width: 20rem
+    width: 20rem;
 }
 textarea {
     height: 7rem
@@ -52,11 +52,12 @@ textarea {
     padding: 0.3rem;
     width: 20rem;
     position: absolute;
-    top: 0.5rem;
+    top: 0.8rem;
     left: 0.5rem;
     color: black;
     background-color: white;
     border: solid 1px #9ca3af;
     border-radius: 0.15rem;
     text-align: left;
+    z-index: 999;
 }

@@ -19,6 +19,10 @@ class OptionalSettings extends Component {
     this.props.onOptionsChange(options)
   }
 
+  handleFolderChange = (e) => {
+    this.props.onOptionsChange({downloadsFolder: e.target.value})
+  }
+
   render() {
     const options = this.props.options
 
@@ -46,6 +50,24 @@ class OptionalSettings extends Component {
               </td>
             </tr>
           )
+        }
+        {this.props.options.downloadPages.value
+          ? <tr key="downloadsFolder">
+              <td>
+                <label htmlFor="downloadsFolder">Save in</label>
+                <div className="tooltip" data-title="Subdirectory of the Downloads folder to save the crawled search results to.
+                Saving directly to the Downloads folder is not possible.">?</div>
+              </td>
+              <td>
+              <input
+                type="text"
+                defaultValue={this.props.downloadsFolder}
+                onChange={this.handleFolderChange}
+                placeholder="webbot"
+              />
+              </td>
+            </tr>
+          : ''
         }
       </tbody>
     )

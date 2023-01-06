@@ -22,6 +22,7 @@ class App extends Component {
         clearBrowser: false,
         closeInactiveTabs: false,
         downloadPages: false,
+        downloadsFolder: '',
       }
     }
   }
@@ -85,7 +86,7 @@ class App extends Component {
     return (
       <form onSubmit={this.handleSubmit}>
         <table>
-          <OptionalSettings options={options} onOptionsChange={this.updateSettings}/>
+          <OptionalSettings options={options} downloadsFolder={settings.downloadsFolder} onOptionsChange={this.updateSettings}/>
           <LocalServerSwitch useServer={settings.useServer} onConfigChange={this.updateSettings} />
           {settings.useServer
             ? <ServerSettings server={settings.server} onServerChange={this.updateSettings} />
