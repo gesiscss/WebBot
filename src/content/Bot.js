@@ -61,6 +61,29 @@ export default class Bot {
     this.step = '';
     this.step_attempts = 5;
 
+    // fetch external content for SingleFile on Chrome through the background
+    // because Chrome gives content scripts the same privileges as page itself
+    // i.e., they cannot access external content without CORS
+    // see also: https://www.chromium.org/Home/chromium-security/extension-content-script-fetches/
+    if (window.hasOwnProperty('chrome')) {
+      singlefile.init({ fetch: this.background_fetch })
+    }
+  }
+
+  background_fetch(resource, options) {
+    options = typeof options !== 'undefined' ? options : {} // options are optional
+    return new Promise((resolve, reject)=>{
+      //console.log('fetching', resource, 'in background')
+      chrome.runtime.sendMessage({'fetch': true, 'resource': resource, 'options': options}, (response) => {
+        const fetched = {
+          status: response.status,
+          headers: new Headers(response.headers), // re-create the Headers object
+          arrayBuffer: async () => new Uint8Array(response.array).buffer // re-create the arrayBuffer containing the fetched content
+        }
+        //console.log(fetched)
+        resolve(fetched)
+      })
+    })
   }
 
   /**

@@ -590,13 +590,13 @@ export default class Extension {
         sendResponse({'next_engine': _next_engine});
       
       } else if (msg.hasOwnProperty('update_settings')){
-        // TODO: implement the updating of the settings
         if (!msg.hasOwnProperty('settings')) sendResponse(false)
         else {
           console.log('updating settings')
           this.set_settings(msg.settings)
           sendResponse(true)
         }
+      
       } else if (msg.hasOwnProperty('get_settings')){
         console.log('getting settings')
         sendResponse(this.get_settings())
@@ -608,8 +608,21 @@ export default class Extension {
           filename: 'webbot/' + this.engine.split('//')[1] + '_' + this.keyword + '_' + msg.filename_suffix
         }
         xbrowser.downloads.download(pageData)
-        sendResponse({});
+        sendResponse(true);
+      
+      } else if (msg.hasOwnProperty('fetch')){
+        // see also https://github.com/gildas-lormeau/SingleFile/blob/911dd7e699fa9818c18320219dba414423156005/src/lib/single-file/fetch/bg/fetch.js
+        //console.log('fetching', msg.resource)
+        fetch(msg.resource, msg.options).then(async (response) => {
+          //console.log('fetched', response)
+          const status = response.status
+          const headers = []
+          for (const header of response.headers.entries()) headers.push(header)
+          const array = Array.from(new Uint8Array(await response.arrayBuffer()))
+          sendResponse({status, headers, array})
+        })
       }
+
       if (this.debug) console.log('<- _onContentMessage');
       return true;
   }

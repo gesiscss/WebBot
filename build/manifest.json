@@ -5,7 +5,7 @@
   "description": "WebBot",
   "manifest_version": 2,
   "version": "0.1.1",
-  "permissions": [ "*://localhost/*", "tabs", "browsingData", "downloads"],
+  "permissions": [ "<all_urls>", "tabs", "browsingData", "downloads"],
   "icons": {
     "128": "images/bot.png"
   },
@@ -28,10 +28,9 @@
     "persistent": true
   },
 
-
   "content_scripts": [
     {
-      "matches": ["http://*/*", "https://*/*"],
+      "matches": ["<all_urls>"],
       "js": ["dist/content.js"],
       "run_at": "document_end",
       "all_frames": false
