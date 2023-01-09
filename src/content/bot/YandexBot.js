@@ -6,6 +6,8 @@ export default class YandexBot extends Bot{
   constructor(worker, extension){
     super(worker, extension);
     this.onStart = this.onStart.bind(this);
+
+    // set the number of result pages to load
     if (this.debug){
       this.result_text_pages = 1;
       this.result_news_pages = 1;
@@ -13,11 +15,7 @@ export default class YandexBot extends Bot{
       this.scroll_text_reloads = 1;
       this.scroll_news_reloads = 1;
     } else {
-      this.result_text_pages = 1;
-      this.result_news_pages = 1;
-      
-      this.scroll_text_reloads = 1;
-      this.scroll_news_reloads = 1;
+      // use the defaults
     }
 
     this.initial_scroll_delay = 3000;
@@ -40,15 +38,17 @@ export default class YandexBot extends Bot{
   videos_animation(extra_delay=0){
     if (this.is_videos_result_scrolls_end()){
       this.videos_results_counter = 0;
-      setTimeout(function(){
-        this.scroll_down().then(
-          value => this.go_to_base_page()
-        );
+      setTimeout(async function(){
+        await this.scroll_down()
+        // download image results page only after scrolling all the way to the bottom (continuously loading additional images)
+        // in contrast, text results etc. are saved at the bottom of each results page
+        if (this.extension.settings['download_pages']) await this.download_page('videos')
+        this.go_to_base_page()
       }.bind(this), this.initial_scroll_delay + extra_delay);
     } else {
-      setTimeout(function(){
-        this.scroll_down().then(
-          value => this.more_videos_animation());
+      setTimeout(async function(){
+        await this.scroll_down()
+        this.more_videos_animation()
       }.bind(this), this.initial_scroll_delay + extra_delay);
     }
   }
@@ -98,9 +98,22 @@ export default class YandexBot extends Bot{
     return location.pathname.includes('/search/');
   }
 
+  // Yandex doesn't have news results anymore, see dzen.ru
   is_news_result_page(){
-    console.log('is_news_result_page');
-    return location.hostname.includes('newssearch');
+    return false
+  }
+
+  // Skip the news results
+  text_animation(){
+    if (this.is_text_result_pages_end()){
+      this.set_text_results_animation(
+        this.set_get_images_tab_timeout // jump to images directly
+      )
+    } else {
+      this.set_text_results_animation(
+        this.set_get_next_button_text_result_timeout
+      )
+    }
   }
 
   is_images_result_page(){
@@ -179,8 +192,6 @@ export default class YandexBot extends Bot{
     this.videos_results_counter += 1;
     return this.videos_results_counter;
   }
-
-
 
   // get_videos_result_page(){
   //   let p = this.find_get_parameter('p');
