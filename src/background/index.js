@@ -26,7 +26,9 @@ function load_settings_from_storage() {
         {name: 'Bing', url: 'https://bing.com', active: true},
         {name: 'Yandex', url: 'https://yandex.com', active: false},
         {name: 'Yahoo', url: 'https://search.yahoo.com', active: false},
-        {name: 'Baidu', url: 'https://baidu.com', active: false}
+        {name: 'Baidu', url: 'https://baidu.com', active: false},
+        {name: 'So', url: 'https://so.com', active: false},
+        {name: 'Sogou', url: 'https://sogou.com', active: false}
       ],
       queryTerms: 'Sage Concept Grant, elections',
       server: '',

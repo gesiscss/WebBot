@@ -149,7 +149,9 @@ export default class Extension {
       {name: 'Bing', url: 'https://bing.com', active: false},
       {name: 'Yandex', url: 'https://yandex.com', active: false},
       {name: 'Yahoo', url: 'https://search.yahoo.com', active: false},
-      {name: 'Baidu', url: 'https://baidu.com', active: false}
+      {name: 'Baidu', url: 'https://baidu.com', active: false},
+      {name: 'So', url: 'https://so.com', active: false},
+      {name: 'Sogou', url: 'https://sogou.com', active: false}
     ]
     for (let i in this.engines) {
       searchEngines = searchEngines.map(({name, url, active}) => url == this.engines[i] ? {name, url, active: true} : {name, url, active})
