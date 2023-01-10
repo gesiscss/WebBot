@@ -148,7 +148,7 @@ export default class Extension {
       {name: 'DuckDuckGo', url: 'https://duckduckgo.com', active: false},
       {name: 'Bing', url: 'https://bing.com', active: false},
       {name: 'Yandex', url: 'https://yandex.com', active: false},
-      {name: 'Yahoo', url: 'https://search.yahoo.com', active: false},
+      {name: 'Yahoo', url: 'https://us.yahoo.com', active: false}, // in contrast to search.yahoo.com this still has a search button
       {name: 'Baidu', url: 'https://baidu.com', active: false},
       {name: 'So', url: 'https://so.com', active: false},
       {name: 'Sogou', url: 'https://sogou.com', active: false}
@@ -337,6 +337,7 @@ export default class Extension {
    */
   async trigger_clear_browser(){
     console.log("trigger_clear_browser(): NEW");
+    // TODO: save current page before navigating to a different one
     try{
       xbrowser.tabs.update(this.search_tab_id, {
         'url': this.config.getBasePage()

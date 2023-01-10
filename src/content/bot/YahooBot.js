@@ -7,11 +7,13 @@ export default class YahooBot extends Bot{
     super(worker, extension);
     this.onStart = this.onStart.bind(this);
 
+    // set the number of result pages to load
     if (this.debug){
       // use the defaults for debug in Bot
     } else {
-      this.scroll_images_reloads = 5;
+      // also use the defaults
     }
+
     this.sub_scroll_waiting_for_more = 500;
   }
 
@@ -88,6 +90,8 @@ export default class YahooBot extends Bot{
   }
 
 
+  // this selects the correct button but the button is broken most of the time
+  // i.e., after clicking (even manually with the extension disabled), nothing happens
   get_more_videos_button(){
     return document.querySelector('section#search button.more');
   }
@@ -99,21 +103,7 @@ export default class YahooBot extends Bot{
 
 
   get_search_input(){
-    let _input = document.querySelector('form[role=search] input');
-
-    // // US interface
-    // let _input = document.querySelector('form[role=search] input');
-
-    // if (_input == null) {
-    //   // DE interface
-    //   _input = document.querySelector('#header-search-input');
-    // }
-    // if (_input == null) {
-    //   // random shot
-    //   _input = document.querySelector('form input[type=text]');
-    // }
-
-    return _input;
+    return document.querySelector('form[role=search] input')
   }
 
   is_collect_consent_page(){
@@ -137,26 +127,7 @@ export default class YahooBot extends Bot{
   }
 
   get_search_button(){
-    let _button = document.querySelector('form[role=search] span[role=button]');
-
-    // // US interface
-    // let _button = document.querySelector('form[role=search] input[type=submit]');
-
-    // if (_button == null) {
-    //   // DE interface
-    //   _button = document.querySelector('#header-desktop-search-button');
-    // }
-    // if (_button == null) {
-    //   // random shot (first form, first button)
-    //   _button = document.querySelector('form button[type=button]');
-    // }
-
-    // if (_button == null) {
-    //   // random shot (first form, first button)
-    //   _button = document.querySelector('form input[type=submit]');
-    // }
-
-    return _button;
+    return document.querySelector('form[role=search] button[type=submit]');
   }
 
   get_images_tab() {
@@ -180,20 +151,22 @@ export default class YahooBot extends Bot{
   }
 
   get_text_result_page(){
-    let p = this.find_get_parameter('b');
+    const p = this.find_get_parameter('b')
+    const stride = this.find_get_parameter('pz')
     
-    if (p){
-      return Math.floor(parseInt(p) / 10) + 1;
+    if (p && stride){
+      return Math.floor(parseInt(p) / parseInt(stride)) + 1;
     } else {
       return 1;
     }
   }
 
   get_news_result_page(){
-    let p = this.find_get_parameter('b');
+    const p = this.find_get_parameter('b')
+    const stride = this.find_get_parameter('pz')
     
-    if (p){
-      return Math.floor(parseInt(p) / 10) + 1;
+    if (p && stride){
+      return Math.floor(parseInt(p) / parseInt(stride)) + 1;
     } else {
       return 1;
     }
