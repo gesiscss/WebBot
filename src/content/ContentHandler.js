@@ -296,6 +296,8 @@ export default class ContentHandler {
         window.location.replace(message.engine);
         sendResponse(false);
       }
+    } else if (message.action == 'download_page'){
+      this.bot.download_page().then(sendResponse(true))
     }
   }
 

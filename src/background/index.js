@@ -16,7 +16,7 @@ function load_settings_from_storage() {
   } catch (err) {console.warn(err)}
 
   // resort to default values if settings could not be loaded from localStorage
-  if (!restored_settings) {
+  if (restored_settings === null) {
     console.warn('Could not restore settings from local storage, using default values.')
     restored_settings = {
       useServer: false,

@@ -114,19 +114,13 @@ export default class Extension {
     // reload engines and keywords if server changed
     if (reload_server) {
       console.log('reloading engines and keywords from server')
-      new Promise((resolve, reject) => {
-        this.config.getEngines().then(engines => {
-          this.engines = engines
-          console.log('got engines:', engines)
-          resolve()
-        })
+      this.config.getEngines().then(engines => {
+        this.engines = engines
+        console.log('got engines:', engines)
       })
-      new Promise((resolve, reject) => {
-        this.config.getQueryTerms().then(keywords => {
-          this.keywords = keywords
-          console.log('got keywords:', keywords)
-          resolve()
-        })
+      this.config.getQueryTerms().then(keywords => {
+        this.keywords = keywords
+        console.log('got keywords:', keywords)
       })
     }
 
@@ -337,7 +331,7 @@ export default class Extension {
    */
   async trigger_clear_browser(){
     console.log("trigger_clear_browser(): NEW");
-    // TODO: save current page before navigating to a different one
+    await this.save_current_page() // save the currently open page before changing to base page
     try{
       xbrowser.tabs.update(this.search_tab_id, {
         'url': this.config.getBasePage()
@@ -345,6 +339,20 @@ export default class Extension {
     } catch (e){
       console.log('Caught error (trigger_clear_browser):', e);
     }
+  }
+
+  save_current_page(){
+    return new Promise((resolve, reject) => {
+      if (this.config.settings.download_pages) {
+        xbrowser.tabs.sendMessage(this.search_tab_id, {action: "download_page"}, () => {
+          console.warn('waiting for resolve')
+          setTimeout(() => {
+            console.warn('resolving now')
+            resolve()
+          }, 5000) //TODO: this seems to work, but it is very hacky
+        })
+      } else resolve()
+    })
   }
 
   async trigger_check_next_engine(){
@@ -613,8 +621,7 @@ export default class Extension {
           filename:
             this.config.settings.downloads_folder + '/' + this.engine.split('//')[1] + '_' + this.keyword + '_' + msg.filename_suffix
         }
-        xbrowser.downloads.download(pageData)
-        sendResponse(true);
+        xbrowser.downloads.download(pageData, sendResponse(true))
       
       } else if (msg.hasOwnProperty('fetch')){
         // see also https://github.com/gildas-lormeau/SingleFile/blob/911dd7e699fa9818c18320219dba414423156005/src/lib/single-file/fetch/bg/fetch.js

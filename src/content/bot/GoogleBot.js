@@ -9,6 +9,7 @@ export default class GoogleBot extends Bot{
     if (this.debug){
       // use the defaults for debug in Bot
     } else {
+      // also use the defaults
     }
   }
 
