@@ -628,17 +628,21 @@ export default class Bot {
   
   clear_browser(){
     return new Promise(async (resolve, reject) => {
-      if (this.extension.settings['clear_browser_flag']) {
+      // DO NOT CLEAR the current page
+      // because this is called by the nextround page included into the extension
+      // thus deleting the settings from localStorage
+
+      /*if (this.extension.settings['clear_browser_flag']) {
         localStorage.clear();
         sessionStorage.clear() 
         this.deleteAllCookies();
         this.clear_cookies();
       } else {
         console.log("NOT DELETING BROWSING DATA! Check settings.clear_browser");
-      }
+      }*/
       // DO NOT INCLUDE this line in the condition above, clear_browser
       // also might keep track of the iterations
-      this.extension.clear_browser();
+      this.extension.clear_browser() // clear everything except for extensions in the background
       resolve(true);
     });
   }
