@@ -7,11 +7,13 @@ export default class YahooBot extends Bot{
     super(worker, extension);
     this.onStart = this.onStart.bind(this);
 
+    // set the number of result pages to load
     if (this.debug){
       // use the defaults for debug in Bot
     } else {
-      this.scroll_images_reloads = 5;
+      // also use the defaults
     }
+
     this.sub_scroll_waiting_for_more = 500;
   }
 
@@ -39,13 +41,27 @@ export default class YahooBot extends Bot{
     }.bind(this), 100);
   }
 
+  // for the new yahoo main page, just press 'Enter' to start the search
+  // focus REQUIRES closed browser console
+  /*set_get_search_button_timeout(delay=1000){
+    console.log('pressing enter...')
+    setTimeout(function(){
+      var input = this.get_search_input();
+      input.focus();
+      input.dispatchEvent(new KeyboardEvent('keypress', {'key': 'Enter'}));
+      input.dispatchEvent(new KeyboardEvent('keydown', {'key': 'Enter'}));
+      input.dispatchEvent(new KeyboardEvent('keyup', {'key': 'Enter'}));
+      console.log('...pressed.')
+    }.bind(this), delay);
+  };*/
+
   images_animation(extra_delay=0){
     if (this.is_images_result_scrolls_end()){
       this.images_results_counter = 0;
-      setTimeout(function(){
-        this.scroll_down().then(
-          value => this.set_get_videos_tab_timeout()
-        );
+      setTimeout(async function(){
+        await this.scroll_down()
+        if (this.extension.settings['download_pages']) await this.download_page('images')
+        this.set_get_videos_tab_timeout()
       }.bind(this), this.initial_scroll_delay + extra_delay);
     } else {
       setTimeout(function(){
@@ -60,10 +76,10 @@ export default class YahooBot extends Bot{
   videos_animation(extra_delay=0){
     if (this.is_videos_result_scrolls_end()){
       this.videos_results_counter = 0;
-      setTimeout(function(){
-        this.scroll_down().then(
-          value => this.go_to_base_page()
-        );
+      setTimeout(async function(){
+        await this.scroll_down()
+        if (this.extension.settings['download_pages']) await this.download_page('videos')
+        this.go_to_base_page()
       }.bind(this), this.initial_scroll_delay + extra_delay);
     } else {
       setTimeout(function(){
@@ -74,6 +90,8 @@ export default class YahooBot extends Bot{
   }
 
 
+  // this selects the correct button but the button is broken most of the time
+  // i.e., after clicking (even manually with the extension disabled), nothing happens
   get_more_videos_button(){
     return document.querySelector('section#search button.more');
   }
@@ -85,21 +103,7 @@ export default class YahooBot extends Bot{
 
 
   get_search_input(){
-    let _input = document.querySelector('form[role=search] input');
-
-    // // US interface
-    // let _input = document.querySelector('form[role=search] input');
-
-    // if (_input == null) {
-    //   // DE interface
-    //   _input = document.querySelector('#header-search-input');
-    // }
-    // if (_input == null) {
-    //   // random shot
-    //   _input = document.querySelector('form input[type=text]');
-    // }
-
-    return _input;
+    return document.querySelector('form[role=search] input')
   }
 
   is_collect_consent_page(){
@@ -123,26 +127,7 @@ export default class YahooBot extends Bot{
   }
 
   get_search_button(){
-    let _button = document.querySelector('form[role=search] span[role=button]');
-
-    // // US interface
-    // let _button = document.querySelector('form[role=search] input[type=submit]');
-
-    // if (_button == null) {
-    //   // DE interface
-    //   _button = document.querySelector('#header-desktop-search-button');
-    // }
-    // if (_button == null) {
-    //   // random shot (first form, first button)
-    //   _button = document.querySelector('form button[type=button]');
-    // }
-
-    // if (_button == null) {
-    //   // random shot (first form, first button)
-    //   _button = document.querySelector('form input[type=submit]');
-    // }
-
-    return _button;
+    return document.querySelector('form[role=search] button[type=submit]');
   }
 
   get_images_tab() {
@@ -166,20 +151,22 @@ export default class YahooBot extends Bot{
   }
 
   get_text_result_page(){
-    let p = this.find_get_parameter('b');
+    const p = this.find_get_parameter('b')
+    const stride = this.find_get_parameter('pz')
     
-    if (p){
-      return Math.floor(parseInt(p) / 10) + 1;
+    if (p && stride){
+      return Math.floor(parseInt(p) / parseInt(stride)) + 1;
     } else {
       return 1;
     }
   }
 
   get_news_result_page(){
-    let p = this.find_get_parameter('b');
+    const p = this.find_get_parameter('b')
+    const stride = this.find_get_parameter('pz')
     
-    if (p){
-      return Math.floor(parseInt(p) / 10) + 1;
+    if (p && stride){
+      return Math.floor(parseInt(p) / parseInt(stride)) + 1;
     } else {
       return 1;
     }

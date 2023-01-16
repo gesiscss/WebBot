@@ -15,13 +15,18 @@ var settings = {
   close_inactive_tabs: false,
 
   // localhost server that will be hit at the end of each round
-  dummy_server: "http://localhost:8000/",
+  dummy_server: "", //"http://localhost:8000/",
 
   // production server where the list of engines, queryterms and urllists would be
   // downloaded from. Temporarily you can also use the microserver provided in this
   // repository (in the microserver folder)
-  server: "http://localhost:8000/",
+  server: "", //"http://localhost:8000/",
 
   // set minutes between each query
-  search_ticks_mins: 5
+  search_ticks_mins: 5,
+
+  // save search result pages using the SingleFile API (included)
+  // turn off to use other methods of saving pages such as the standalone
+  // SingleFile extension set to auto-save, or the WebTracking extension
+  download_pages: true
 }

@@ -37,7 +37,7 @@ export default class BaiduBot extends Bot{
   }
 
 
-  images_animation(delay = null){
+  async images_animation(delay = null){
     console.log('images_animation');
     if (delay == null){
       delay = this.initial_scroll_delay;
@@ -45,11 +45,10 @@ export default class BaiduBot extends Bot{
 
     if (this.is_images_result_scrolls_end()){
       this.images_results_counter = 0;
-      this.scroll_down().then(
-        value => this.set_get_videos_tab_timeout().then(
-          value => this.set_navigate_timeout()
-        )
-      );
+      await this.scroll_down()
+      if (this.extension.settings['download_pages']) await this.download_page('images')
+      await this.set_get_videos_tab_timeout()
+      this.set_navigate_timeout()
     } else {
       setTimeout(function(){
         this.scroll_down().then(
@@ -59,7 +58,7 @@ export default class BaiduBot extends Bot{
   }
 
 
-  videos_animation(delay = null){
+  async videos_animation(delay = null){
     console.log('videos_animation');
     if (delay == null){
       delay = this.initial_scroll_delay;
@@ -67,9 +66,9 @@ export default class BaiduBot extends Bot{
 
     if (this.is_videos_result_scrolls_end()){
       this.videos_results_counter = 0;
-      this.scroll_down().then(
-        value => this.go_to_base_page()
-      );
+      await this.scroll_down()
+      if (this.extension.settings['download_pages']) await this.download_page('videos')
+      this.go_to_base_page()
     } else {
       setTimeout(function(){
         this.scroll_down().then(
@@ -87,14 +86,13 @@ export default class BaiduBot extends Bot{
   };
 
   set_text_results_animation(callback_end){
-    setTimeout(function(){
-      this.scroll_down().then( value => 
-        // the callback needs to be bind again, so that it finds
-        // the methods of the object
-        callback_end.bind(this)().then(
-            value => this.set_navigate_timeout()
-          )
-      );
+    setTimeout(async function(){
+      await this.scroll_down()
+      if (this.extension.settings['download_pages']) await this.download_page('text')
+      // the callback needs to be bind again, so that it finds
+      // the methods of the object
+      await callback_end.bind(this)()
+      this.set_navigate_timeout()
     }.bind(this), this.initial_scroll_delay);
   }
 

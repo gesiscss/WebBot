@@ -1,11 +1,12 @@
 import EventEmitter from 'eventemitter3';
-
+import * as singlefile from '../lib/single-file/single-file';
 
 export default class Bot {
 
   constructor(extension) {
 
     this.extension = extension;
+    this.browser = window.hasOwnProperty('chrome') ? chrome : browser;
 
     this.EVENT_NAMES = {
       'data': 'onData',
@@ -60,6 +61,29 @@ export default class Bot {
     this.step = '';
     this.step_attempts = 5;
 
+    // fetch external content for SingleFile on Chrome through the background
+    // because Chrome gives content scripts the same privileges as page itself
+    // i.e., they cannot access external content without CORS
+    // see also: https://www.chromium.org/Home/chromium-security/extension-content-script-fetches/
+    if (window.hasOwnProperty('chrome')) {
+      singlefile.init({ fetch: this.background_fetch })
+    }
+  }
+
+  background_fetch(resource, options) {
+    options = typeof options !== 'undefined' ? options : {} // options are optional
+    return new Promise((resolve, reject)=>{
+      //console.log('fetching', resource, 'in background')
+      chrome.runtime.sendMessage({'fetch': true, 'resource': resource, 'options': options}, (response) => {
+        const fetched = {
+          status: response.status,
+          headers: new Headers(response.headers), // re-create the Headers object
+          arrayBuffer: async () => new Uint8Array(response.array).buffer // re-create the arrayBuffer containing the fetched content
+        }
+        //console.log(fetched)
+        resolve(fetched)
+      })
+    })
   }
 
   /**
@@ -139,21 +163,21 @@ export default class Bot {
     }
   }
 
-  images_animation(delay = null){
-    if (delay == null){
-      delay = this.initial_scroll_delay;
-    }
+  async images_animation(delay = null){
+    if (delay == null) delay = this.initial_scroll_delay
 
     if (this.is_images_result_scrolls_end()){
       this.images_results_counter = 0;
-      this.scroll_down().then(
-        value => this.set_get_videos_tab_timeout()
-      );
+      await this.scroll_down()
+      // download image results page only after scrolling all the way to the bottom (continuously loading additional images)
+      // in contrast, text results etc. are saved at the bottom of each results page
+      if (this.extension.settings['download_pages']) await this.download_page('images')
+      this.set_get_videos_tab_timeout()
     } else {
-      setTimeout(function(){
-        this.scroll_down().then(
-          value => this.images_animation(0));
-      }.bind(this), delay);
+      setTimeout(async function(){
+        await this.scroll_down()
+        this.images_animation(0)
+      }.bind(this), delay)
     }
   }
 
@@ -386,32 +410,35 @@ export default class Bot {
   };
 
   set_videos_results_animation(callback_end){
-    setTimeout(function(){
-      this.scroll_down().then( value => 
-        // the callback needs to be bind again, so that it finds
-        // the methods of the object
-        callback_end.bind(this)()
-      )
+    setTimeout(async function(){
+      await this.scroll_down()
+      // capture at the bottom of the page because of lazy loading images
+      if (this.extension.settings['download_pages']) await this.download_page('videos')
+      // the callback needs to be bind again, so that it finds
+      // the methods of the object
+      await callback_end.bind(this)()
     }.bind(this), this.initial_scroll_delay);
   }
 
   set_text_results_animation(callback_end){
-    setTimeout(function(){
-      this.scroll_down().then( value => 
-        // the callback needs to be bind again, so that it finds
-        // the methods of the object
-        callback_end.bind(this)()
-      );
+    setTimeout(async function(){
+      await this.scroll_down()
+      // capture at the bottom of the page because of lazy loading images
+      if (this.extension.settings['download_pages']) await this.download_page('text')
+      // the callback needs to be bind again, so that it finds
+      // the methods of the object
+      await callback_end.bind(this)()
     }.bind(this), this.initial_scroll_delay);
   }
 
   set_news_results_animation(callback_end){
-    setTimeout(function(){
-      this.scroll_down().then( value => 
-        // the callback needs to be bind again, so that it finds
-        // the methods of the object
-        callback_end.bind(this)()
-      );
+    setTimeout(async function(){
+      await this.scroll_down()
+      // capture at the bottom of the page because of lazy loading images
+      if (this.extension.settings['download_pages']) await this.download_page('news')
+      // the callback needs to be bind again, so that it finds
+      // the methods of the object
+      await callback_end.bind(this)()
     }.bind(this), this.initial_scroll_delay);
   }
   
@@ -601,17 +628,21 @@ export default class Bot {
   
   clear_browser(){
     return new Promise(async (resolve, reject) => {
-      if (this.extension.settings['clear_browser_flag']) {
+      // DO NOT CLEAR the current page
+      // because this is called by the nextround page included into the extension
+      // thus deleting the settings from localStorage
+
+      /*if (this.extension.settings['clear_browser_flag']) {
         localStorage.clear();
         sessionStorage.clear() 
         this.deleteAllCookies();
         this.clear_cookies();
       } else {
         console.log("NOT DELETING BROWSING DATA! Check settings.clear_browser");
-      }
+      }*/
       // DO NOT INCLUDE this line in the condition above, clear_browser
       // also might keep track of the iterations
-      this.extension.clear_browser();
+      this.extension.clear_browser() // clear everything except for extensions in the background
       resolve(true);
     });
   }
@@ -712,6 +743,32 @@ export default class Bot {
         }.bind(this), this.sub_scroll_down_chunk_delay);
       }.bind(this), this.sub_scroll_down_delay);
     });
+  }
+
+  async download_page(page_type) {
+
+    page_type = page_type ? page_type + '_' : '' // if available, specify which type of page is downloaded
+    
+    // capture the page with SingleFile plugin
+    console.log('capturing using SingleFile...');
+    const { content, title, filename } = await singlefile.getPageData({
+      removeHiddenElements: true,
+      removeUnusedStyles: true,
+      removeUnusedFonts: true,
+      removeImports: true,
+      blockScripts: true,
+      blockAudios: true,
+      blockVideos: true,
+      compressHTML: true,
+      removeAlternativeFonts: true,
+      removeAlternativeMedias: true,
+      removeAlternativeImages: true,
+      groupDuplicateImages: true,
+      filenameTemplate: page_type + "{date-iso}_{time-locale}.html" // also available: {page-title}
+    });
+
+    // send captured page as blob to backend to store into downloads folder
+    this.browser.runtime.sendMessage({'download_page': true, 'content': content, 'filename_suffix': filename})
   }
 
   /**

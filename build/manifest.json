@@ -5,7 +5,7 @@
   "description": "WebBot",
   "manifest_version": 2,
   "version": "0.1.1",
-  "permissions": [ "*://localhost/*", "tabs", "browsingData"],
+  "permissions": [ "<all_urls>", "tabs", "browsingData", "downloads"],
   "icons": {
     "128": "images/bot.png"
   },
@@ -15,31 +15,26 @@
   ],
   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
 
-  "browser_action": {
-    "default_popup": "index.html",
-    "default_title": "WebBot",
-
-    "default_icon": {
-      "128": "images/bot.png"
-    }
-  },
+  "browser_action": {},
+  "options_ui": {
+    "page": "index.html",
+    "browser_style": true
+  },  
 
   "background": {
     "scripts": [
-
-      "defined/settings.js",
       "dist/background.js"
     ],
     "persistent": true
   },
 
-
-  "content_scripts": [{
-      "matches": ["http://*/*", "https://*/*"],
-      "js": [
-             "dist/content.js"],
-        "run_at": "document_end",
-        "all_frames": false
-    }]
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["dist/content.js"],
+      "run_at": "document_end",
+      "all_frames": false
+    }
+  ]
 
 }

@@ -35,8 +35,8 @@ export default class Extension {
     this.keyword_iterator = 0;
     this.keywords = navlists['keywords'];
     this.engines = navlists['engines'];
-    console.log(this.keywords);
-    console.log(this.engines);
+    console.log('using keywords:', this.keywords);
+    console.log('using engines:', this.engines);
 
     this.engine = '';
     this.keyword = '';
@@ -67,16 +67,102 @@ export default class Extension {
   }
 
 
-clear_browser(){
-  console.log("-> Extension.clear_browser()");
-  this.config.clear_browser()
+  clear_browser(){
+    console.log("-> Extension.clear_browser()");
+    this.config.clear_browser()
 
-  if (this.next_clear_browser){
-    console.log("Removing Browser Event (this.next_clear_browser)");
-    clearTimeout(this.next_clear_browser);
+    if (this.next_clear_browser){
+      console.log("Removing Browser Event (this.next_clear_browser)");
+      clearTimeout(this.next_clear_browser);
+    }
   }
-}
 
+  set_settings(settings){
+    
+    const reload_server = this.config.settings.server != settings.server
+    const clear_browser = settings.clearBrowser & !this.config.settings.clear_browser
+
+    if (this.debug) {
+      console.log('before:')
+      console.log('this.keywords:', this.keywords, 'this.keyword_iterator:', this.keyword_iterator)
+      console.log('this.engines:', this.engines)
+      console.log('this.config.settings:', this.config.settings)
+    }
+
+    this.keywords = settings.queryTerms.split(',').map((term) => term.trim())
+    this.keyword_iterator = 0
+    console.log(this.keywords, this.keyword_iterator)
+
+    this.engines = settings.searchEngines.filter(({active}) => active).map(({url}) => url)
+    console.log(this.engines)
+
+    if (!settings.useServer) settings.server = ''
+    this.config.settings.server = settings.server
+
+    this.config.settings.clear_browser = settings.clearBrowser
+    this.config.settings.download_pages = settings.downloadPages
+    this.config.settings.downloads_folder = settings.downloadsFolder
+    this.config.settings.close_inactive_tabs = settings.closeInactiveTabs
+    this.config.settings.search_ticks_mins = settings.searchTicksMins
+
+    // save the settings to localStorage, if possible
+    try {
+      window.localStorage.setItem('extension_settings', JSON.stringify(settings))
+      console.log('persisted settings in localStorage')
+    } catch(err) {console.warn(err)}
+
+    // reload engines and keywords if server changed
+    if (reload_server) {
+      console.log('reloading engines and keywords from server')
+      this.config.getEngines().then(engines => {
+        this.engines = engines
+        console.log('got engines:', engines)
+      })
+      this.config.getQueryTerms().then(keywords => {
+        this.keywords = keywords
+        console.log('got keywords:', keywords)
+      })
+    }
+
+    // clear browser after clearing was turned on
+    if (clear_browser) {
+      console.log('clearing browser now')
+      this.config.clear_browser()
+    }
+
+    if (this.debug) {
+      console.log('after:')
+      console.log(this.config.settings)
+    }
+  }
+
+  get_settings(){
+    let searchEngines = [ // augment list of search engine urls with names and activations
+      {name: 'Google', url: 'https://google.com', active: false},
+      {name: 'DuckDuckGo', url: 'https://duckduckgo.com', active: false},
+      {name: 'Bing', url: 'https://bing.com', active: false},
+      {name: 'Yandex', url: 'https://yandex.com', active: false},
+      {name: 'Yahoo', url: 'https://us.yahoo.com', active: false}, // in contrast to search.yahoo.com this still has a search button
+      {name: 'Baidu', url: 'https://baidu.com', active: false},
+      {name: 'So', url: 'https://so.com', active: false},
+      {name: 'Sogou', url: 'https://sogou.com', active: false}
+    ]
+    for (let i in this.engines) {
+      searchEngines = searchEngines.map(({name, url, active}) => url == this.engines[i] ? {name, url, active: true} : {name, url, active})
+    }
+
+    return {
+      queryTerms: this.keywords.join(', '),
+      searchEngines: searchEngines,
+      clearBrowser: this.config.settings.clear_browser ? this.config.settings.clear_browser : false,
+      downloadPages: this.config.settings.download_pages ? this.config.settings.download_pages : false,
+      downloadsFolder: this.config.settings.downloads_folder ? this.config.settings.downloads_folder: '',
+      closeInactiveTabs: this.config.settings.close_inactive_tabs ? this.config.settings.close_inactive_tabs : false,
+      searchTicksMins: this.config.settings.search_ticks_mins ? this.config.settings.search_ticks_mins : 5,
+      server: this.config.settings.server ? this.config.settings.server : '',
+      useServer: this.config.settings.server == '' ? false : true
+    }
+  }
 
   /**
    * [_onConnectedPopup listen when the extension popup is open]
@@ -245,6 +331,7 @@ clear_browser(){
    */
   async trigger_clear_browser(){
     console.log("trigger_clear_browser(): NEW");
+    await this.save_current_page() // save the currently open page before changing to base page
     try{
       xbrowser.tabs.update(this.search_tab_id, {
         'url': this.config.getBasePage()
@@ -252,6 +339,20 @@ clear_browser(){
     } catch (e){
       console.log('Caught error (trigger_clear_browser):', e);
     }
+  }
+
+  save_current_page(){
+    return new Promise((resolve, reject) => {
+      if (this.config.settings.download_pages) {
+        xbrowser.tabs.sendMessage(this.search_tab_id, {action: "download_page"}, () => {
+          console.warn('waiting for resolve')
+          setTimeout(() => {
+            console.warn('resolving now')
+            resolve()
+          }, 5000) //TODO: this seems to work, but it is very hacky
+        })
+      } else resolve()
+    })
   }
 
   async trigger_check_next_engine(){
@@ -434,8 +535,9 @@ clear_browser(){
       if(msg==='on_start'){
         sendResponse({
           'clear_browser_flag': this.config.settings.clear_browser,
-          'dummy_server': this.config.settings.dummy_server,
-          'server': this.config.settings.server
+          //'dummy_server': this.config.settings.dummy_server,
+          'server': this.config.settings.server,
+          'download_pages': this.config.settings.download_pages
         });
       }else if (msg.hasOwnProperty('steady')){
 
@@ -464,6 +566,7 @@ clear_browser(){
       } else if (msg.hasOwnProperty('clear_browser')){
         this.clear_browser();
         sendResponse(true);
+      
       } else if (msg.hasOwnProperty('set_iter_step')){
         if (msg.step in this.step_iterators){
           this.step_iterators[msg.step] += 1;
@@ -473,25 +576,66 @@ clear_browser(){
         let _iterator = this.step_iterators[msg.step];
         console.log('set_iter_step', msg.step, _iterator);
         sendResponse({'iterator': _iterator});
+      
       } else if (msg.hasOwnProperty('get_iter_step')){
         let _iterator = this.step_iterators[msg.step];
         console.log('get_iter_step', msg.step, _iterator);
         sendResponse({'iterator': _iterator});
-      } else if (msg.hasOwnProperty('get_base_page')){
+      
+      } else if (msg.hasOwnProperty('go_to_base_page')){
         let _basepage = this.config.getBasePage();
-        console.log('get_base_page', _basepage)
+        console.log('go_to_base_page', _basepage)
+        xbrowser.tabs.update(this.search_tab_id, {
+          'url': this.config.getBasePage()
+        })
         sendResponse({'base_page': _basepage});
+      
       } else if (msg.hasOwnProperty('get_current_search')){
         console.log('get_current_search:', this.engine, this.keyword)
         sendResponse({
           'current_engine': this.engine,
           'current_keyword': this.keyword
         });
+      
       } else if (msg.hasOwnProperty('get_next_engine')){
         let _next_engine = this.get_next_engine();
         console.log('get_next_engine', _next_engine)
         sendResponse({'next_engine': _next_engine});
-      } 
+      
+      } else if (msg.hasOwnProperty('update_settings')){
+        if (!msg.hasOwnProperty('settings')) sendResponse(false)
+        else {
+          console.log('updating settings')
+          this.set_settings(msg.settings)
+          sendResponse(true)
+        }
+      
+      } else if (msg.hasOwnProperty('get_settings')){
+        console.log('getting settings')
+        sendResponse(this.get_settings())
+
+      } else if (msg.hasOwnProperty('download_page')){
+        const blob = new Blob([msg.content], {type: "text/html"})
+        const pageData = {
+          url: URL.createObjectURL(blob),
+          filename:
+            this.config.settings.downloads_folder + '/' + this.engine.split('//')[1] + '_' + this.keyword + '_' + msg.filename_suffix
+        }
+        xbrowser.downloads.download(pageData, sendResponse(true))
+      
+      } else if (msg.hasOwnProperty('fetch')){
+        // see also https://github.com/gildas-lormeau/SingleFile/blob/911dd7e699fa9818c18320219dba414423156005/src/lib/single-file/fetch/bg/fetch.js
+        //console.log('fetching', msg.resource)
+        fetch(msg.resource, msg.options).then(async (response) => {
+          //console.log('fetched', response)
+          const status = response.status
+          const headers = []
+          for (const header of response.headers.entries()) headers.push(header)
+          const array = Array.from(new Uint8Array(await response.arrayBuffer()))
+          sendResponse({status, headers, array})
+        })
+      }
+
       if (this.debug) console.log('<- _onContentMessage');
       return true;
   }
@@ -506,6 +650,7 @@ clear_browser(){
       xbrowser.runtime.onMessage.addListener(this._onContentMessage);
       xbrowser.runtime.onConnect.addListener(this._onConnectPopup);
 
+      xbrowser.browserAction.onClicked.addListener(() => {xbrowser.runtime.openOptionsPage();});
 
       this.getAllTabsIds().then(tabIds => {
         for (let id of tabIds){

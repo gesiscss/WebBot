@@ -39,12 +39,11 @@ export default class DuckDuckGoBot extends Bot{
   text_animation(extra_delay=0){
     if (this.is_text_result_scrolls_end()){
       this.text_results_counter = 0;
-      setTimeout(function(){
-        this.scroll_down().then(
-          value => this.set_get_news_tab_timeout().then(
-            value => this.set_navigate_timeout()
-          )
-        );
+      setTimeout(async function(){
+        await this.scroll_down()
+        if (this.extension.settings['download_pages']) await this.download_page('text')
+        await this.set_get_news_tab_timeout()
+        this.set_navigate_timeout()
       }.bind(this), this.initial_scroll_delay + extra_delay);
     } else {
       setTimeout(function(){
@@ -63,12 +62,11 @@ export default class DuckDuckGoBot extends Bot{
     if (this.is_news_result_scrolls_end()){
       console.log('End of news');
       this.news_results_counter = 0;
-      setTimeout(function(){
-        this.scroll_down().then(
-          value => this.set_get_images_tab_timeout().then(
-            value => this.set_navigate_timeout()
-          )
-        );
+      setTimeout(async function(){
+        await this.scroll_down()
+        if (this.extension.settings['download_pages']) await this.download_page('news')
+        await this.set_get_images_tab_timeout()
+        this.set_navigate_timeout()
       }.bind(this), this.initial_scroll_delay + extra_delay);
     } else {
       console.log('Continue news');
@@ -85,18 +83,17 @@ export default class DuckDuckGoBot extends Bot{
   }
 
 
-  images_animation(delay = null){
+  async images_animation(delay = null){
     if (delay == null){
       delay = this.initial_scroll_delay;
     }
 
     if (this.is_images_result_scrolls_end()){
       this.images_results_counter = 0;
-      this.scroll_down().then(
-        value => this.set_get_videos_tab_timeout().then(
-          value => this.set_navigate_timeout()
-        )
-      );
+      await this.scroll_down()
+      if (this.extension.settings['download_pages']) await this.download_page('images')
+      await this.set_get_videos_tab_timeout()
+      this.set_navigate_timeout()
     } else {
       setTimeout(function(){
         this.scroll_down().then(
@@ -105,16 +102,16 @@ export default class DuckDuckGoBot extends Bot{
     }
   }
 
-  videos_animation(delay = null){
+  async videos_animation(delay = null){
     if (delay == null){
       delay = this.initial_scroll_delay;
     }
 
     if (this.is_videos_result_scrolls_end()){
       this.videos_results_counter = 0;
-      this.scroll_down().then(
-        value => this.go_to_base_page()
-      );
+      await this.scroll_down()
+      if (this.extension.settings['download_pages']) await this.download_page('videos')
+      this.go_to_base_page()
     } else {
       setTimeout(function(){
         this.scroll_down().then(

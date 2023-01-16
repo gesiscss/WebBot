@@ -30,8 +30,8 @@ export default class Configuration {
          })
         .catch(err => {
           //if (this.debug) console.log('_fetchQueryTerms: ', err);
-          console.log("Failed fetching the queryterms");
-          resolve(['Sage Concept Grant', 'elections']);
+          console.warn("Failed fetching the queryterms");
+          resolve([]); // ['Sage Concept Grant', 'elections']
           //resolve(false);
         })
     });
@@ -56,8 +56,8 @@ export default class Configuration {
          })
         .catch(err => {
           //if (this.debug) console.log('_fetchQueryTerms: ', err);
-          console.log("Failed fetching the urllist");
-          resolve(['example.com']);
+          console.warn("Failed fetching the urllist");
+          resolve([]); // ['example.com']
           //resolve(false);
         })
     });
@@ -82,22 +82,23 @@ export default class Configuration {
          })
         .catch(err => {
           //if (this.debug) console.log('_fetchEngines: ', err);
-          console.log("Failed fetching the engines");
+          console.warn("Failed fetching the engines");
           //resolve(false);
-          resolve(['https://google.com', 'https://duckduckgo.com', 
+          resolve([]);
+          /* ['https://google.com', 'https://duckduckgo.com', 
             'https://bing.com', 'https://yandex.com', 
-            'https://search.yahoo.com', 'https://baidu.com']);
+            'https://search.yahoo.com', 'https://baidu.com'] */
         })
     });
   }
 
   getBasePage(){
-    return this.settings.dummy_server + 'bot/nextround';
+    return '/nextround.html'
   }
 
 
   clear_browser(){
-    console.log('clear_browser', this.settings.clear_browser);
+    //console.log('clear_browser', this.settings.clear_browser);
 
     if (this.settings.clear_browser){
       //chrome

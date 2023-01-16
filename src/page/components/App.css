@@ -1,0 +1,63 @@
+.box {
+    background-color: #f3f4f6;
+    border-radius: 0.3rem;
+    padding: 0.3rem;
+    margin: 0.2rem 0.4rem 0.2rem 0;
+    width: auto;
+    float: left;
+}
+table {
+    border-collapse: collapse;
+    margin: 0;
+    padding: 0;
+}
+td {
+    border-bottom: 1px #cbd5e1 dashed;
+    padding: 0.5rem 0 0.5rem 0;
+    vertical-align: middle;
+}
+.lastrow{
+    border-bottom: none;
+    min-width: 10rem
+}
+textarea, input[type=text] {
+    width: 20rem;
+}
+textarea {
+    height: 7rem
+}
+.checklabel, .radiolabel, input[type="checkbox"], input[type="radio"] {
+    cursor: pointer;
+    vertical-align: middle;
+    margin: 0.15rem
+}
+.tooltip {
+    border-radius: 9999px;
+    background-color: #f3f4f6;
+    color: #6b7280;
+    position: relative;
+    margin-left: 0.4rem;
+    width: 15px;
+    height: 15px;
+    font-size: 12px;
+    line-height: 1rem;
+    cursor: default;
+    text-align: center;
+    vertical-align: center;
+    display: inline-block;
+    border: solid 1px #6b7280;
+}
+.tooltip:hover::after {
+    content: attr(data-title);
+    padding: 0.3rem;
+    width: 20rem;
+    position: absolute;
+    top: 0.8rem;
+    left: 0.5rem;
+    color: black;
+    background-color: white;
+    border: solid 1px #9ca3af;
+    border-radius: 0.15rem;
+    text-align: left;
+    z-index: 999;
+}
