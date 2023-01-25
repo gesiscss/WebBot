@@ -4,13 +4,13 @@
 	WebBot
 </h1>
 
-A browser extension for Mozilla and Chrome that simulates a user searching (at least) 50-top main, news, images and videos search results of up to 8 different [search engines](#supported-engines).
+A browser extension for Mozilla and Chrome that simulates a user searching (at least) 50-top main, news, images and videos search results of up to 8 different [search engines](#-supported-engines).
 
 - Install on [Firefox](#firefox) or [Chrome](#chrome)
-- Select [search engines and keywords](#🔧-adjusting-the-settings)
-- [Start crawling](#🕷️-start-crawling)
-- [Save accessed pages](#💾-saving-search-results) into downloads
-- [Deactivate](#🚧-reload-deactivate-or-remove) the extension
+- Select [search engines and keywords](#-adjusting-the-settings)
+- [Start crawling](#%EF%B8%8F-start-crawling)
+- [Save accessed pages](#-saving-search-results) into downloads
+- [Deactivate](#-reload-deactivate-or-remove) the extension
 
 ### Cite us
 
@@ -24,7 +24,7 @@ Demo goes here
 
 ## Installation
 
-*Note that as soon as the extension is installed and activated, it will interfere with your normal web browser usage. [Deactivate](#🚧-reload-deactivate-or-remove) the extension whenever you don't need it.*
+*Note that as soon as the extension is installed and activated, it will interfere with your normal web browser usage. [Deactivate](#-reload-deactivate-or-remove) the extension whenever you don't need it.*
 
 ### Firefox
 
@@ -51,7 +51,7 @@ Demo goes here
 
 ### 🔧 Adjusting the Settings
 
-Settings can be accessed by clicking on the extension's icon in the browser's tool bar. Settings are applied after the `Update Settings` button is pressed and are stored in the browser's local storage. If settings are changed after crawling had already started, it is recommended to [reload the extension](#🚧-reload-deactivate-or-remove). The following settings are available:
+Settings can be accessed by clicking on the extension's icon in the browser's tool bar. Settings are applied after the `Update Settings` button is pressed and are stored in the browser's local storage. If settings are changed after crawling had already started, it is recommended to [reload the extension](#-reload-deactivate-or-remove). The following settings are available:
 
 | Option                | Default                  | Behavior                          |
 |-----------------------|--------------------------|-----------------------------------|
@@ -61,7 +61,7 @@ Settings can be accessed by clicking on the extension's icon in the browser's to
 | `Save In`             | `webbot`                 | If `Save Pages` is activated, this is the subdirectory of your downloads folder that the webpages are saved into. |
 | `Configuration`       | `Local`                  | Switch between selecting engines and keywords locally or providing them through a server. For the latter, see the [Advanced](#advanced) guide down below. |
 | `Server`              | -                        | If `Server` configuration is selected, the full URL of the server. |
-| `Search Engines`      | Google, DuckDuckGo, Bing | If `Local` configuration is selected, determine the search engines to query – see the [table below](#🔍-supported-engines). |
+| `Search Engines`      | Google, DuckDuckGo, Bing | If `Local` configuration is selected, determine the search engines to query – see the [table below](#-supported-engines). |
 | `Query Terms`         | -                        | If `Local` configuration is selected, provide a comma-separated list of terms to query. Each term can be composed of multiple words and symbols such as `-"+`, only commas are reserved. Each term is queried once by a selected search engine. To query the same term by multiple search engines, repeat the term for each engine. |
 
 **Example:** Assuming the goal is to query both Google and Baidu for the terms "climate" and "kyoto protocol +band" and you want to use the `Local` configuration. Then select Google and Baidu from the list of search engines, unticking all other engines. In the `Query Terms` field, input the following: "climate, climate, kyoto protocol +band, kyoto protocol +band". It is necessary to repeat the terms such that both engines are queried with the same terms. Otherwise the crawled pages would just include "climate" results from Google and "kyoto protocol +band" results from Baidu.
@@ -87,7 +87,7 @@ Settings can be accessed by clicking on the extension's icon in the browser's to
 
 ### 💾 Saving Search Results
 
-We integrated the wonderful [SingleFile](https://github.com/gildas-lormeau/SingleFile) into this extension to automatically save search result pages. This feature can be turned on or off in the [settings](#🔧-adjusting-the-settings). Pages will be stored as full archives containing all necessary scripts, fonts, pictures, etc. in-line.
+We integrated the wonderful [SingleFile](https://github.com/gildas-lormeau/SingleFile) into this extension to automatically save search result pages. This feature can be turned on or off in the [settings](#-adjusting-the-settings). Pages will be stored as full archives containing all necessary scripts, fonts, pictures, etc. in-line.
 
 If search results are presented as multiple pages, each page is saved individually. If more search results are automatically loaded after scrolling to the bottom, the page is only saved once after scrolling the designated amount. Pages are saved in the format `<engine url>_<keyword>_<result type>_<date>_<time>.html`. It is also possible to designate a specific subdirectory to download the pages into. This might come handy if multiple browsers are used to crawl and save into the same downloads directory.
 
@@ -103,7 +103,7 @@ On Chrome, navigate to `chrome://extensions` to reload, deactivate, or remove th
 
 ## Advanced
 
-For some experimental setups, crawling search engines in parallel on multiple browsers or machines could be desired. For example, to investigate how Google search results differ between Germany and Brazil, one could rent virtual servers in both countries and then start crawling. In these scenarios it makes sense not to define the lists of search engines and query terms within the extension but to provide it through a central server. WebBot supports this by allowing for a `Server` configuration in the [Settings](#🔧-adjusting-the-settings).
+For some experimental setups, crawling search engines in parallel on multiple browsers or machines could be desired. For example, to investigate how Google search results differ between Germany and Brazil, one could rent virtual servers in both countries and then start crawling. In these scenarios it makes sense not to define the lists of search engines and query terms within the extension but to provide it through a central server. WebBot supports this by allowing for a `Server` configuration in the [Settings](#-adjusting-the-settings).
 
 ### 🚲 Installing the Microserver
 
