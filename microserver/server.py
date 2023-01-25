@@ -15,15 +15,6 @@ class S(BaseHTTPRequestHandler):
         self.send_header('Content-type', 'text/html')
         self.end_headers()
 
-    def do_GET(self):
-        if self.path == "/bot/nextround":
-            self._set_headers()
-            f = open("bot/nextround.html", "r")
-            if version == 2:
-               self.wfile.write(f.read())
-            elif version == 3:
-               self.wfile.write(bytes(f.read(), "utf-8"))
-
     def do_HEAD(self):
         self._set_headers()
 
@@ -44,11 +35,6 @@ class S(BaseHTTPRequestHandler):
         elif self.path == '/bot/getqueryterms':            
             with open('bot/queryterms.txt') as f:
                 lines = f.read().splitlines()
-
-        elif self.path == '/bot/geturllist':            
-            with open('bot/urllist.txt') as f:
-                lines = f.read().splitlines()
-
 
         self.wfile.write(simplejson.dumps({
             'result': [x.strip() for x in lines if x.strip() != '']
