@@ -1,6 +1,6 @@
 
 <h1 align="center">
-	<img src="./build/images/bot.png" alt="WebBot" height="25">
+	<img src="./build/images/bot.png" alt="WebBot icon" height="25">
 	WebBot
 </h1>
 
@@ -17,7 +17,7 @@ A browser extension for Mozilla and Chrome that simulates a user searching (at l
 Ulloa, R., Makhortykh, M., & Urman, A. (2021). Algorithm Auditing at a Large-Scale: Insights from Search Engine Audits. ArXiv:2106.05831 [Cs]. http://arxiv.org/abs/2106.05831
 
 <div align="center">
-Demo goes here
+	<img src="./docs/demo.webp" alt="WebBot demo">
 </div>
 
 
