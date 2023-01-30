@@ -164,3 +164,11 @@ Instead of `npm run build` you can also use `npm run start` for hot reloading an
 This extension in generally quite talkative, both the content but also the background script. In some classes, setting `this.debug=true` will enable even more console output. The console output of the content script directly appears in a console opened in the current tab. The console output of the background can be found in Firefox under `about:debugging#/runtime/this-firefox` (click `Inspect`) and in Chrome under `chrome://extensions/` (click `background page`).
 
 During the build process, webpack by default minimizes the output files using the [TerserPlugin](https://github.com/webpack-contrib/terser-webpack-plugin). For debugging, it might make sense to disable this by removing `options.plugins.push(new TerserPlugin())` from `webpack.default.config.js` and `webpack.page.config.js`.
+
+### 🧭 Installing on Safari
+
+Compared to Firefox and Chrome, loading a temporary extension into Safari isn't as straight-forward. Apple, however, provides a command line script to convert an extension for Safari:
+
+    xcrun safari-web-extension-converter WebBot/build
+
+This creates an Xcode project which in turn can be used to compile a macOS app that installs the extension in Safari. For more information, see the [official documentation](https://developer.apple.com/documentation/safariservices/safari_web_extensions/converting_a_web_extension_for_safari). Some initial testing revealed that both saving web pages and clearing browser data is broken in Safari, so a proper port would need some additional work.
