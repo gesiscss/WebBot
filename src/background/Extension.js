@@ -158,7 +158,7 @@ export default class Extension {
       downloadPages: this.config.settings.download_pages ? this.config.settings.download_pages : false,
       downloadsFolder: this.config.settings.downloads_folder ? this.config.settings.downloads_folder: '',
       closeInactiveTabs: this.config.settings.close_inactive_tabs ? this.config.settings.close_inactive_tabs : false,
-      searchTicksMins: this.config.settings.search_ticks_mins ? this.config.settings.search_ticks_mins : 5,
+      searchTicksMins: this.config.settings.search_ticks_mins ? this.config.settings.search_ticks_mins : 6,
       server: this.config.settings.server ? this.config.settings.server : '',
       useServer: this.config.settings.server == '' ? false : true
     }

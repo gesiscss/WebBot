@@ -32,7 +32,7 @@ function load_settings_from_storage() {
       ],
       queryTerms: 'Sage Concept Grant, elections',
       server: '',
-      searchTicksMins: 5,
+      searchTicksMins: 6,
       clearBrowser: false,
       closeInactiveTabs: false,
       downloadPages: false,

@@ -18,7 +18,7 @@ class App extends Component {
         searchEngines: [],
         queryTerms: '',
         server: '',
-        searchTicksMins: 5,
+        searchTicksMins: 6,
         clearBrowser: false,
         closeInactiveTabs: false,
         downloadPages: false,
