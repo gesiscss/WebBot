@@ -14,7 +14,7 @@ A browser extension for Mozilla and Chrome that simulates a user searching (at l
 
 ### Cite us
 
-Ulloa, R., Makhortykh, M., & Urman, A. (2021). Algorithm Auditing at a Large-Scale: Insights from Search Engine Audits. ArXiv:2106.05831 [Cs]. http://arxiv.org/abs/2106.05831
+Ulloa, R., Makhortykh, M., & Urman, A. (2022). Scaling up search engine audits: Practical insights for algorithm auditing. Journal of Information Science. https://doi.org/10.1177/01655515221093029
 
 <div align="center">
 	<img src="./docs/demo.webp" alt="WebBot demo">
