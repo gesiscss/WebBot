@@ -151,25 +151,25 @@ export default class YandexBot extends Bot{
   }
 
   get_search_button(){
-    return document.querySelector('div.search2__button button');
+    return document.querySelector('div.search2__button button')
   }
 
   get_next_button(){
-    return document.querySelector('a.pager__item_kind_next');
+    return document.querySelector('a.Pager-Item_type_next')
   }
 
-  get_next_button_news(){
-    let buttons = document.querySelectorAll('span.pager__group a.button');
+  /*get_next_button_news(){
+    let buttons = document.querySelectorAll('span.pager__group a.button')
     return buttons[buttons.length - 1];
-  }
+  }*/
 
   get_text_result_page(){
-    let p = this.find_get_parameter('p');
+    let p = this.find_get_parameter('p')
 
     if (p){
-      return parseInt(p) + 1;
+      return parseInt(p) + 1
     } else {
-      return 1;
+      return 1
     }
   }
 
