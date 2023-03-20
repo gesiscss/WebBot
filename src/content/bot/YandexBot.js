@@ -105,10 +105,15 @@ export default class YandexBot extends Bot{
 
   // Skip the news results
   text_animation(){
-    if (this.is_text_result_pages_end()){
-      this.set_text_results_animation(
-        this.set_get_images_tab_timeout // jump to images directly
-      )
+    // skip the initial text results if unwanted
+    if (!this.extension.settings['result_types'].includes('Text')) {
+      console.log('skipping the text')
+      // don't do any animation when directly skipping the text results
+      this.jump_to_next_active_result_type('Text', null, ['News'])
+    // jump to the result type we want to consider next
+    } else if (this.is_text_result_pages_end()){
+      this.jump_to_next_active_result_type('Text', this.set_text_results_animation.bind(this), ['News'])
+    // continue with the next result page
     } else {
       this.set_text_results_animation(
         this.set_get_next_button_text_result_timeout

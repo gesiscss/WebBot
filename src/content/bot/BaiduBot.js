@@ -47,8 +47,8 @@ export default class BaiduBot extends Bot{
       this.images_results_counter = 0;
       await this.scroll_down()
       if (this.extension.settings['download_pages']) await this.download_page('images')
-      await this.set_get_videos_tab_timeout()
-      this.set_navigate_timeout()
+      // jump to the result type we want to consider next
+      this.jump_to_next_active_result_type('Images', null)
     } else {
       setTimeout(function(){
         this.scroll_down().then(

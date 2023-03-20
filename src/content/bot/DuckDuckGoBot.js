@@ -36,13 +36,21 @@ export default class DuckDuckGoBot extends Bot{
 
   // WATCH OUT: DUCKDUCKGO is different because it uses pushstate and popstate,
   // therefore there is a navigate timeout method
-  text_animation(extra_delay=0){
-    if (this.is_text_result_scrolls_end()){
+  async text_animation(extra_delay=0){
+    // skip the initial text results if unwanted
+    if (!this.extension.settings['result_types'].includes('Text')) {
+      console.log('skipping the text')
+      // don't do any animation when directly skipping the text results
+      await this.jump_to_next_active_result_type('Text', null)
+      this.set_navigate_timeout()
+
+    } else if (this.is_text_result_scrolls_end()){
       this.text_results_counter = 0;
       setTimeout(async function(){
         await this.scroll_down()
         if (this.extension.settings['download_pages']) await this.download_page('text')
-        await this.set_get_news_tab_timeout()
+        // jump to the result type we want to consider next
+        await this.jump_to_next_active_result_type('Text', null)
         this.set_navigate_timeout()
       }.bind(this), this.initial_scroll_delay + extra_delay);
     } else {
@@ -65,7 +73,8 @@ export default class DuckDuckGoBot extends Bot{
       setTimeout(async function(){
         await this.scroll_down()
         if (this.extension.settings['download_pages']) await this.download_page('news')
-        await this.set_get_images_tab_timeout()
+        // jump to the result type we want to consider next
+        await this.jump_to_next_active_result_type('News', null)
         this.set_navigate_timeout()
       }.bind(this), this.initial_scroll_delay + extra_delay);
     } else {
@@ -92,7 +101,8 @@ export default class DuckDuckGoBot extends Bot{
       this.images_results_counter = 0;
       await this.scroll_down()
       if (this.extension.settings['download_pages']) await this.download_page('images')
-      await this.set_get_videos_tab_timeout()
+      // jump to the result type we want to consider next
+      await this.jump_to_next_active_result_type('Images', null)
       this.set_navigate_timeout()
     } else {
       setTimeout(function(){

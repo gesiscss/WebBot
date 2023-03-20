@@ -65,7 +65,7 @@ export default class YahooBot extends Bot{
       setTimeout(async function(){
         await this.scroll_down()
         if (this.extension.settings['download_pages']) await this.download_page('images')
-        this.set_get_videos_tab_timeout()
+        this.jump_to_next_active_result_type('Images', null)
       }.bind(this), this.initial_scroll_delay + extra_delay);
     } else {
       setTimeout(function(){

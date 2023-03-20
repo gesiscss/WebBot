@@ -140,24 +140,24 @@ export default class Bot {
     }.bind(this), navigate_delay);
   }
 
-  jump_to_next_active_result_type(current_result_type, result_animation){
+  async jump_to_next_active_result_type(current_result_type, result_animation, skipping=[]){
     const result_types = ['Text', 'News', 'Images', 'Videos']
     const active_result_types = this.extension.settings['result_types']
     if (!result_types.includes(current_result_type)) throw new Error('Current result type not among the supported types.')
     const current_index = result_types.indexOf(current_result_type)
 
-    if (current_index < 1 && active_result_types.includes('News')) {
-      if (result_animation) result_animation(this.set_get_news_tab_timeout)
-      else this.set_get_news_tab_timeout()
-    } else if (current_index < 2 && active_result_types.includes('Images')) {
-      if (result_animation) result_animation(this.set_get_images_tab_timeout)
-      else this.set_get_images_tab_timeout()
-    } else if (current_index < 3 && active_result_types.includes('Videos')) {
-      if (result_animation) result_animation(this.set_get_videos_tab_timeout)
-      else this.set_get_videos_tab_timeout()
+    if (current_index < 1 && active_result_types.includes('News') && !skipping.includes('News')) {
+      if (result_animation) await result_animation(this.set_get_news_tab_timeout)
+      else await this.set_get_news_tab_timeout()
+    } else if (current_index < 2 && active_result_types.includes('Images') && !skipping.includes('Images')) {
+      if (result_animation) await result_animation(this.set_get_images_tab_timeout)
+      else await this.set_get_images_tab_timeout()
+    } else if (current_index < 3 && active_result_types.includes('Videos') && !skipping.includes('Videos')) {
+      if (result_animation) await result_animation(this.set_get_videos_tab_timeout)
+      else await this.set_get_videos_tab_timeout()
     } else {
-      if (result_animation) result_animation(this.go_to_base_page)
-      else this.go_to_base_page()
+      if (result_animation) await result_animation(this.go_to_base_page)
+      else await this.go_to_base_page()
     }
   }
 
@@ -551,10 +551,8 @@ export default class Bot {
 
         console.log('is_it_loaded', this.is_news_loaded());
         if (this.is_news_loaded()){
-          console.log('is_news_loaded');
-          this.set_news_results_animation(
-            this.set_get_images_tab_timeout
-          );
+          console.log('is_news_loaded')
+          this.jump_to_next_active_result_type('News', this.set_news_results_animation.bind(this))
         } else {
           location.reload();
         }
