@@ -119,8 +119,10 @@ export default class BingBot extends Bot{
   The method is otherwise unnecessary. It will still work without
   it. Basically the URL bar does not seem to be triggering the 
   loading of a new page.
+
+  BROKEN because there is no search button anymore
   *****************************************************************/
-  set_get_next_button_text_result_timeout(){
+  /*set_get_next_button_text_result_timeout(){
     return new Promise(async (resolve, reject) => {
       setTimeout(function(){
         console.log("click_or_reload_promise");
@@ -133,7 +135,7 @@ export default class BingBot extends Bot{
         resolve(true);
       }.bind(this), this.next_delay);
     });  
-  }
+  }*/
 
   force_location(_href){
     console.log('force location', _href);
@@ -150,12 +152,30 @@ export default class BingBot extends Bot{
   * For Bing, click as fast as possible to avoid the auto-suggestions
   * Leaving the parameter just in case but it is fine to just ignore it
   */
-  set_get_search_button_timeout(delay=0){
+  /*set_get_search_button_timeout(delay=0){
     this.click_or_reload(this.get_search_button());
-  };
+  };*/
+
+  // for the new bing main page, just press 'Enter' to start the search
+  set_get_search_button_timeout(delay=1000){
+    console.log('pressing enter...')
+    setTimeout(function(){
+      var input = this.get_search_input();
+      const enterEvent = new KeyboardEvent('keydown', {
+        code: 'Enter',
+        key: 'Enter',
+        charCode: 13,
+        keyCode: 13,
+        view: window,
+        bubbles: true
+      })
+      input.dispatchEvent(enterEvent)
+      console.log('...pressed.')
+    }.bind(this), delay);
+  }
 
   get_search_input(){
-    return document.querySelector('input#sb_form_q');
+    return document.querySelector('textarea#sb_form_q');
   }
 
   clear_autosuggestion_box(){
@@ -186,9 +206,9 @@ export default class BingBot extends Bot{
     }
   }
 
-  get_search_button(){
+  /*get_search_button(){
     return document.querySelector('input#sb_form_go');
-  }
+  }*/
 
   get_news_tab() {
     return document.querySelector("a[href*='/news/']");
