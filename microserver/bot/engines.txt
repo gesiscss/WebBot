@@ -3,4 +3,4 @@ https://duckduckgo.com
 https://baidu.com
 https://bing.com
 https://yandex.com
-https://us.yahoo.com
+https://search.yahoo.com

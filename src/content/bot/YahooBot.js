@@ -42,18 +42,22 @@ export default class YahooBot extends Bot{
   }
 
   // for the new yahoo main page, just press 'Enter' to start the search
-  // focus REQUIRES closed browser console
-  /*set_get_search_button_timeout(delay=1000){
+  set_get_search_button_timeout(delay=1000){
     console.log('pressing enter...')
     setTimeout(function(){
       var input = this.get_search_input();
-      input.focus();
-      input.dispatchEvent(new KeyboardEvent('keypress', {'key': 'Enter'}));
-      input.dispatchEvent(new KeyboardEvent('keydown', {'key': 'Enter'}));
-      input.dispatchEvent(new KeyboardEvent('keyup', {'key': 'Enter'}));
+      const enterEvent = new KeyboardEvent('keydown', {
+        code: 'Enter',
+        key: 'Enter',
+        charCode: 13,
+        keyCode: 13,
+        view: window,
+        bubbles: true
+      })
+      input.dispatchEvent(enterEvent)
       console.log('...pressed.')
     }.bind(this), delay);
-  };*/
+  };
 
   images_animation(extra_delay=0){
     if (this.is_images_result_scrolls_end()){

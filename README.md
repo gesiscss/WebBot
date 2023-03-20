@@ -80,7 +80,7 @@ Settings can be accessed by clicking on the extension's icon in the browser's to
 | DuckDuckGo | [duckduckgo.com](https://duckduckgo.com) | |
 | Bing       | [bing.com](https://bing.com) | |
 | Yandex     | [yandex.com](https://yandex.com) | Yandex is very strict with captchas and might thus require some manual intervention. News are currently not supported. Not yet implemented are `ya.ru` and `yandex.ru` (which now redirects to `dzen.ru`). |
-| Yahoo!     | [us.yahoo.com](https://us.yahoo.com) | Note that Yahoo! handles localization primarily through subdomains, so we only support the US version for now. |
+| Yahoo!     | [search.yahoo.com](https://search.yahoo.com) | Note that Yahoo! handles localization primarily through subdomains, so we use the 'neutral' `search` subdomain for now. |
 | Baidu      | [baidu.com](https://baidu.com) | Baidu provides *information* rather than news results. |
 | So         | [so.com](https://so.com) | So also provides *information* rather than news results. |
 | Sogou      | [sogou.com](https://sogou.com) | Sogou does not provide news results. |
@@ -107,7 +107,7 @@ For some experimental setups, crawling search engines in parallel on multiple br
 
 ### 🚲 Installing the Microserver
 
-To test out server deployment, this repository includes a microserver that can be started in the same machine where the browser is running (localhost). It requires python and the simplejson package to be installed. The lists of engines and queryterms are served from `engines.txt` and `queryterms.txt`, separated by newlines. Beware that `engines.txt` has to contain the full URL of each engine such as `https://us.yahoo.com`.
+To test out server deployment, this repository includes a microserver that can be started in the same machine where the browser is running (localhost). It requires python and the simplejson package to be installed. The lists of engines and queryterms are served from `engines.txt` and `queryterms.txt`, separated by newlines. Beware that `engines.txt` has to contain the full URL of each engine such as `https://search.yahoo.com`.
 
 1. Open a terminal
 2. Navigate to where you downloaded/cloned this repository

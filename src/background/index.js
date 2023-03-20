@@ -25,7 +25,7 @@ function load_settings_from_storage() {
         {name: 'DuckDuckGo', url: 'https://duckduckgo.com', active: true},
         {name: 'Bing', url: 'https://bing.com', active: true},
         {name: 'Yandex', url: 'https://yandex.com', active: false},
-        {name: 'Yahoo', url: 'https://us.yahoo.com', active: false}, // in contrast to search.yahoo.com this still has a search button
+        {name: 'Yahoo', url: 'https://search.yahoo.com', active: false},
         {name: 'Baidu', url: 'https://baidu.com', active: false},
         {name: 'So', url: 'https://so.com', active: false},
         {name: 'Sogou', url: 'https://sogou.com', active: false}
