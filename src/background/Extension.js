@@ -35,10 +35,10 @@ export default class Extension {
     this.keyword_iterator = 0
     this.keywords = navlists['keywords']
     this.engines = navlists['engines']
-    this.resultTypes = navlists['resultTypes']
+    this.result_types = navlists['resultTypes']
     console.log('using keywords:', this.keywords)
     console.log('using engines:', this.engines)
-    console.log('using resultTypes:', this.resultTypes);
+    console.log('using resultTypes:', this.result_types);
 
     this.engine = '';
     this.keyword = '';
@@ -97,6 +97,9 @@ export default class Extension {
 
     this.engines = settings.searchEngines.filter(({active}) => active).map(({url}) => url)
     console.log(this.engines)
+
+    this.result_types = settings.resultTypes.filter(({active}) => active).map(({name}) => name)
+    console.log(this.result_types)
 
     if (!settings.useServer) settings.server = ''
     this.config.settings.server = settings.server
@@ -158,13 +161,13 @@ export default class Extension {
     }
 
     let resultTypes = [ // augment list of result types with activations
-      {name: 'Text', active: true},
-      {name: 'News', active: true},
+      {name: 'Text', active: false},
+      {name: 'News', active: false},
       {name: 'Images', active: false},
       {name: 'Videos', active: false}
     ]
-    for (let i in this.resultTypes) {
-      resultTypes = resultTypes.map(({name, active}) => name == this.resultTypes[i] ? {name, active: true} : {name, active})
+    for (let i in this.result_types) {
+      resultTypes = resultTypes.map(({name, active}) => name == this.result_types[i] ? {name, active: true} : {name, active})
     }
 
     return {
@@ -554,7 +557,8 @@ export default class Extension {
           'clear_browser_flag': this.config.settings.clear_browser,
           //'dummy_server': this.config.settings.dummy_server,
           'server': this.config.settings.server,
-          'download_pages': this.config.settings.download_pages
+          'download_pages': this.config.settings.download_pages,
+          'result_types': this.result_types
         });
       }else if (msg.hasOwnProperty('steady')){
 
