@@ -1,3 +1,6 @@
+body {
+    width: 500px;
+}
 .box {
     background-color: #f3f4f6;
     border-radius: 0.3rem;
