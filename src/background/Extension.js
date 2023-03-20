@@ -32,11 +32,13 @@ export default class Extension {
     this.tabs = {};
     this.event = new EventEmitter();
 
-    this.keyword_iterator = 0;
-    this.keywords = navlists['keywords'];
-    this.engines = navlists['engines'];
-    console.log('using keywords:', this.keywords);
-    console.log('using engines:', this.engines);
+    this.keyword_iterator = 0
+    this.keywords = navlists['keywords']
+    this.engines = navlists['engines']
+    this.resultTypes = navlists['resultTypes']
+    console.log('using keywords:', this.keywords)
+    console.log('using engines:', this.engines)
+    console.log('using resultTypes:', this.resultTypes);
 
     this.engine = '';
     this.keyword = '';
@@ -122,6 +124,10 @@ export default class Extension {
         this.keywords = keywords
         console.log('got keywords:', keywords)
       })
+      this.config.getResultTypes().then(resultTypes => {
+        this.resultTypes = resultTypes
+        console.log('got result types:', resultTypes)
+      })
     }
 
     // clear browser after clearing was turned on
@@ -151,9 +157,20 @@ export default class Extension {
       searchEngines = searchEngines.map(({name, url, active}) => url == this.engines[i] ? {name, url, active: true} : {name, url, active})
     }
 
+    let resultTypes = [ // augment list of result types with activations
+      {name: 'Text', active: true},
+      {name: 'News', active: true},
+      {name: 'Images', active: false},
+      {name: 'Videos', active: false}
+    ]
+    for (let i in this.resultTypes) {
+      resultTypes = resultTypes.map(({name, active}) => name == this.resultTypes[i] ? {name, active: true} : {name, active})
+    }
+
     return {
       queryTerms: this.keywords.join(', '),
       searchEngines: searchEngines,
+      resultTypes: resultTypes,
       clearBrowser: this.config.settings.clear_browser ? this.config.settings.clear_browser : false,
       downloadPages: this.config.settings.download_pages ? this.config.settings.download_pages : false,
       downloadsFolder: this.config.settings.downloads_folder ? this.config.settings.downloads_folder: '',
