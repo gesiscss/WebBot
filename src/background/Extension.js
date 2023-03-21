@@ -58,10 +58,13 @@ export default class Extension {
 
     this.getAllTabsIds = this.getAllTabsIds.bind(this);
 
-    this.search_ticks = this.config.settings.search_ticks_mins*60000;
-    this.clear_browser_lapse = this.search_ticks - 45000;
-    this.check_engine_lapse = this.search_ticks - 30000;
-    this.initial_search_delay = 60000;
+    // make the bot move on to the next engine faster, if less result types are selected
+    const discounted_search_mins = this.config.settings.search_ticks_mins - 4 + this.result_types.length
+    // calculate when the next browser clearing and navigation to next engine should occur
+    this.search_ticks = discounted_search_mins*60000
+    this.clear_browser_lapse = this.search_ticks - 45000
+    this.check_engine_lapse = this.search_ticks - 30000
+    this.initial_search_delay = 60000
 
     this.step_iterators = {}
 
@@ -100,6 +103,11 @@ export default class Extension {
 
     this.result_types = settings.resultTypes.filter(({active}) => active).map(({name}) => name)
     console.log(this.result_types)
+    // adjusting the search tick timing
+    const discounted_search_mins = this.config.settings.search_ticks_mins - 4 + this.result_types.length
+    this.search_ticks = discounted_search_mins*60000
+    this.clear_browser_lapse = this.search_ticks - 45000
+    this.check_engine_lapse = this.search_ticks - 30000
 
     if (!settings.useServer) settings.server = ''
     this.config.settings.server = settings.server
