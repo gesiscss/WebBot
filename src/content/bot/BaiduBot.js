@@ -38,22 +38,19 @@ export default class BaiduBot extends Bot{
 
 
   async images_animation(delay = null){
-    console.log('images_animation');
-    if (delay == null){
-      delay = this.initial_scroll_delay;
-    }
+    if (delay == null) delay = this.initial_scroll_delay
 
     if (this.is_images_result_scrolls_end()){
-      this.images_results_counter = 0;
+      this.images_results_counter = 0
       await this.scroll_down()
       if (this.extension.settings['download_pages']) await this.download_page('images')
       // jump to the result type we want to consider next
-      this.jump_to_next_active_result_type('Images', null)
+      await this.jump_to_next_active_result_type('Images', null)
     } else {
-      setTimeout(function(){
-        this.scroll_down().then(
-          value => this.images_animation(500));
-      }.bind(this), delay);
+      setTimeout(async function(){
+        await this.scroll_down()
+        this.images_animation(500)
+      }.bind(this), delay)
     }
   }
 
@@ -143,8 +140,8 @@ export default class BaiduBot extends Bot{
   }
 
   get_videos_tab() {
-    let tab = document.querySelector("div.s_tab_inner a[href*='tn=vsearch']")
-    //tab.dispatchEvent(new MouseEvent('mousedown')); 
+    let tab = document.querySelector("div.s_tab_inner a[href*='tn=vsearch'], a[name='i_video']")
+    tab.dispatchEvent(new MouseEvent('mousedown')) // weirdly, this is required for Baidu's video tab
     return tab;
   }
 
