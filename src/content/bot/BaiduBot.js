@@ -143,8 +143,8 @@ export default class BaiduBot extends Bot{
   }
 
   get_videos_tab() {
-    let tab = document.querySelector("a[name='i_video']")
-    tab.dispatchEvent(new MouseEvent('mousedown')); 
+    let tab = document.querySelector("div.s_tab_inner a[href*='tn=vsearch']")
+    //tab.dispatchEvent(new MouseEvent('mousedown')); 
     return tab;
   }
 
@@ -160,9 +160,8 @@ export default class BaiduBot extends Bot{
 
   is_news_loaded(){
     //assume that things are loaded for news
-    // see baidu for an example of implementing this properly
 
-    // this did not work because some queries only produce one page of news
+    // this selector is broken, we just move one for now
     // return document.querySelector("div#page a.n") != null;
 
     return true;
