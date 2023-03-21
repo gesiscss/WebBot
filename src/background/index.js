@@ -25,10 +25,16 @@ function load_settings_from_storage() {
         {name: 'DuckDuckGo', url: 'https://duckduckgo.com', active: true},
         {name: 'Bing', url: 'https://bing.com', active: true},
         {name: 'Yandex', url: 'https://yandex.com', active: false},
-        {name: 'Yahoo', url: 'https://us.yahoo.com', active: false}, // in contrast to search.yahoo.com this still has a search button
+        {name: 'Yahoo', url: 'https://search.yahoo.com', active: false},
         {name: 'Baidu', url: 'https://baidu.com', active: false},
         {name: 'So', url: 'https://so.com', active: false},
         {name: 'Sogou', url: 'https://sogou.com', active: false}
+      ],
+      resultTypes: [
+        {name: 'Text', active: true},
+        {name: 'News', active: true},
+        {name: 'Images', active: false},
+        {name: 'Videos', active: false}
       ],
       queryTerms: 'Sage Concept Grant, elections',
       server: '',
@@ -81,6 +87,7 @@ function load_settings_from_storage() {
   let navlists = {
     'keywords': [],
     'engines': [],
+    'resultTypes': []
   }
  
   // load data if server is used, returns [] if server could not be reached
@@ -88,12 +95,14 @@ function load_settings_from_storage() {
     console.log('Loading engines & keywords from server:', base_settings.server)
     navlists['keywords'] = await config.getQueryTerms()
     navlists['engines'] = await config.getEngines()
+    navlists['resultTypes'] = await config.getResultTypes()
   }
   // otherwise restore keywords and engines from localStorage
   else {
     console.log('Restoring engines & keywords from localStorage')
     navlists['keywords'] = restored_settings.queryTerms.split(',').map((term) => term.trim())
     navlists['engines'] = restored_settings.searchEngines.filter(({active}) => active).map(({url}) => url)
+    navlists['resultTypes'] = restored_settings.resultTypes.filter(({active}) => active).map(({name}) => name)
   }
   //console.log(navlists);
 

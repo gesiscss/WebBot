@@ -82,7 +82,7 @@ export default class GoogleBot extends Bot{
   // }
 
   get_search_input(){
-    return document.querySelector('input[name=q]');
+    return document.querySelector('textarea[name=q], input[name=q]');
   }
 
   get_consent_button(){

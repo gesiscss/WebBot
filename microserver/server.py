@@ -35,6 +35,10 @@ class S(BaseHTTPRequestHandler):
         elif self.path == '/bot/getqueryterms':            
             with open('bot/queryterms.txt') as f:
                 lines = f.read().splitlines()
+        
+        elif self.path == '/bot/getresulttypes':            
+            with open('bot/resulttypes.txt') as f:
+                lines = f.read().splitlines()
 
         self.wfile.write(simplejson.dumps({
             'result': [x.strip() for x in lines if x.strip() != '']

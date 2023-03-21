@@ -92,6 +92,27 @@ export default class Configuration {
     });
   }
 
+  getResultTypes(){
+    return new Promise((resolve, reject)=>{
+      this.transfer.jsonFetch(this.settings.server+'bot/getresulttypes', {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({})})
+      .then(resultTypes => {
+          resolve(resultTypes);
+         })
+        .catch(err => {
+          //if (this.debug) console.log('_fetchEngines: ', err);
+          console.warn("Failed fetching the resultTypes");
+          //resolve(false);
+          resolve([]);
+        })
+    });
+  }
+
   getBasePage(){
     return '/nextround.html'
   }

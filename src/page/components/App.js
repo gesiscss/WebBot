@@ -16,6 +16,7 @@ class App extends Component {
       settings: {
         useServer: false,
         searchEngines: [],
+        resultTypes: [],
         queryTerms: '',
         server: '',
         searchTicksMins: 6,
@@ -92,8 +93,10 @@ class App extends Component {
             ? <ServerSettings server={settings.server} onServerChange={this.updateSettings} />
             : <LocalSettings
                 searchEngines={settings.searchEngines}
+                resultTypes={settings.resultTypes}
                 queryTerms={settings.queryTerms}
                 onEngineChange={this.updateSettings}
+                onResultTypeChange={this.updateSettings}
                 onQueryTermsChange={this.updateSettings}
               />
           }  

@@ -17,11 +17,26 @@ class LocalSettings extends Component {
     this.props.onEngineChange({searchEngines})
   }
 
+  handleResultTypeChange = (e) => {
+    const resultTypeName = e.target.id
+    const resultTypeActive = e.target.checked
+    const resultTypes = this.props.resultTypes.map(
+        ({name, active}) =>
+          name.toLowerCase() == resultTypeName
+            ? {name, active: resultTypeActive}
+            : {name, active}
+      )
+    this.props.onResultTypeChange({resultTypes})
+  }
+
   handleQueryTermsChange = (e) => {
     this.props.onQueryTermsChange({queryTerms: e.target.value})
   }
 
   render() {
+    const len_results = this.props.resultTypes.filter(({active}) => active).length
+    const len_engines = this.props.searchEngines.filter(({active}) => active).length
+
     return (
       <tbody>
         <tr>
@@ -36,6 +51,30 @@ class LocalSettings extends Component {
                       name={name.toLowerCase()}
                       id={name.toLowerCase()}
                       onChange={this.handleEngineChange}
+                      disabled={len_engines === 1 && active}
+                    />
+                    <label className="checklabel" htmlFor={name.toLowerCase()}>{name}</label>
+                  </div>)
+              }
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <label>Result Types</label>
+            <div className="tooltip" data-title="Results types to access for each engine. Note that not all engines give
+            results of all types, in particular news results might be missing.">?</div>
+          </td>
+          <td>
+              {
+                this.props.resultTypes.map(({name, active}) =>
+                  <div className="box" key={name.toLowerCase()}>
+                    <input
+                      type="checkbox"
+                      defaultChecked={active}
+                      name={name.toLowerCase()}
+                      id={name.toLowerCase()}
+                      onChange={this.handleResultTypeChange}
+                      disabled={len_results === 1 && active}
                     />
                     <label className="checklabel" htmlFor={name.toLowerCase()}>{name}</label>
                   </div>)

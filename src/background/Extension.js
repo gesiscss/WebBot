@@ -32,11 +32,13 @@ export default class Extension {
     this.tabs = {};
     this.event = new EventEmitter();
 
-    this.keyword_iterator = 0;
-    this.keywords = navlists['keywords'];
-    this.engines = navlists['engines'];
-    console.log('using keywords:', this.keywords);
-    console.log('using engines:', this.engines);
+    this.keyword_iterator = 0
+    this.keywords = navlists['keywords']
+    this.engines = navlists['engines']
+    this.result_types = navlists['resultTypes']
+    console.log('using keywords:', this.keywords)
+    console.log('using engines:', this.engines)
+    console.log('using resultTypes:', this.result_types);
 
     this.engine = '';
     this.keyword = '';
@@ -56,10 +58,13 @@ export default class Extension {
 
     this.getAllTabsIds = this.getAllTabsIds.bind(this);
 
-    this.search_ticks = this.config.settings.search_ticks_mins*60000;
-    this.clear_browser_lapse = this.search_ticks - 45000;
-    this.check_engine_lapse = this.search_ticks - 30000;
-    this.initial_search_delay = 60000;
+    // make the bot move on to the next engine faster, if less result types are selected
+    const discounted_search_mins = this.config.settings.search_ticks_mins - 4 + this.result_types.length
+    // calculate when the next browser clearing and navigation to next engine should occur
+    this.search_ticks = discounted_search_mins*60000
+    this.clear_browser_lapse = this.search_ticks - 45000
+    this.check_engine_lapse = this.search_ticks - 30000
+    this.initial_search_delay = 60000
 
     this.step_iterators = {}
 
@@ -96,6 +101,14 @@ export default class Extension {
     this.engines = settings.searchEngines.filter(({active}) => active).map(({url}) => url)
     console.log(this.engines)
 
+    this.result_types = settings.resultTypes.filter(({active}) => active).map(({name}) => name)
+    console.log(this.result_types)
+    // adjusting the search tick timing
+    const discounted_search_mins = this.config.settings.search_ticks_mins - 4 + this.result_types.length
+    this.search_ticks = discounted_search_mins*60000
+    this.clear_browser_lapse = this.search_ticks - 45000
+    this.check_engine_lapse = this.search_ticks - 30000
+
     if (!settings.useServer) settings.server = ''
     this.config.settings.server = settings.server
 
@@ -122,6 +135,10 @@ export default class Extension {
         this.keywords = keywords
         console.log('got keywords:', keywords)
       })
+      this.config.getResultTypes().then(resultTypes => {
+        this.resultTypes = resultTypes
+        console.log('got result types:', resultTypes)
+      })
     }
 
     // clear browser after clearing was turned on
@@ -142,7 +159,7 @@ export default class Extension {
       {name: 'DuckDuckGo', url: 'https://duckduckgo.com', active: false},
       {name: 'Bing', url: 'https://bing.com', active: false},
       {name: 'Yandex', url: 'https://yandex.com', active: false},
-      {name: 'Yahoo', url: 'https://us.yahoo.com', active: false}, // in contrast to search.yahoo.com this still has a search button
+      {name: 'Yahoo', url: 'https://search.yahoo.com', active: false},
       {name: 'Baidu', url: 'https://baidu.com', active: false},
       {name: 'So', url: 'https://so.com', active: false},
       {name: 'Sogou', url: 'https://sogou.com', active: false}
@@ -151,9 +168,20 @@ export default class Extension {
       searchEngines = searchEngines.map(({name, url, active}) => url == this.engines[i] ? {name, url, active: true} : {name, url, active})
     }
 
+    let resultTypes = [ // augment list of result types with activations
+      {name: 'Text', active: false},
+      {name: 'News', active: false},
+      {name: 'Images', active: false},
+      {name: 'Videos', active: false}
+    ]
+    for (let i in this.result_types) {
+      resultTypes = resultTypes.map(({name, active}) => name == this.result_types[i] ? {name, active: true} : {name, active})
+    }
+
     return {
       queryTerms: this.keywords.join(', '),
       searchEngines: searchEngines,
+      resultTypes: resultTypes,
       clearBrowser: this.config.settings.clear_browser ? this.config.settings.clear_browser : false,
       downloadPages: this.config.settings.download_pages ? this.config.settings.download_pages : false,
       downloadsFolder: this.config.settings.downloads_folder ? this.config.settings.downloads_folder: '',
@@ -537,7 +565,8 @@ export default class Extension {
           'clear_browser_flag': this.config.settings.clear_browser,
           //'dummy_server': this.config.settings.dummy_server,
           'server': this.config.settings.server,
-          'download_pages': this.config.settings.download_pages
+          'download_pages': this.config.settings.download_pages,
+          'result_types': this.result_types
         });
       }else if (msg.hasOwnProperty('steady')){
 

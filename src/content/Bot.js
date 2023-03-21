@@ -68,6 +68,9 @@ export default class Bot {
     if (window.hasOwnProperty('chrome')) {
       singlefile.init({ fetch: this.background_fetch })
     }
+
+    console.log('accessing result types:', this.extension.settings['result_types'])
+
   }
 
   background_fetch(resource, options) {
@@ -137,12 +140,37 @@ export default class Bot {
     }.bind(this), navigate_delay);
   }
 
+  async jump_to_next_active_result_type(current_result_type, result_animation, skipping=[]){
+    const result_types = ['Text', 'News', 'Images', 'Videos']
+    const active_result_types = this.extension.settings['result_types']
+    if (!result_types.includes(current_result_type)) throw new Error('Current result type not among the supported types.')
+    const current_index = result_types.indexOf(current_result_type)
+
+    if (current_index < 1 && active_result_types.includes('News') && !skipping.includes('News')) {
+      if (result_animation) await result_animation(this.set_get_news_tab_timeout)
+      else await this.set_get_news_tab_timeout()
+    } else if (current_index < 2 && active_result_types.includes('Images') && !skipping.includes('Images')) {
+      if (result_animation) await result_animation(this.set_get_images_tab_timeout)
+      else await this.set_get_images_tab_timeout()
+    } else if (current_index < 3 && active_result_types.includes('Videos') && !skipping.includes('Videos')) {
+      if (result_animation) await result_animation(this.set_get_videos_tab_timeout)
+      else await this.set_get_videos_tab_timeout()
+    } else {
+      if (result_animation) await result_animation(this.go_to_base_page)
+      else await this.go_to_base_page()
+    }
+  }
 
   text_animation(){
-    if (this.is_text_result_pages_end()){
-      this.set_text_results_animation(
-        this.set_get_news_tab_timeout
-      );
+    // skip the initial text results if unwanted
+    if (!this.extension.settings['result_types'].includes('Text')) {
+      console.log('skipping the text')
+      // don't do any animation when directly skipping the text results
+      this.jump_to_next_active_result_type('Text', null)
+    // jump to the result type we want to consider next
+    } else if (this.is_text_result_pages_end()){
+      this.jump_to_next_active_result_type('Text', this.set_text_results_animation.bind(this))
+    // continue with the next result page
     } else {
       this.set_text_results_animation(
         this.set_get_next_button_text_result_timeout
@@ -152,9 +180,8 @@ export default class Bot {
 
   news_animation(){
     if (this.is_news_result_pages_end()){
-      this.set_news_results_animation(
-        this.set_get_images_tab_timeout
-      );
+      // jump to the results we want to consider next
+      this.jump_to_next_active_result_type('News', this.set_news_results_animation.bind(this))
     } else {
       console.log('continue news animation');
       this.set_news_results_animation(
@@ -172,7 +199,8 @@ export default class Bot {
       // download image results page only after scrolling all the way to the bottom (continuously loading additional images)
       // in contrast, text results etc. are saved at the bottom of each results page
       if (this.extension.settings['download_pages']) await this.download_page('images')
-      this.set_get_videos_tab_timeout()
+      // jump to the results we want to consider next
+      this.jump_to_next_active_result_type('Images', null)
     } else {
       setTimeout(async function(){
         await this.scroll_down()
@@ -186,11 +214,11 @@ export default class Bot {
     if (this.is_videos_result_pages_end()){
       this.set_videos_results_animation(
         this.go_to_base_page
-      );
+      )
     } else {
       this.set_videos_results_animation(
         this.set_get_next_button_videos_timeout
-      );
+      )
     }
   }
 
@@ -216,7 +244,7 @@ export default class Bot {
   }
   
   click_more_text(){
-    this.click_or_reload(this.get_more_text_button());
+    this.click_or_move_to_next_result_type('Text', this.get_more_text_button())
   }
 
   // news
@@ -236,7 +264,7 @@ export default class Bot {
   }
   
   click_more_news(){
-    this.click_or_reload(this.get_more_news_button());
+    this.click_or_move_to_next_result_type('News', this.get_more_news_button())
   }
   /////////////////////////////////////
   // End more text animation
@@ -262,7 +290,7 @@ export default class Bot {
   }
 
   click_more_images(){
-    this.click_or_reload(this.get_more_images_button());
+    this.click_or_move_to_next_result_type('Images', this.get_more_images_button())
   }
   /////////////////////////////////////
   // End more images animation
@@ -288,7 +316,7 @@ export default class Bot {
   }
 
   click_more_videos(){
-    this.click_or_reload(this.get_more_videos_button());
+    this.click_or_move_to_next_result_type('Videos', this.get_more_videos_button())
   }
   /////////////////////////////////////
   // End more videos animation
@@ -445,29 +473,29 @@ export default class Bot {
   set_get_next_button_text_result_timeout(){
     return new Promise(async (resolve, reject) => {
       setTimeout(function(){
-        this.click_or_reload(this.get_next_button());
-        resolve(true);
-      }.bind(this), this.next_delay);
-    });  
+        this.click_or_move_to_next_result_type('Text', this.get_next_button())
+        resolve(true)
+      }.bind(this), this.next_delay)
+    })
   }
 
   set_get_next_button_news_result_timeout(){
     return new Promise(async (resolve, reject) => {
       setTimeout(function(){
-        console.log("this.click_or_move_to_images(this.get_next_button_news());");
-        this.click_or_move_to_images(this.get_next_button_news());
-        resolve(true);
-      }.bind(this), this.next_delay);
-    });  
+        //console.log("this.click_or_move_to_images(this.get_next_button_news());");
+        this.click_or_move_to_next_result_type('News', this.get_next_button_news())
+        resolve(true)
+      }.bind(this), this.next_delay)
+    })  
   }
 
   set_get_next_button_videos_timeout(){
     return new Promise(async (resolve, reject) => {
       setTimeout(function(){
-        this.click_or_reload(this.get_next_button_videos());
-        resolve(true);
-      }.bind(this), this.next_delay);
-    });
+        this.click_or_move_to_next_result_type('Videos', this.get_next_button_videos())
+        resolve(true)
+      }.bind(this), this.next_delay)
+    })
   }
 
   set_get_news_tab_timeout(){
@@ -497,14 +525,14 @@ export default class Bot {
     });
   }
 
-  is_news_loaded(){
+  /*is_news_loaded(){
     //assume that things are loaded for news
     // see baidu for an example of implementing this properly
     return true;
-  }
+  }*/
 
 
-  click_or_move_to_images(button){
+  click_or_move_to_next_result_type(current_result_type, button){
     console.log(button)
     if(button){
       //button.click();
@@ -514,19 +542,8 @@ export default class Bot {
         view: window
       }))
     }else {
-      console.log('Moving to images (Promise)...');
-      setTimeout(function(){
-
-        console.log('is_it_loaded', this.is_news_loaded());
-        if (this.is_news_loaded()){
-          console.log('is_news_loaded');
-          this.set_news_results_animation(
-            this.set_get_images_tab_timeout
-          );
-        } else {
-          location.reload();
-        }
-      }.bind(this), 500);
+      console.log('Moving to next result type...');
+      this.jump_to_next_active_result_type(current_result_type, null)
     }
   }
 
