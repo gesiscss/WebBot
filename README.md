@@ -16,11 +16,11 @@ A browser extension for Mozilla and Chrome that simulates a user searching (at l
 
 Ulloa, R., Makhortykh, M., & Urman, A. (2022). Scaling up search engine audits: Practical insights for algorithm auditing. Journal of Information Science. https://doi.org/10.1177/01655515221093029
 
+## Demo
+
 <div align="center">
-	<img src="./docs/demo.webp" alt="WebBot demo">
+    <img src="./docs/demo.webp" alt="WebBot demo">
 </div>
-
-
 
 ## Installation
 
