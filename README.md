@@ -94,7 +94,7 @@ If search results are presented as multiple pages, each page is saved individual
 
 ### ⚙️ Processing Saved Search Results
 
-We provide scripts for parsing the search results in [Python](https://github.com/gesiscss/WebBot-tutorials) and [R](https://github.com/schochastics/webbotparseR). Have a look!
+We provide scripts for parsing the search results in [Python](https://github.com/gesiscss/WebBotParser) and [R](https://github.com/schochastics/webbotparseR). Have a look!
 
 In general, saved result pages parsed in Python with [Beautiful Soup](https://beautiful-soup-4.readthedocs.io/en/latest/). As images are stored inline, they can be extracted from the result pages for further processing, no re-loading the original image required.
 
