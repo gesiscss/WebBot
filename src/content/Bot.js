@@ -781,7 +781,7 @@ export default class Bot {
       removeAlternativeMedias: true,
       removeAlternativeImages: true,
       groupDuplicateImages: true,
-      filenameTemplate: page_type + "{date-iso}_{time-locale}.html" // also available: {page-title}
+      filenameTemplate: page_type + "{date-iso}_{hours-locale}_{minutes-locale}_{seconds-locale}.html" // also available: {page-title}
     });
 
     // send captured page as blob to backend to store into downloads folder
