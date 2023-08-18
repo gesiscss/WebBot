@@ -1,8 +1,4 @@
-
-<h1 align="center">
-	<img src="./build/images/bot.png" alt="WebBot icon" height="25">
-	WebBot
-</h1>
+# WebBot
 
 A browser extension for Mozilla and Chrome that simulates a user searching (at least) 50-top main, news, images and videos search results of up to 8 different [search engines](#-supported-engines).
 
@@ -18,9 +14,7 @@ Ulloa, R., Makhortykh, M., & Urman, A. (2022). Scaling up search engine audits: 
 
 ## Demo
 
-<div align="center">
-    <img src="./docs/demo.webp" alt="WebBot demo">
-</div>
+![WebBot demo](./docs/demo.webp)
 
 ## Installation
 
