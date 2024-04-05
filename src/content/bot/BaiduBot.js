@@ -140,7 +140,7 @@ export default class BaiduBot extends Bot{
   }
 
   get_videos_tab() {
-    let tab = document.querySelector("div.s_tab_inner a[href*='tn=vsearch'], a[name='i_video']")
+    let tab = document.querySelector("div.s_tab_inner a[href*='tn=vsearch'], a[name='video_2']")
     tab.dispatchEvent(new MouseEvent('mousedown')) // weirdly, this is required for Baidu's video tab
     return tab;
   }
