@@ -67,6 +67,8 @@ Settings can be accessed by clicking on the extension's icon in the browser's to
 2. Wait up to a minute, the automatic search will start in next minute o' clock, e.g. 14:37:**00**.
 3. Let the extension handle navigation between search results (text, news, images, videos) and between the engines you selected. The engines will be accessed in the same order as in the table below. Each engine has 6 minutes to provide all results. If the request times out or navigation is interrupted, e.g. by a captcha, the next engine will automatically be accessed after 6 minutes have passed. If not all result types are selected, the time is reduced by 1 min per unselected result type.
 
+Be aware that some search engines might display **weird behavior if developer tools are opened**. Make sure to close the inspector/console/etc. unless you are debugging the extension.
+
 ### 🔍 Supported Engines
 
 | Engine     | URL | Notes |

@@ -96,7 +96,7 @@ export default class SoBot extends Bot{
   }
 
   get_next_button_news(){
-    return document.querySelector('a.next')
+    return document.querySelector('a#snext')
   }
 
   get_text_result_page(){
