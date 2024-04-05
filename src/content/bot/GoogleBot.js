@@ -58,6 +58,28 @@ export default class GoogleBot extends Bot{
   // }
 
 
+  // Infinite scrolling text results
+  async text_animation(delay = null){
+    console.log('text_animation');
+    if (delay == null){
+      delay = this.initial_scroll_delay;
+    }
+
+    if (this.is_text_result_scrolls_end()){
+      this.text_results_counter = 0;
+      await this.scroll_down()
+      if (this.extension.settings['download_pages']) await this.download_page('text')
+      // jump to the result type we want to consider next
+      this.jump_to_next_active_result_type('Text', null)
+    } else {
+      setTimeout(function(){
+        this.scroll_down().then(
+          value => this.text_animation(0));
+      }.bind(this), delay);
+    }
+  }
+
+
   consent_animation(){
     setTimeout(function(){
       let consent_button = this.get_consent_button();
@@ -98,7 +120,7 @@ export default class GoogleBot extends Bot{
   }
 
   is_text_result_page(){
-    return window.location.pathname == '/search' && this.find_get_parameter('tbm') == null;
+    return window.location.pathname == '/search' && this.find_get_parameter('tbm') == null && this.find_get_parameter('udm') == null;
   }
 
   is_news_result_page(){
@@ -106,7 +128,7 @@ export default class GoogleBot extends Bot{
   }
 
   is_images_result_page(){
-    return this.find_get_parameter('tbm') == 'isch';
+    return this.find_get_parameter('udm') == '2';
   }
 
   is_videos_result_page(){
@@ -122,7 +144,7 @@ export default class GoogleBot extends Bot{
   }
 
   get_images_tab() {
-    return document.querySelector("a[href*='tbm=isch']");
+    return document.querySelector("a[href*='udm=2']");
   }
 
   get_videos_tab() {
@@ -141,6 +163,7 @@ export default class GoogleBot extends Bot{
     return document.querySelector('a#pnnext');
   }
 
+  /* The text result page has since be replace by infinite scrolling
   get_text_result_page(){
     let _start = this.find_get_parameter('start');
     if (_start){
@@ -148,6 +171,11 @@ export default class GoogleBot extends Bot{
     } else {
       return 1;
     }
+  }*/
+
+  get_text_result_page(){
+    this.text_results_counter += 1;
+    return this.text_results_counter;
   }
 
   get_news_result_page(){
