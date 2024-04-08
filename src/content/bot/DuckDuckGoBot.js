@@ -61,9 +61,8 @@ export default class DuckDuckGoBot extends Bot{
     }
   }
 
-
   get_more_text_button(){
-    return document.querySelector('a.result--more__btn');
+    return document.querySelector('#more-results');
   }
 
   news_animation(extra_delay=0){
@@ -131,7 +130,7 @@ export default class DuckDuckGoBot extends Bot{
   }
 
   get_search_input(){
-    return document.querySelector('#search_form_input_homepage');
+    return document.querySelector('#searchbox_input');
   }
 
   is_text_result_page(){
@@ -151,7 +150,7 @@ export default class DuckDuckGoBot extends Bot{
   }
 
   get_search_button(){
-    return document.querySelector('#search_button_homepage');
+    return document.querySelector('button[class*="searchButton"]');
   }
 
   get_news_tab() {
@@ -206,7 +205,12 @@ export default class DuckDuckGoBot extends Bot{
     });
   }
 
-
+  // workaround because keystrokes not registered in the search field
+  set_get_search_button_timeout(delay=1000) {
+    setTimeout(function(){
+      document.forms[0].submit();
+    }.bind(this), delay);
+  };
 
   /**
    * [onStart on start event]
