@@ -648,7 +648,7 @@ export default class Extension {
         const pageData = {
           url: URL.createObjectURL(blob),
           filename:
-            this.config.settings.downloads_folder + '/' + this.engine.split('//')[1] + '_' + this.keyword.replace('/[<>:"/\\|?*\x00-\x1F]/gi', '_').replace(/_{2,}/g, '_') + '_' + msg.filename_suffix
+            this.config.settings.downloads_folder + '/' + this.engine.split('//')[1] + '_' + this.keyword.replace(/[<>:"/\\|?*\x00-\x1F]/gi, '_').replace(/_{2,}/g, '_') + '_' + msg.filename_suffix
         }
         xbrowser.downloads.download(pageData, sendResponse(true))
       
