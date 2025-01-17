@@ -11,6 +11,9 @@ export default class GoogleBot extends Bot{
     } else {
       // also use the defaults
     }
+
+    // true if text results are paginated, false if infinite scrolling
+    this.is_text_paginated = true;
   }
 
 
@@ -58,24 +61,28 @@ export default class GoogleBot extends Bot{
   // }
 
 
-  // Infinite scrolling text results
   async text_animation(delay = null){
-    console.log('text_animation');
-    if (delay == null){
-      delay = this.initial_scroll_delay;
-    }
-
-    if (this.is_text_result_scrolls_end()){
-      this.text_results_counter = 0;
-      await this.scroll_down()
-      if (this.extension.settings['download_pages']) await this.download_page('text')
-      // jump to the result type we want to consider next
-      this.jump_to_next_active_result_type('Text', null)
+    if (this.is_text_paginated) {
+      super.text_animation();
     } else {
-      setTimeout(function(){
-        this.scroll_down().then(
-          value => this.text_animation(0));
-      }.bind(this), delay);
+      // Infinite scrolling text results
+      console.log('text_animation');
+      if (delay == null){
+        delay = this.initial_scroll_delay;
+      }
+
+      if (this.is_text_result_scrolls_end()){
+        this.text_results_counter = 0;
+        await this.scroll_down()
+        if (this.extension.settings['download_pages']) await this.download_page('text')
+        // jump to the result type we want to consider next
+        this.jump_to_next_active_result_type('Text', null)
+      } else {
+        setTimeout(function(){
+          this.scroll_down().then(
+            value => this.text_animation(0));
+        }.bind(this), delay);
+      }
     }
   }
 
@@ -163,19 +170,20 @@ export default class GoogleBot extends Bot{
     return document.querySelector('a#pnnext');
   }
 
-  /* The text result page has since be replace by infinite scrolling
-  get_text_result_page(){
-    let _start = this.find_get_parameter('start');
-    if (_start){
-      return (parseInt(_start) / 10) + 1;
-    } else {
-      return 1;
+  get_text_result_page() {
+    if (this.is_text_paginated) {
+        // pagination
+        let _start = this.find_get_parameter('start');
+        if (_start) {
+          return (parseInt(_start) / 10) + 1;
+        } else {
+          return 1;
+        }
+    } else {        
+        // infinite scrolling
+        this.text_results_counter += 1;
+        return this.text_results_counter;
     }
-  }*/
-
-  get_text_result_page(){
-    this.text_results_counter += 1;
-    return this.text_results_counter;
   }
 
   get_news_result_page(){

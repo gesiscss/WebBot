@@ -1,6 +1,6 @@
 {
   "name": "webbot-extension-client",
-  "version": "4.1.5",
+  "version": "4.1.6",
   "description": "Browser extension to simulate browsing behaviour in search engines.",
   "repository": {
     "type": "git",
