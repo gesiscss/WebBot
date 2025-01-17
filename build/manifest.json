@@ -4,7 +4,7 @@
   "name": "WebBot",
   "description": "WebBot",
   "manifest_version": 2,
-  "version": "4.1.4",
+  "version": "4.1.5",
   "permissions": [ "<all_urls>", "tabs", "browsingData", "downloads"],
   "icons": {
     "128": "images/bot.png"
