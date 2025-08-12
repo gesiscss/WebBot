@@ -144,7 +144,7 @@ Be aware that some search engines might display **weird behavior if developer to
 
 ## Technical Details
 
-See the [official GitHub repository](https://github.com/gesiscss/WebBot) for further information about technical details-
+See the [official GitHub repository](https://github.com/gesiscss/WebBot) or the [publication](https://journals.sagepub.com/doi/10.1177/01655515221093029) for further information about technical details-
 
 ## Contact Details
 
