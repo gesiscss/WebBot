@@ -5,8 +5,7 @@ format:
   gfm: default
 ---
 
-# README Template: WebBot
-
+# WebBot
 
 ## Description
 
