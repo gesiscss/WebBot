@@ -139,7 +139,7 @@ export default class GoogleBot extends Bot{
   }
 
   is_videos_result_page(){
-    return this.find_get_parameter('tbm') == 'vid';
+    return this.find_get_parameter('tbm') == 'vid' || this.find_get_parameter('udm') == '7';
   }
 
   get_search_button(){
@@ -155,7 +155,7 @@ export default class GoogleBot extends Bot{
   }
 
   get_videos_tab() {
-    return document.querySelector("a[href*='tbm=vid']");
+    return document.querySelector("a[href*='tbm=vid'], a[href*='udm=7']");
   }
 
   get_next_button(){
