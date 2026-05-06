@@ -1,10 +1,10 @@
 {
   "short_name": "WebBot",
-  "author": "robertour",
+  "author": "GESIS – Leibniz Institute for the Social Sciences",
   "name": "WebBot",
   "description": "WebBot",
   "manifest_version": 2,
-  "version": "4.1.6",
+  "version": "4.1.7",
   "permissions": [ "<all_urls>", "tabs", "browsingData", "downloads"],
   "icons": {
     "128": "images/bot.png"
@@ -19,7 +19,7 @@
   "options_ui": {
     "page": "index.html",
     "browser_style": true
-  },  
+  },
 
   "background": {
     "scripts": [
@@ -36,5 +36,4 @@
       "all_frames": false
     }
   ]
-
 }
