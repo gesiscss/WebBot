@@ -62,7 +62,7 @@ export default class DuckDuckGoBot extends Bot{
   }
 
   get_more_text_button(){
-    return document.querySelector('#more-results');
+    return document.querySelector('#more-results, button#more-results');
   }
 
   news_animation(extra_delay=0){
@@ -87,7 +87,7 @@ export default class DuckDuckGoBot extends Bot{
 
 
   get_more_news_button(){
-    return document.querySelector('a.result--more__btn');
+    return document.querySelector('#more-results, a.result--more__btn, button.result--more__btn');
   }
 
 
@@ -129,8 +129,8 @@ export default class DuckDuckGoBot extends Bot{
     }
   }
 
-  get_search_input(){
-    return document.querySelector('#searchbox_input');
+  get_search_input() {
+    return document.querySelector('#searchbox_input, input[name="q"], input[type="search"]');
   }
 
   is_text_result_page(){
@@ -150,19 +150,19 @@ export default class DuckDuckGoBot extends Bot{
   }
 
   get_search_button(){
-    return document.querySelector('button[class*="searchButton"]');
+    return document.querySelector('button[type="submit"], button[aria-label="Search"], button[class*="searchButton"], button[class*="searchbox_searchButton"]');
   }
 
-  get_news_tab() {
-    return document.querySelector("#duckbar a.js-zci-link--news");
+  get_news_tab(){
+    return document.querySelector("a[data-zci-link='news'], a[href*='ia=news']");
   }
 
   get_images_tab() {
-    return document.querySelector("#duckbar a.js-zci-link--images");
+    return document.querySelector("a[data-zci-link='images'], a[href*='iax=images'], a[href*='ia=images']");
   }
 
   get_videos_tab() {
-    return document.querySelector("#duckbar a.js-zci-link--videos");
+    return document.querySelector("a[data-zci-link='videos'], a[href*='iax=videos'], a[href*='ia=videos']");
   }
 
   get_text_result_page(){

@@ -32,6 +32,8 @@ export default class YahooBot extends Bot{
 
   consent_animation(){
     setTimeout(function(){
+      const expandBtn = document.querySelector('button[name="moreOptions"], .consent-button.secondary');
+      if (expandBtn) expandBtn.click();
       let consent_form = document.querySelector('form.consent-form');
       if (consent_form){
         document.querySelector(
@@ -46,6 +48,7 @@ export default class YahooBot extends Bot{
     console.log('pressing enter...')
     setTimeout(function(){
       var input = this.get_search_input();
+      if (!input) return;
       const enterEvent = new KeyboardEvent('keydown', {
         code: 'Enter',
         key: 'Enter',
@@ -55,6 +58,12 @@ export default class YahooBot extends Bot{
         bubbles: true
       })
       input.dispatchEvent(enterEvent)
+      const form = input.closest('form');
+      if (form) {
+        const submitBtn = form.querySelector('button[type="submit"], input[type="submit"]');
+        if (submitBtn) submitBtn.click();
+        else form.submit();
+      }
       console.log('...pressed.')
     }.bind(this), delay);
   };
@@ -151,7 +160,7 @@ export default class YahooBot extends Bot{
   }
 
   get_next_button_news(){
-    return document.querySelector('a.next');
+    return document.querySelector("a.next, a#pg-next, .compPagination a");
   }
 
   get_text_result_page(){
