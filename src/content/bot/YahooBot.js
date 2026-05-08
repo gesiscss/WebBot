@@ -160,7 +160,7 @@ export default class YahooBot extends Bot{
   }
 
   get_next_button_news(){
-    return document.querySelector("a.next, a#pg-next, .compPagination a");
+    return document.querySelector("a.next, a#pg-next");
   }
 
   get_text_result_page(){
