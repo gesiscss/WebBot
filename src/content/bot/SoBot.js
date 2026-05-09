@@ -148,7 +148,7 @@ export default class SoBot extends Bot{
       this.videos_results_counter = 0;
       await this.scroll_down()
       if (this.extension.settings['download_pages']) await this.download_page('videos')
-      this.go_to_base_page()
+      this.jump_to_next_active_result_type('Videos', null)
     } else {
       setTimeout(async function(){
         await this.scroll_down()
