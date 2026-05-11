@@ -213,20 +213,27 @@ export default class BingBot extends Bot{
   }*/
 
   get_news_tab() {
-    return document.querySelector("a[href*='/news/']");
+    let tab = document.querySelector("#b-scopeListItem-news a");
+    if (tab) tab.onclick = function () { location.href = this.href; };
+    return tab;
   }
 
   get_images_tab() {
-    return document.querySelector("a[href*='/images/']");
+    let tab = document.querySelector("#b-scopeListItem-images a");
+    if (tab) tab.onclick = function () { location.href = this.href; };
+    return tab;
   }
 
   get_videos_tab() {
-    return document.querySelector("a[href*='/videos/']");
+    let tab = document.querySelector("#b-scopeListItem-video a");
+    if (tab) tab.onclick = function () { location.href = this.href; };
+    return tab;
   }
 
-  get_next_button(){
-    console.log("Next Button", document.querySelector('a.sb_pagN'))
-    return document.querySelector('a.sb_pagN');
+  get_next_button() {
+    let btn = document.querySelector('a.sb_pagN');
+    if (btn) btn.onclick = function () { location.href = this.href; };
+    return btn;
   }
 
   get_text_result_page(){

@@ -46,9 +46,6 @@ export default class SoBot extends Bot{
     }.bind(this), this.initial_scroll_delay);
   }
 
-  get_search_input(){
-    return document.querySelector('input#input');
-  }
 
   is_text_result_page(){
     return window.location.pathname == '/s' && !this.is_videos_result_page()
@@ -71,21 +68,40 @@ export default class SoBot extends Bot{
      return window.location.hostname == 'tv.360kan.com'
   }
 
-  get_search_button(){
-    return document.querySelector('input#search-button')
+  // navigate directly to the search results page
+  set_mainpage_animation(keyword, delay = 500){
+    setTimeout(function(){
+      location.href = 'https://www.so.com/s?q=' + encodeURIComponent(keyword);
+    }, delay);
   }
 
   get_news_tab(){
-    return document.querySelector("div#tabs-wrap a[href*='news.so.com/ns']")
+    return document.querySelector("#g-hd-tabs a[data-i='news']");
   }
 
   get_images_tab() {
-    return document.querySelector("div#so-nav-container a[href*='image.so.com/i']")
+    return document.querySelector("#g-hd-tabs a[data-i='image']");
   }
 
   get_videos_tab() {
-    return document.querySelector("div#so-nav-container a[href*='tv.360kan.com/s']")
+    return document.querySelector("#g-hd-tabs a[data-i='video']");
   }
+
+  // Override Bot.js clicks with URL navigation
+  navigate_to_tab(tabGetter, typeName) {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        let t = tabGetter.call(this);
+        if (t) location.href = t.href;
+        else this.jump_to_next_active_result_type(typeName, null);
+        resolve(true);
+      }, this.next_delay);
+    });
+  }
+
+  set_get_news_tab_timeout() { return this.navigate_to_tab(this.get_news_tab, 'News'); }
+  set_get_images_tab_timeout() { return this.navigate_to_tab(this.get_images_tab, 'Images'); }
+  set_get_videos_tab_timeout() { return this.navigate_to_tab(this.get_videos_tab, 'Videos'); }
 
   get_next_button(){
     return document.querySelector('a#snext')
@@ -132,7 +148,7 @@ export default class SoBot extends Bot{
       this.videos_results_counter = 0;
       await this.scroll_down()
       if (this.extension.settings['download_pages']) await this.download_page('videos')
-      this.go_to_base_page()
+      this.jump_to_next_active_result_type('Videos', null)
     } else {
       setTimeout(async function(){
         await this.scroll_down()

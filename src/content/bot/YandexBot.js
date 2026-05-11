@@ -48,7 +48,7 @@ export default class YandexBot extends Bot{
     } else {
       setTimeout(async function(){
         await this.scroll_down()
-        this.more_videos_animation()
+        this.videos_animation(0);
       }.bind(this), this.initial_scroll_delay + extra_delay);
     }
   }
@@ -156,7 +156,7 @@ export default class YandexBot extends Bot{
   }
 
   get_search_button(){
-    return document.querySelector('div.search2__button button')
+    return document.querySelector('form button[type="submit"]');
   }
 
   get_next_button(){

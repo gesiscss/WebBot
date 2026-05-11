@@ -16,6 +16,7 @@ export default class SogouBot extends Bot{
 
     this.initial_scroll_delay = 3000;
     this.sub_scroll_down_delay = 1000;
+    this.result_text_pages = 1;
 
   }
 
@@ -99,6 +100,13 @@ export default class SogouBot extends Bot{
     return document.querySelector('input#stb');
   }
 
+  set_get_search_button_timeout(delay = 1000){
+    setTimeout(function(){
+      var btn = this.get_search_button();
+      if (btn) btn.click();
+    }.bind(this), delay);
+  }
+
   get_images_tab() {
     return document.querySelector("ul.searchnav a[href*='/pics']");
   }
@@ -120,6 +128,17 @@ export default class SogouBot extends Bot{
     return document.querySelector('a.btn_nxt');
   }
 
+  set_get_next_button_videos_timeout(){
+    return new Promise(async (resolve, reject) => {
+      setTimeout(function(){
+        let btn = this.get_next_button_videos();
+        if (btn) btn.click();
+        else this.jump_to_next_active_result_type('Videos', null);
+        resolve(true);
+      }.bind(this), this.next_delay);
+    });
+  }
+
   get_text_result_page(){
     let _start = this.find_get_parameter('page');
     if (_start) return parseInt(_start)
@@ -134,7 +153,7 @@ export default class SogouBot extends Bot{
   get_videos_result_page(){
     let _start = document.querySelector('a.btn_pg_num.on');
     if (_start){
-      let _val = _start.getAttribute('data-page');
+      let _val = _start.getAttribute('data-page') || _start.innerText;
       if (_val){
         return parseInt(_val);
       }
