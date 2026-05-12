@@ -7,13 +7,26 @@ import ExtensionHandler from './ExtensionHandler';
 import * as singleFilePolyfill from '../lib/single-file/chrome-browser-polyfill'
 import * as singleFileBackground from '../lib/single-file/single-file-background'
 
-function load_settings_from_storage() {
+async function load_settings_from_storage() {
 
-  // try to load settings from localStorage
+  // try to load settings from extension storage
   let restored_settings = null
   try {
-    restored_settings = JSON.parse(window.localStorage.getItem('extension_settings'))
+    const storage = await new Promise((resolve, reject) => {
+      xbrowser.storage.local.get('extension_settings', (items) => {
+        if (xbrowser.runtime.lastError) reject(xbrowser.runtime.lastError)
+        else resolve(items)
+      })
+    })
+    restored_settings = storage.extension_settings || null
   } catch (err) {console.warn(err)}
+
+  // fall back to localStorage for older MV2 installs/dev builds
+  if (restored_settings === null && globalThis.localStorage) {
+    try {
+      restored_settings = JSON.parse(globalThis.localStorage.getItem('extension_settings'))
+    } catch (err) {console.warn(err)}
+  }
 
   // resort to default values if settings could not be loaded from localStorage
   if (restored_settings === null) {
@@ -63,14 +76,16 @@ function load_settings_from_storage() {
 
 (async function main() {
 
-  const { base_settings, restored_settings } = load_settings_from_storage()
+  globalThis.xbrowser = globalThis.hasOwnProperty('chrome') ? chrome : browser;
+
+  const { base_settings, restored_settings } = await load_settings_from_storage()
   
   console.log('Start', new Date());
   var transfer = new Transfer(base_settings.server);
-  window.config = new Configuration(base_settings, transfer);
-  window.config.clear_browser()
+  globalThis.config = new Configuration(base_settings, transfer);
+  globalThis.config.clear_browser()
   
-  window.addEventListener("unhandledrejection", event => {
+  globalThis.addEventListener("unhandledrejection", event => {
     console.warn(`UNHANDLED PROMISE REJECTION: `, event.reason, 
       '. Have you added the certificates by visiting the server page?');
   });
@@ -81,8 +96,7 @@ function load_settings_from_storage() {
     window.requireUpdate = true;
   }*/
   
-  window.xbrowser = window.hasOwnProperty('chrome') ? chrome : browser;
-  window.settings = base_settings;
+  globalThis.settings = base_settings;
 
   let navlists = {
     'keywords': [],
@@ -106,7 +120,7 @@ function load_settings_from_storage() {
   }
   //console.log(navlists);
 
-  window.extensionHandler = new ExtensionHandler(config, navlists);
-  await window.extensionHandler.init();
+  globalThis.extensionHandler = new ExtensionHandler(config, navlists);
+  await globalThis.extensionHandler.init();
 
 })();

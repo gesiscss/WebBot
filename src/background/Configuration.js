@@ -125,7 +125,7 @@ export default class Configuration {
       //chrome
       try {
         console.log("Removing Chrome Data");
-        window.chrome.browsingData.remove({
+        chrome.browsingData.remove({
           "originTypes": {
             "protectedWeb": true, // Set to true or true as per your requirement
             "unprotectedWeb":true,// Set to true or true as per your requirement
@@ -152,7 +152,7 @@ export default class Configuration {
       // firefox
       } catch(err) {
         console.log("Removing Firefox Data");
-        window.browser.browsingData.remove({
+        browser.browsingData.remove({
           "originTypes": {
             //"protectedWeb": true, // NOT SUPPORTED BY FIREFOX
             "unprotectedWeb":true,// Set to true or true as per your requirement

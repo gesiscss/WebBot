@@ -120,9 +120,19 @@ export default class Extension {
 
     // save the settings to localStorage, if possible
     try {
-      window.localStorage.setItem('extension_settings', JSON.stringify(settings))
-      console.log('persisted settings in localStorage')
-    } catch(err) {console.warn(err)}
+      xbrowser.storage.local.set({extension_settings: settings}, () => {
+        if (xbrowser.runtime.lastError) console.warn(xbrowser.runtime.lastError)
+        else console.log('persisted settings in extension storage')
+      })
+    } catch(err) {
+      console.warn(err)
+      if (globalThis.localStorage) {
+        try {
+          globalThis.localStorage.setItem('extension_settings', JSON.stringify(settings))
+          console.log('persisted settings in localStorage')
+        } catch(localStorageErr) {console.warn(localStorageErr)}
+      }
+    }
 
     // reload engines and keywords if server changed
     if (reload_server) {
@@ -644,9 +654,8 @@ export default class Extension {
         sendResponse(this.get_settings())
 
       } else if (msg.hasOwnProperty('download_page')){
-        const blob = new Blob([msg.content], {type: "text/html"})
         const pageData = {
-          url: URL.createObjectURL(blob),
+          url: 'data:text/html;charset=utf-8,' + encodeURIComponent(msg.content),
           filename:
             this.config.settings.downloads_folder + '/' + this.engine.split('//')[1] + '_' + this.keyword.replace(/[<>:"/\\|?*\x00-\x1F]/gi, '_').replace(/_{2,}/g, '_') + '_' + msg.filename_suffix
         }
@@ -683,7 +692,7 @@ export default class Extension {
       xbrowser.runtime.onMessage.addListener(this._onContentMessage);
       xbrowser.runtime.onConnect.addListener(this._onConnectPopup);
 
-      xbrowser.browserAction.onClicked.addListener(() => {xbrowser.runtime.openOptionsPage();});
+      (xbrowser.action || xbrowser.browserAction).onClicked.addListener(() => {xbrowser.runtime.openOptionsPage();});
 
       this.getAllTabsIds().then(tabIds => {
         for (let id of tabIds){
