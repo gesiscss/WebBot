@@ -653,6 +653,9 @@ export default class Extension {
         console.log('getting settings')
         sendResponse(this.get_settings())
 
+      } else if (msg.hasOwnProperty('keep_alive')){
+        sendResponse({alive: true})
+
       } else if (msg.hasOwnProperty('download_page')){
         const pageData = {
           url: 'data:text/html;charset=utf-8,' + encodeURIComponent(msg.content),
