@@ -28,6 +28,7 @@ export default class ContentHandler {
     this.debug = true; //false;
     this.onBackendMessage = this.onBackendMessage.bind(this);
     this.settings = {}
+    this.keepAliveTimer = null;
     
   }
 
@@ -319,6 +320,10 @@ export default class ContentHandler {
         if (this.debug) console.log('onStart this.sendMessage');
       });
 
+      // keep alive connection to avoid browser disabling the serviceworker
+      setInterval(() => {
+        this.browser.runtime.sendMessage({ keep_alive: true }).catch(() => {});
+      }, 25000);
       
       // connect to the backend
       this.browser.runtime.connect({
