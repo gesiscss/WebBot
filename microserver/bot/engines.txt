@@ -1,5 +1,6 @@
 https://google.com
 https://duckduckgo.com
+https://noai.duckduckgo.com
 https://baidu.com
 https://bing.com
 https://yandex.com

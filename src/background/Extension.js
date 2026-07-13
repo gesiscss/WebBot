@@ -167,6 +167,7 @@ export default class Extension {
     let searchEngines = [ // augment list of search engine urls with names and activations
       {name: 'Google', url: 'https://google.com', active: false},
       {name: 'DuckDuckGo', url: 'https://duckduckgo.com', active: false},
+      {name: 'DuckDuckGo NoAI', url: 'https://noai.duckduckgo.com', active: false},
       {name: 'Bing', url: 'https://bing.com', active: false},
       {name: 'Yandex', url: 'https://yandex.com', active: false},
       {name: 'Yahoo', url: 'https://search.yahoo.com', active: false},
