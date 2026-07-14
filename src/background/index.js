@@ -36,6 +36,7 @@ async function load_settings_from_storage() {
       searchEngines: [
         {name: 'Google', url: 'https://google.com', active: true},
         {name: 'DuckDuckGo', url: 'https://duckduckgo.com', active: true},
+        {name: 'DuckDuckGo NoAI', url: 'https://noai.duckduckgo.com', active: false},
         {name: 'Bing', url: 'https://bing.com', active: true},
         {name: 'Yandex', url: 'https://yandex.com', active: false},
         {name: 'Yahoo', url: 'https://search.yahoo.com', active: false},
