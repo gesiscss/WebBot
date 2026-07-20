@@ -2661,8 +2661,6 @@
 
 	(globalThis => {
 
-		const IS_NOT_SAFARI = !/Safari/.test(navigator.userAgent) || /Chrome/.test(navigator.userAgent) || /Vivaldi/.test(navigator.userAgent) || /OPR/.test(navigator.userAgent);
-
 		const singlefile = globalThis.singlefile;
 
 		const FORBIDDEN_TAG_NAMES = ["a", "area", "audio", "base", "br", "col", "command", "embed", "hr", "img", "iframe", "input", "keygen", "link", "meta", "param", "source", "track", "video", "wbr"];
@@ -2805,7 +2803,7 @@
 					infobarPositionBottom = message.infobarPositionBottom;
 					infobarPositionLeft = message.infobarPositionLeft;
 					infobarPositionRight = message.infobarPositionRight;
-					let content = getContent(message.compressHTML);
+					let content = getContent(message.compressHTML, message.updatedResources);
 					let filename;
 					const pageOptions = loadOptionsFromPage(document);
 					if (pageOptions) {
@@ -2926,16 +2924,8 @@
 			await initConstants();
 			if (compressContent) {
 				const zipOptions = {
-					workerScripts: { inflate: ["/lib/single-file-z-worker.js"] }
+					useWebWorkers: false
 				};
-				try {
-					const worker = new Worker(zipOptions.workerScripts.inflate[0]);
-					worker.terminate();
-					// eslint-disable-next-line no-unused-vars
-				} catch (error) {
-					delete zipOptions.workerScripts;
-				}
-				zipOptions.useWebWorkers = IS_NOT_SAFARI;
 				const { docContent, origDocContent, resources, url } = await singlefile.helper.extract(content, {
 					password,
 					prompt,
@@ -3741,7 +3731,7 @@
 				previousContent = document.documentElement.cloneNode(true);
 				deserializeShadowRoots(document);
 			} else {
-				previousContent = getContent(false);
+				previousContent = getContent(false, []);
 			}
 			const shadowRoots = {};
 			const classesToPreserve = ["single-file-highlight", "single-file-highlight-yellow", "single-file-highlight-green", "single-file-highlight-pink", "single-file-highlight-blue"];
@@ -3848,7 +3838,7 @@
 			}
 		}
 
-		function getContent(compressHTML) {
+		function getContent(compressHTML, updatedResources) {
 			unhighlightCutElement();
 			serializeShadowRoots(document);
 			singlefile.helper.markInvalidNesting(document);
@@ -3890,6 +3880,12 @@
 				element.style.removeProperty("-sf-" + pointerEvents);
 			});
 			doc.body.removeAttribute("contentEditable");
+			const newResources = Object.keys(updatedResources).filter(url => updatedResources[url].type == "stylesheet").map(url => updatedResources[url]);
+			newResources.forEach(resource => {
+				const element = doc.createElement("style");
+				doc.body.appendChild(element);
+				element.textContent = resource.content;
+			});
 			if (pageCompressContent) {
 				const pageFilename = pageResources
 					.filter(resource => resource.filename.endsWith("index.html"))
