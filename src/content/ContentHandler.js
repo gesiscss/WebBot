@@ -298,7 +298,13 @@ export default class ContentHandler {
         sendResponse(false);
       }
     } else if (message.action == 'download_page'){
-      this.bot.download_page().then(sendResponse(true))
+      this.bot.download_page()
+        .then((downloaded) => sendResponse(downloaded))
+        .catch((error) => {
+          console.warn('Page download failed:', error)
+          sendResponse(false)
+        })
+      return true
     }
   }
 

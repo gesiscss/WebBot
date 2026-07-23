@@ -784,8 +784,8 @@ export default class Bot {
       filenameTemplate: page_type + "{date-iso}_{hours-locale}_{minutes-locale}_{seconds-locale}.html" // also available: {page-title}
     });
 
-    // send captured page as blob to backend to store into downloads folder
-    this.browser.runtime.sendMessage({'download_page': true, 'content': content, 'filename_suffix': filename})
+    // send the captured page to the background script to store in the downloads folder
+    return this.browser.runtime.sendMessage({'download_page': true, 'content': content, 'filename_suffix': filename})
   }
 
   /**
