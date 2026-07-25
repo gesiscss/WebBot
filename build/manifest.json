@@ -3,29 +3,34 @@
   "author": "GESIS – Leibniz Institute for the Social Sciences",
   "name": "WebBot",
   "description": "WebBot",
-  "manifest_version": 2,
-  "version": "4.1.7",
-  "permissions": [ "<all_urls>", "tabs", "browsingData", "downloads"],
+  "manifest_version": 3,
+  "version": "5.0.0",
+  "permissions": ["tabs", "browsingData", "downloads", "storage"],
+  "host_permissions": ["<all_urls>"],
   "icons": {
     "128": "images/bot.png"
   },
   "web_accessible_resources": [
-    "images/bot.png",
-    "data/*.txt"
+    {
+      "resources": [
+        "images/bot.png",
+        "data/*.txt"
+      ],
+      "matches": ["<all_urls>"]
+    }
   ],
-  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  },
 
-  "browser_action": {},
+  "action": {},
   "options_ui": {
-    "page": "index.html",
-    "browser_style": true
+    "page": "index.html"
   },
 
   "background": {
-    "scripts": [
-      "dist/background.js"
-    ],
-    "persistent": true
+    "service_worker": "dist/background.js",
+    "scripts": ["dist/background.js"]
   },
 
   "content_scripts": [

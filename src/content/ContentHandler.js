@@ -28,6 +28,7 @@ export default class ContentHandler {
     this.debug = true; //false;
     this.onBackendMessage = this.onBackendMessage.bind(this);
     this.settings = {}
+    this.keepAliveTimer = null;
     
   }
 
@@ -297,7 +298,13 @@ export default class ContentHandler {
         sendResponse(false);
       }
     } else if (message.action == 'download_page'){
-      this.bot.download_page().then(sendResponse(true))
+      this.bot.download_page()
+        .then((downloaded) => sendResponse(downloaded))
+        .catch((error) => {
+          console.warn('Page download failed:', error)
+          sendResponse(false)
+        })
+      return true
     }
   }
 
@@ -319,6 +326,10 @@ export default class ContentHandler {
         if (this.debug) console.log('onStart this.sendMessage');
       });
 
+      // keep alive connection to avoid browser disabling the serviceworker
+      setInterval(() => {
+        this.browser.runtime.sendMessage({ keep_alive: true }).catch(() => {});
+      }, 25000);
       
       // connect to the backend
       this.browser.runtime.connect({

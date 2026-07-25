@@ -83,7 +83,7 @@ export default class Extension {
   }
 
   set_settings(settings){
-    
+
     const reload_server = this.config.settings.server != settings.server
     const clear_browser = settings.clearBrowser & !this.config.settings.clear_browser
 
@@ -120,9 +120,19 @@ export default class Extension {
 
     // save the settings to localStorage, if possible
     try {
-      window.localStorage.setItem('extension_settings', JSON.stringify(settings))
-      console.log('persisted settings in localStorage')
-    } catch(err) {console.warn(err)}
+      xbrowser.storage.local.set({extension_settings: settings}, () => {
+        if (xbrowser.runtime.lastError) console.warn(xbrowser.runtime.lastError)
+        else console.log('persisted settings in extension storage')
+      })
+    } catch(err) {
+      console.warn(err)
+      if (globalThis.localStorage) {
+        try {
+          globalThis.localStorage.setItem('extension_settings', JSON.stringify(settings))
+          console.log('persisted settings in localStorage')
+        } catch(localStorageErr) {console.warn(localStorageErr)}
+      }
+    }
 
     // reload engines and keywords if server changed
     if (reload_server) {
@@ -157,6 +167,7 @@ export default class Extension {
     let searchEngines = [ // augment list of search engine urls with names and activations
       {name: 'Google', url: 'https://google.com', active: false},
       {name: 'DuckDuckGo', url: 'https://duckduckgo.com', active: false},
+      {name: 'DuckDuckGo NoAI', url: 'https://noai.duckduckgo.com', active: false},
       {name: 'Bing', url: 'https://bing.com', active: false},
       {name: 'Yandex', url: 'https://yandex.com', active: false},
       {name: 'Yahoo', url: 'https://search.yahoo.com', active: false},
@@ -299,7 +310,7 @@ export default class Extension {
   get_next_term(){
     let keyword_iterator = this.keyword_iterator + 1;
     if (keyword_iterator >= this.keywords.length){
-      keyword_iterator=0;      
+      keyword_iterator=0;
     }
     return this.keywords[keyword_iterator];
   }
@@ -335,7 +346,7 @@ export default class Extension {
       engine_idx = 0;
     }
 
-    return this.engines[engine_idx];    
+    return this.engines[engine_idx];
   }
 
 
@@ -344,9 +355,9 @@ export default class Extension {
 
     this.keyword_iterator = this.keyword_iterator + 1;
     if (this.keyword_iterator >= this.keywords.length){
-      this.keyword_iterator=0;      
+      this.keyword_iterator=0;
     }
-    
+
     this.keyword = this.keywords[this.keyword_iterator];
     this.engine = this.get_next_engine(this.engine);
 
@@ -355,7 +366,7 @@ export default class Extension {
 
   /**
    * trigger_a browser_clean loop send a message
-   * @param {Boolean} 
+   * @param {Boolean}
    */
   async trigger_clear_browser(){
     console.log("trigger_clear_browser(): NEW");
@@ -385,8 +396,8 @@ export default class Extension {
 
   async trigger_check_next_engine(){
     console.log('trigger_check_next_engine');
-    
-    
+
+
     try{
 
       xbrowser.tabs.get(this.search_tab_id,function(tab) {
@@ -401,12 +412,12 @@ export default class Extension {
           } catch (e){
             console.log('Caught error 1 (trigger_check_next_engine):', e);
           }
-        }  
+        }
 
         var tablocation = new URL(tab.url);
-        
+
         if(this._clean_www(tablocation.hostname) == this._clean_www(next_location.hostname) && tablocation.pathname == '/'){
-          console.log('this is the correct engine:',  next_location.hostname);          
+          console.log('this is the correct engine:',  next_location.hostname);
         } else {
           console.log('wrong engine (main page)', this._clean_www(tablocation.hostname), this._clean_www(next_location.hostname));
           try{
@@ -417,7 +428,7 @@ export default class Extension {
             console.log('Caught error 2 (trigger_check_next_engine):', e);
           }
         }
-    
+
       }.bind(this))
 
     } catch (e){
@@ -454,11 +465,11 @@ export default class Extension {
     console.log('trigger_frontend_next_search');
 
     try{
-       xbrowser.tabs.sendMessage(this.search_tab_id, { 
-          action: "search", 
+       xbrowser.tabs.sendMessage(this.search_tab_id, {
+          action: "search",
           engine: engine,
           keyword: keyword
-        }, 
+        },
         function(response) {
           if(xbrowser.runtime.lastError) {
             if (this.debug) console.log('trigger_next_search: No front end tab is listening. Try refreshing engine again');
@@ -480,7 +491,7 @@ export default class Extension {
     let keyword_turn = round % this.keywords.length;
     let engine_turn = round % this.engines.length;
     console.log('keywords:', this.keywords[this.keyword_iterator], 'vs', this.keywords[keyword_turn]);
-    
+
 
     let is_synchronized = true;
 
@@ -511,7 +522,7 @@ export default class Extension {
 
   /**
    * trigger_next_search send a message indicating that a popup should appear
-   * @param {Boolean} 
+   * @param {Boolean}
    */
   async trigger_next_search(){
     console.log('trigger_next_search');
@@ -530,7 +541,7 @@ export default class Extension {
       xbrowser.tabs.get(this.search_tab_id,function(tab) {
         if(xbrowser.runtime.lastError) {
           this.go_to_engine_and_retrigger_next_search(engine, keyword);
-        }  
+        }
 
         var tablocation = new URL(tab.url);
         console.log('tabs.get()', tablocation.pathname)
@@ -544,7 +555,7 @@ export default class Extension {
           console.log('not the correct location (main page)', this._clean_www(tablocation.hostname), this._clean_www(engine_hostname));
           this.go_to_engine_and_retrigger_next_search(engine, keyword);
         }
-    
+
       }.bind(this))
 
     } catch (e){
@@ -559,7 +570,7 @@ export default class Extension {
   _onContentMessage(msg, sender, sendResponse){
       if (this.debug) console.log('-> _onContentMessage');
 
-      
+
       if(msg==='on_start'){
         sendResponse({
           'clear_browser_flag': this.config.settings.clear_browser,
@@ -591,26 +602,26 @@ export default class Extension {
         } else {
           sendResponse(false);
         }
-        
+
       } else if (msg.hasOwnProperty('clear_browser')){
         this.clear_browser();
         sendResponse(true);
-      
+
       } else if (msg.hasOwnProperty('set_iter_step')){
         if (msg.step in this.step_iterators){
           this.step_iterators[msg.step] += 1;
         } else {
           this.step_iterators[msg.step] = 0;
-        }        
+        }
         let _iterator = this.step_iterators[msg.step];
         console.log('set_iter_step', msg.step, _iterator);
         sendResponse({'iterator': _iterator});
-      
+
       } else if (msg.hasOwnProperty('get_iter_step')){
         let _iterator = this.step_iterators[msg.step];
         console.log('get_iter_step', msg.step, _iterator);
         sendResponse({'iterator': _iterator});
-      
+
       } else if (msg.hasOwnProperty('go_to_base_page')){
         let _basepage = this.config.getBasePage();
         console.log('go_to_base_page', _basepage)
@@ -618,19 +629,19 @@ export default class Extension {
           'url': this.config.getBasePage()
         })
         sendResponse({'base_page': _basepage});
-      
+
       } else if (msg.hasOwnProperty('get_current_search')){
         console.log('get_current_search:', this.engine, this.keyword)
         sendResponse({
           'current_engine': this.engine,
           'current_keyword': this.keyword
         });
-      
+
       } else if (msg.hasOwnProperty('get_next_engine')){
         let _next_engine = this.get_next_engine();
         console.log('get_next_engine', _next_engine)
         sendResponse({'next_engine': _next_engine});
-      
+
       } else if (msg.hasOwnProperty('update_settings')){
         if (!msg.hasOwnProperty('settings')) sendResponse(false)
         else {
@@ -638,20 +649,76 @@ export default class Extension {
           this.set_settings(msg.settings)
           sendResponse(true)
         }
-      
+
       } else if (msg.hasOwnProperty('get_settings')){
         console.log('getting settings')
         sendResponse(this.get_settings())
 
+      } else if (msg.hasOwnProperty('keep_alive')){
+        sendResponse({alive: true})
+
       } else if (msg.hasOwnProperty('download_page')){
-        const blob = new Blob([msg.content], {type: "text/html"})
+        const canCreateObjectURL = typeof URL.createObjectURL === 'function'
+        const downloadUrl = canCreateObjectURL                                  // For Firefox which still allows URL.createObjectURL() in MV3 background script
+          ? URL.createObjectURL(new Blob([msg.content], {type: 'text/html'}))   // create the Blob URL
+          : 'data:text/html;charset=utf-8,' + encodeURIComponent(msg.content)   // Firefox rejects data: URLs passed to downloads.download()
         const pageData = {
-          url: URL.createObjectURL(blob),
+          url: downloadUrl,
           filename:
             this.config.settings.downloads_folder + '/' + this.engine.split('//')[1] + '_' + this.keyword.replace(/[<>:"/\\|?*\x00-\x1F]/gi, '_').replace(/_{2,}/g, '_') + '_' + msg.filename_suffix
         }
-        xbrowser.downloads.download(pageData, sendResponse(true))
-      
+
+        let completed = false
+        const releaseDownloadUrl = (downloadId) => {
+          if (!canCreateObjectURL)
+            return
+          if (downloadId === undefined) {
+            URL.revokeObjectURL(downloadUrl)
+            return
+          }
+          const onChanged = (change) => {
+            if (change.id === downloadId && change.state &&
+                ['complete', 'interrupted'].includes(change.state.current)) {
+              xbrowser.downloads.onChanged.removeListener(onChanged)
+              URL.revokeObjectURL(downloadUrl)
+            }
+          }
+          xbrowser.downloads.onChanged.addListener(onChanged)
+        }
+        const completeDownload = (success, error, downloadId) => {
+          if (completed)
+            return
+          completed = true
+          if (success)
+            releaseDownloadUrl(downloadId)
+          else if (canCreateObjectURL)
+            URL.revokeObjectURL(downloadUrl)
+          if (error)
+            console.warn('Page download failed:', error)
+          sendResponse(success)
+        }
+        try {
+          // The chrome namespace uses a callback; the browser namespace returns
+          // a Promise and rejects the extra callback argument.
+          let result
+          try {
+            result = xbrowser.downloads.download(pageData, (downloadId) => {
+              const error = xbrowser.runtime.lastError
+              completeDownload(!error, error, downloadId)
+            })
+          } catch (error) {
+            result = xbrowser.downloads.download(pageData)
+          }
+          if (result && typeof result.then === 'function') {
+            result.then(
+              (downloadId) => completeDownload(true, undefined, downloadId),
+              (error) => completeDownload(false, error)
+            )
+          }
+        } catch (error) {
+          completeDownload(false, error)
+        }
+
       } else if (msg.hasOwnProperty('fetch')){
         // see also https://github.com/gildas-lormeau/SingleFile/blob/911dd7e699fa9818c18320219dba414423156005/src/lib/single-file/fetch/bg/fetch.js
         //console.log('fetching', msg.resource, msg.options)
@@ -683,7 +750,7 @@ export default class Extension {
       xbrowser.runtime.onMessage.addListener(this._onContentMessage);
       xbrowser.runtime.onConnect.addListener(this._onConnectPopup);
 
-      xbrowser.browserAction.onClicked.addListener(() => {xbrowser.runtime.openOptionsPage();});
+      (xbrowser.action || xbrowser.browserAction).onClicked.addListener(() => {xbrowser.runtime.openOptionsPage();});
 
       this.getAllTabsIds().then(tabIds => {
         for (let id of tabIds){
