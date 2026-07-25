@@ -21,7 +21,10 @@ module.exports = env => {
       ]
     },
     resolve: {
-      extensions: ['*', '.js', '.jsx']
+      extensions: ['*', '.js', '.jsx'],
+      fallback: {
+        "url": require.resolve("url/")
+      }
     },
     output: {
       // pathinfo: false, //ability to generate path info in the output bundle

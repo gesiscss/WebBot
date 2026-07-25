@@ -36,15 +36,17 @@
     "babel-loader": "^9.1.2",
     "css-loader": "^6.7.1",
     "css-minimizer-webpack-plugin": "^8.0.0",
-    "eslint": "^8.36.0",
-    "eslint-plugin-react": "^7.32.2",
     "file-loader": "^6.2.0",
     "html-webpack-plugin": "^5.5.0",
     "mini-css-extract-plugin": "^2.7.5",
+    "url": "^0.11.4",
     "url-loader": "^4.1.1",
     "webpack": "^5.105.4",
     "webpack-cli": "^5.0.1",
     "webpack-dev-server": "^6.0.0"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.8"
   },
   "dependencies": {
     "eventemitter3": "^5.0.0",
