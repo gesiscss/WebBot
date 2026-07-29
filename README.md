@@ -8,10 +8,6 @@ A browser extension for Mozilla and Chrome that simulates a user searching (at l
 - [Save accessed pages](#-saving-search-results) into downloads
 - [Deactivate](#-reload-deactivate-or-remove) the extension
 
-### Cite us
-
-Ulloa, R., Makhortykh, M., & Urman, A. (2022). Scaling up search engine audits: Practical insights for algorithm auditing. Journal of Information Science. https://doi.org/10.1177/01655515221093029
-
 ## Demo
 
 ![WebBot demo](./docs/demo.webp)
@@ -74,7 +70,7 @@ Be aware that some search engines might display **weird behavior if developer to
 | Engine     | URL | Notes |
 |------------|-----|-------|
 | Google     | [google.com](https://google.com) | |
-| DuckDuckGo | [duckduckgo.com](https://duckduckgo.com) | |
+| DuckDuckGo | [duckduckgo.com](https://duckduckgo.com) | We support [DuckDuckGo's No-AI mode](https://noai.duckduckgo.com/) in addition. |
 | Bing       | [bing.com](https://bing.com) | |
 | Yandex     | [yandex.com](https://yandex.com) | Yandex is very strict with captchas and might thus require some manual intervention. News are currently not supported. Not yet implemented are `ya.ru` and `yandex.ru` (which now redirects to `dzen.ru`). |
 | Yahoo!     | [search.yahoo.com](https://search.yahoo.com) | Note that Yahoo! handles localization primarily through subdomains, so we use the 'neutral' `search` subdomain for now. |
@@ -113,7 +109,7 @@ To test out server deployment, this repository includes a microserver that can b
 1. Open a terminal
 2. Navigate to where you downloaded/cloned this repository
 3. Navigate to the microserver folder
-4. Install simplejson: `pip install simplejson` or `conda install simplejson` 
+4. Install simplejson: `pip install simplejson` or `conda install simplejson`
 5. Run the server: `python sever.py 8000`
 6. In the extension's settings, select the `Server` configuration and enter `http://localhost:8000/` for the server URL.
 
@@ -123,8 +119,23 @@ The microserver provided is meant to be used on the same machine only, which is 
 
 Therefore, it is better to set up a server in an external machine that is accessible to all the machines, so one can easily change the lists for all machines at once. Any server would do (e.g. Flask, Apache, klein, node), you just have to make sure that the following requests are available:
 
-	- POST: bot/getengines
-	- POST: bot/getresulttypes
-	- POST: bot/getqueryterms
- 
+```
+- POST: bot/getengines
+- POST: bot/getresulttypes
+- POST: bot/getqueryterms
+```
+
 Make sure to change the `Server` field in the extension's settings to the server URL, including port and a trailing `/`.
+
+## Authors
+
+* [Roberto Ulloa](https://github.com/robertour) (original author)
+* [Georg Ahnert](https://github.com/wanLo)
+* [Hojjat Kamyabi](https://github.com/HojjatKamyabi)
+* [Jun Sun](https://github.com/yfiua)
+
+### Cite us
+
+Ulloa, R., Makhortykh, M., & Urman, A. (2022). Scaling up search engine audits: Practical insights for algorithm auditing. Journal of Information Science. https://doi.org/10.1177/01655515221093029
+
+Ulloa, R., Ahnert, G., Kamyabi, H., & Sun, J. (2026). WebBot. [Computer software]. GESIS Methods Hub. https://doi.org/10.71627/WebBot.1

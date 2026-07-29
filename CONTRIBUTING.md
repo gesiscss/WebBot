@@ -4,10 +4,10 @@ Browser extensions are more or less standardized and can therefore be used acros
 
 To compile the extension yourself, install [Node.js](https://nodejs.org/) (tested with v16 and v18) and clone the repository. Then run the following to install the necessary dependencies and to build the code from `/src/` into `/build/`:
 
-```
-    cd path/to/extension
-    npm install
-	npm run build
+```sh
+cd path/to/extension
+npm install
+npm run build
 ```
 
 As most browser extensions, WebBot consists of 3 components:
@@ -40,8 +40,8 @@ During the build process, webpack by default minimizes the output files using th
 
 Compared to Firefox and Chrome, loading a temporary extension into Safari isn't as straight-forward. Apple, however, provides a command line script to convert an extension for Safari:
 
-```
-    xcrun safari-web-extension-converter WebBot/build
+```sh
+xcrun safari-web-extension-converter WebBot/build
 ```
 
 This creates an Xcode project which in turn can be used to compile a macOS app that installs the extension in Safari. For more information, see the [official documentation](https://developer.apple.com/documentation/safariservices/safari_web_extensions/converting_a_web_extension_for_safari). Some initial testing revealed that both saving web pages and clearing browser data is broken in Safari, so a proper port would need some additional work.
