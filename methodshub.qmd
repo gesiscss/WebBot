@@ -24,9 +24,9 @@ A browser extension for Mozilla and Chrome that simulates a user searching (at l
 3. Each use case may list publications in which the use case occurs (e.g., in APA7 style, https://apastyle.apa.org/style-grammar-guidelines/references/examples).
 -->
 
-* Automated collection of search engine results
-* Longitudinal monitoring of search engine result changes
-* Comparison of results from different search engines
+* **Automated collection of search engine results**: Collecting large-scale, systematic samples of search outputs across engines without manual intervention for computational social science.
+* **Longitudinal monitoring of search engine result changes**: Track how search results for the same queries evolve over time, revealing temporal dynamics in algorithmic curation, seasonal trends, or responses to real-world events.
+* **Algorithm auditing and bias detection** : Audit search engine algorithms for potential biases related to gender, race, political orientation, or other sensitive attributes. By querying systematically varied terms and comparing result compositions across engines, researchers can detect and quantify algorithmic discrimination (e.g., [Ulloa et al., 2022](https://doi.org/10.1177/01655515221093029)).
 
 ## Input Data
 <!--
@@ -149,12 +149,14 @@ See the [official GitHub repository](https://github.com/gesiscss/WebBot) or the 
 
 ## Contact Details
 
-In case of questions, contact [Roberto Ulloa](mailto:roberto.ulloa@gesis.org).
+In case of questions, contact the current maintainer [Jun Sun](mailto:jun.sun@gesis.org).
 Issue Tracker: [https://github.com/gesiscss/WebBot/issues](https://github.com/gesiscss/WebBot/issues)
 
 ## Citation
 
 Ulloa, R., Makhortykh, M., & Urman, A. (2022). Scaling up search engine audits: Practical insights for algorithm auditing. Journal of Information Science. https://doi.org/10.1177/01655515221093029
+
+Ulloa, R., Ahnert, G., Kamyabi, H., & Sun, J. (2026). WebBot. [Computer software]. GESIS Methods Hub. https://doi.org/10.71627/WebBot.1
 
 ## Advanced
 
