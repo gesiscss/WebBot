@@ -115,7 +115,7 @@ On Chrome, navigate to `chrome://extensions` to reload, deactivate, or remove th
 
 ### Demo
 
-![WebBot demo](./docs/demo.webp)
+[WebBot demo](https://github.com/gesiscss/WebBot/blob/main/docs/demo.webp)
 
 ### Adjusting the Settings
 
