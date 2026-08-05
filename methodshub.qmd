@@ -9,7 +9,7 @@ format:
 
 ## Description
 
-A browser extension for Mozilla and Chrome that simulates a user searching (at least) 50-top main, news, images and videos search results of up to 8 different [search engines](#-supported-engines).
+A browser extension for Mozilla and Chrome that searches and saves **main, news, images and videos** results of up to 8 different [search engines](#-supported-engines).
 
 - Install on [Firefox](#firefox) or [Chrome](#chrome)
 - Select [search engines and keywords](#-adjusting-the-settings)
@@ -117,7 +117,7 @@ On Chrome, navigate to `chrome://extensions` to reload, deactivate, or remove th
 
 [WebBot demo](https://github.com/gesiscss/WebBot/blob/main/docs/demo.webp)
 
-### Adjusting the Settings
+### Step 1: Adjusting the Settings
 
 Settings can be accessed by clicking on the extension's icon in the browser's toolbar. Settings are applied after the `Update Settings` button is pressed and are stored in the browser's local storage. If settings are changed after crawling has already started, it is recommended to [reload the extension](#-reload-deactivate-or-remove). The following settings are available:
 
@@ -135,13 +135,20 @@ Settings can be accessed by clicking on the extension's icon in the browser's to
 
 **Example:** Assuming the goal is to query both Google and Baidu for the terms "climate" and "kyoto protocol +band" and you want to use the `Local` configuration. Then select Google and Baidu from the list of search engines, unticking all other engines. In the `Query Terms` field, input the following: "climate, climate, kyoto protocol +band, kyoto protocol +band". It is necessary to repeat the terms such that both engines are queried with the same terms. Otherwise, the crawled pages would just include "climate" results from Google and "kyoto protocol +band" results from Baidu.
 
-### Start Crawling
+### Step 2: Start Crawling
 
 1. Navigate to the URL of the engine that you would like to start crawling with. You do not need to accept any cookies etc.; this is all handled by the extension.
 2. Wait up to a minute; the automatic search will start at the next minute o'clock, e.g., 14:37:**00**.
 3. Let the extension handle navigation between search results (text, news, images, videos) and between the engines you selected. The engines will be accessed in the same order as in the table below. Each engine has 6 minutes to provide all results. If the request times out or navigation is interrupted, e.g., by a CAPTCHA, the next engine will automatically be accessed after 6 minutes have passed. If not all result types are selected, the time is reduced by 1 min per unselected result type.
 
 Be aware that some search engines might display **weird behavior if developer tools are opened**. Make sure to close the inspector/console/etc. unless you are debugging the extension.
+
+### Step 3: Stop Crawling
+
+Once you have gathered all data needed, stop crawling by deactivating or removing the extension.
+
+* On Firefox, navigate to `about:addons` to deactivate or remove the extension.
+* On Chrome, navigate to `chrome://extensions` to deactivate, or remove the extension.
 
 ## Advanced
 
