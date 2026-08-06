@@ -183,7 +183,7 @@ See the [official GitHub repository](https://github.com/gesiscss/WebBot) or the 
 
 ## Contact Details
 
-In case of questions, contact the current maintainer [Jun Sun](mailto:jun.sun@gesis.org).
+In case of questions, contact the current maintainer Jun Sun [jun.sun@gesis.org](mailto:jun.sun@gesis.org).
 Issue Tracker: [https://github.com/gesiscss/WebBot/issues](https://github.com/gesiscss/WebBot/issues)
 
 ## Citation
