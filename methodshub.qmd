@@ -6,16 +6,9 @@ format:
 ---
 
 # WebBot
-
 ## Description
 
-A browser extension for Mozilla and Chrome that searches and saves **main, news, images and videos** results of up to 8 different [search engines](#-supported-engines).
-
-- Install on [Firefox](#firefox) or [Chrome](#chrome)
-- Select [search engines and keywords](#-adjusting-the-settings)
-- [Start crawling](#%EF%B8%8F-start-crawling)
-- [Save accessed pages](#-saving-search-results) into downloads
-- [Deactivate](#-reload-deactivate-or-remove) the extension
+A browser extension for Mozilla and Chrome that searches and saves **main, news, images, and videos** results of up to 8 different [search engines](#-supported-engines). For example, the extension can be installed on [Firefox](#firefox) or [Chrome](#chrome). After selecting [search engines and keywords](#-adjusting-the-settings), you can [start crawling](#%EF%B8%8F-start-crawling). Once you have [saved accessed pages](#-saving-search-results) into downloads, you can [deactivate](#-reload-deactivate-or-remove) the extension.
 
 ## Use Cases
 <!--
@@ -38,6 +31,8 @@ A browser extension for Mozilla and Chrome that searches and saves **main, news,
 This program does not require input data.
 
 ## Output Data
+
+You can save the search results and process them for future analysis.
 
 ### Saving Search Results
 
