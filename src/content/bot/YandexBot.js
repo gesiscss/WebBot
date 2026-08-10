@@ -54,6 +54,13 @@ export default class YandexBot extends Bot{
     }
   }
 
+  set_get_next_button_text_result_timeout(){
+    setTimeout(() => {
+      const button = this.get_next_button();
+      if (button) { location.assign(button.href);}
+      else { this.jump_to_next_active_result_type('Text', null, ['News']);}
+    }, this.next_delay);
+  }
 
   set_videos_results_animation(callback_end){
     setTimeout(function(){
