@@ -48,6 +48,7 @@ export default class YandexBot extends Bot{
     } else {
       setTimeout(async function(){
         await this.scroll_down()
+        this.get_more_videos_button()?.click()
         this.videos_animation(0);
       }.bind(this), this.initial_scroll_delay + extra_delay);
     }
@@ -68,7 +69,7 @@ export default class YandexBot extends Bot{
 
 
   get_more_videos_button(){
-    return document.querySelector('div.more_last_yes button');
+    return document.querySelector('button.NextPageButton_direction_next');
   }
 
   get_search_input(){
