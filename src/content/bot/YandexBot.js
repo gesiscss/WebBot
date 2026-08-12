@@ -48,11 +48,19 @@ export default class YandexBot extends Bot{
     } else {
       setTimeout(async function(){
         await this.scroll_down()
+        this.get_more_videos_button()?.click()
         this.videos_animation(0);
       }.bind(this), this.initial_scroll_delay + extra_delay);
     }
   }
 
+  set_get_next_button_text_result_timeout(){
+    setTimeout(() => {
+      const button = this.get_next_button();
+      if (button) { location.assign(button.href);}
+      else { this.jump_to_next_active_result_type('Text', null, ['News']);}
+    }, this.next_delay);
+  }
 
   set_videos_results_animation(callback_end){
     setTimeout(function(){
@@ -68,7 +76,7 @@ export default class YandexBot extends Bot{
 
 
   get_more_videos_button(){
-    return document.querySelector('div.more_last_yes button');
+    return document.querySelector('button.NextPageButton_direction_next');
   }
 
   get_search_input(){
