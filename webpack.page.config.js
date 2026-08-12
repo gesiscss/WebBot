@@ -1,7 +1,6 @@
 const process = require("process");
 const path = require("path");
 const fs = require('fs');
-const webpack = require('webpack');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 const TerserPlugin = require("terser-webpack-plugin");
@@ -27,7 +26,7 @@ function cleanDistFolder(directory) {
 
 module.exports = env => {
   cleanDistFolder(DIST_FOLDER);
-  
+
   let options = {
     entry: ['./src/page/index.js'],
     //mode: 'production',
@@ -66,8 +65,8 @@ module.exports = env => {
           ]
         },
         {
-  				test: /\.css$/,
-  				use: [
+          test: /\.css$/,
+          use: [
             {
               loader: MiniCssExtractPlugin.loader,
               options: {
@@ -75,14 +74,14 @@ module.exports = env => {
               }
             },
             "css-loader"
-  				]
-  			},
+          ]
+        },
         {
           test: /\.(pdf|jpg|png|gif|svg|ico)$/,
           use: [
-              {
-                  loader: 'url-loader'
-              },
+            {
+              loader: 'url-loader'
+            },
           ]
         }
       ]
@@ -120,9 +119,9 @@ module.exports = env => {
     optimization: {
       runtimeChunk : false,
       splitChunks: {
-         chunks: 'all',
-         maxInitialRequests: Infinity,
-         minSize: 0
+        chunks: 'all',
+        maxInitialRequests: Infinity,
+        minSize: 0
       },
       minimizer: [
         new CssMinimizerPlugin(),
