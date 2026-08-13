@@ -8,7 +8,7 @@ format:
 # WebBot
 ## Description
 
-A browser extension for Mozilla and Chrome that searches and saves **main, news, images, and videos** results of up to 8 different [search engines](#supported-engines). For example, the extension can be installed on [Firefox](#firefox) or [Chrome](#chrome). After selecting [search engines and keywords](#step-1-adjusting-the-settings), you can [start crawling](#step-2-start-crawling). Once you have [saved accessed pages](#saving-search-results) into downloads, you can [deactivate](#reload-deactivate-or-remove) the extension.
+A browser extension for Mozilla and Chrome that searches and saves *main, news, images, and video* results of up to 8 different [search engines](#supported-engines). For example, the extension can be installed on [Firefox](#firefox) or [Chrome](#chrome). After selecting [search engines and keywords](#step-1-adjusting-the-settings), you can [start crawling](#step-2-start-crawling). Once you have [saved accessed pages](#saving-search-results) into downloads, you can [deactivate](#reload-deactivate-or-remove) the extension.
 
 ## Use Cases
 <!--
@@ -136,7 +136,7 @@ Settings can be accessed by clicking on the extension's icon in the browser's to
 2. Wait up to a minute; the automatic search will start at the next minute o'clock, e.g., 14:37:**00**.
 3. Let the extension handle navigation between search results (text, news, images, videos) and between the engines you selected. The engines will be accessed in the same order as in the table below. Each engine has 6 minutes to provide all results. If the request times out or navigation is interrupted, e.g., by a CAPTCHA, the next engine will automatically be accessed after 6 minutes have passed. If not all result types are selected, the time is reduced by 1 min per unselected result type.
 
-Be aware that some search engines might display **weird behavior if developer tools are opened**. Make sure to close the inspector/console/etc. unless you are debugging the extension.
+Be aware that some search engines might display *weird behavior if developer tools are opened*. Make sure to close the inspector/console/etc. unless you are debugging the extension.
 
 ### Step 3: Stop Crawling
 
@@ -176,14 +176,12 @@ Make sure to change the `Server` field in the extension's settings to the server
 
 See the [official GitHub repository](https://github.com/gesiscss/WebBot) or the [publication](https://journals.sagepub.com/doi/10.1177/01655515221093029) for further information about technical details.
 
+## References
+
+Ulloa, R., Makhortykh, M., & Urman, A. (2022). Scaling up search engine audits: Practical insights for algorithm auditing. Journal of Information Science. https://doi.org/10.1177/01655515221093029
+
 ## Contact Details
 
 In case of questions, contact the current maintainer Jun Sun [jun.sun@gesis.org](mailto:jun.sun@gesis.org).
 Issue Tracker: [https://github.com/gesiscss/WebBot/issues](https://github.com/gesiscss/WebBot/issues).
-
-## Citation
-
-Ulloa, R., Makhortykh, M., & Urman, A. (2022). Scaling up search engine audits: Practical insights for algorithm auditing. Journal of Information Science. https://doi.org/10.1177/01655515221093029
-
-Ulloa, R., Ahnert, G., Kamyabi, H., & Sun, J. (2026). WebBot. [Computer software]. GESIS Methods Hub. https://doi.org/10.71627/WebBot.1
 
