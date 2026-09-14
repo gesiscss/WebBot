@@ -65,7 +65,7 @@ export default class Bot {
     // because Chrome gives content scripts the same privileges as page itself
     // i.e., they cannot access external content without CORS
     // see also: https://www.chromium.org/Home/chromium-security/extension-content-script-fetches/
-    if (window.hasOwnProperty('chrome')) {
+    if (window.hasOwnProperty('chrome') || window.location.hostname.endsWith('duckduckgo.com')) {
       singlefile.init({ fetch: this.background_fetch })
     }
 
