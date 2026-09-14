@@ -130,7 +130,7 @@ export default class DuckDuckGoBot extends Bot{
   }
 
   get_search_input() {
-    return document.querySelector('#searchbox_input, input[name="q"], input[type="search"]');
+    return document.querySelector('#searchbox_homepage > div > textarea');
   }
 
   is_text_result_page(){

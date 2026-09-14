@@ -2,6 +2,7 @@ import GoogleBot from './bot/GoogleBot';
 import GoogleConsentBot from './bot/GoogleConsentBot';
 import YahooConsentBot from './bot/YahooConsentBot';
 import DuckDuckGoBot from './bot/DuckDuckGoBot';
+import DuckDuckGoNoAIBot from './bot/DuckDuckGoNoAIBot';
 import YandexBot from './bot/YandexBot';
 import BingBot from './bot/BingBot';
 import YahooBot from './bot/YahooBot';
@@ -77,8 +78,12 @@ export default class ContentHandler {
         // otherwise default to google
         if (this.debug) console.log('GoogleBot');
         return GoogleBot;
-      }else if(str =='duckduckgo'){
-        if (this.debug) console.log('DuckDuckGoBot');
+      }else if(str == "duckduckgo") {
+        if (window.location.hostname == "noai.duckduckgo.com") {
+          if (this.debug) console.log("DuckDuckGoNoAIBot");
+          return DuckDuckGoNoAIBot;
+        }
+        if (this.debug) console.log("DuckDuckGoBot");
         return DuckDuckGoBot;
       }else if(str =='yandex'){
         if (this.debug) console.log('YandexBot');
